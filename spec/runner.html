@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>GSS engine in browser</title>
+    <link rel="stylesheet" href="../node_modules/mocha/mocha.css">
+    <style>
+      #fixtures {
+        margin-left: -1000px;
+      }
+    </style>
+    <script src="../dist/gss.document.parser.js"></script>
+    <script src="vendor/MutationObserver.attributes.js"></script>
+
+    <style>
+      #mocha .test {
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <div id="fixtures"></div>
+    <script src="../node_modules/chai/chai.js"></script>
+    <script src="../node_modules/mocha/mocha.js"></script>
+    <script>
+      assert = chai.assert
+      expect = chai.expect
+    </script>
+    <script>
+      mocha.setup('bdd');
+      chai.config.includeStack = true;
+      chai.config.showDiff = true;
+      if (String(location.port).indexOf(9999) > -1)
+        setInterval(function() {
+          window.scrollTo(0, Infinity)
+        }, 100)
+    </script>
+    <script src="./js/specs.js"></script>
+    <script>
+      if (window.mochaPhantomJS) {
+        mochaPhantomJS.run();
+      } else {
+        var runner = mocha.run();
+        var failedTests = [];
+        runner.on('end', function(){
+          window.mochaResults = runner.stats;
+          window.mochaResults.reports = failedTests;
+        });
+
+        runner.on('fail', logFailure);
+
+        function logFailure(test, err){
+          var flattenTitles = function(test){
+            var titles = [];
+            while (test.parent.title){
+              titles.push(test.parent.title);
+              test = test.parent;
+            }
+            return titles.reverse();
+          };
+
+          failedTests.push({name: test.title, result: false, message: err.message, stack: err.stack, titles: flattenTitles(test) });
+        };
+      }
+    </script>
+  </body>
+</html>

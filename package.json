@@ -1,0 +1,44 @@
+{
+  "name": "gss-engine",
+  "description": "GSS styling engine",
+  "version": "2.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/gss/engine.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/gss/engine/blob/master/LICENSE"
+    }
+  ],
+  "devDependencies": {
+    "chai": "~1.9.0",
+    "coffeeify": "^1.0.0",
+    "mocha": "~1.17.0",
+    "grunt": "^0.4.5",
+    "grunt-banner": "^0.2.1",
+    "grunt-browserify": "^3.2.1",
+    "grunt-cli": "^0.1.13",
+    "grunt-coffeelint": "0.0.6",
+    "grunt-contrib-watch": "~0.3.1",
+    "grunt-contrib-uglify": "~0.2.1",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-connect": "~0.3.0",
+    "grunt-mocha-test": "^0.11.0",
+    "grunt-docco": "^0.3.3",
+    "grunt-mocha-phantomjs": "~0.4.0",
+    "grunt-saucelabs": "^8.4.1"
+  },
+  "keywords": [],
+  "scripts": {
+    "test": "grunt test"
+  },
+  "main": "./src/Document",
+  "paths": [
+    "./vendor"
+  ],
+  "dependencies": {
+    "gss-engine": "git://github.com/gss/engine.git#balkanization"
+  }
+}
