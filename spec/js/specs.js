@@ -1339,15 +1339,11 @@ require("gss-engine/spec/assignments");
 
 require("./assignments");
 
-require("./cassowary");
-
 require("./matrix");
 
 require("./end-to-end");
 
 require("./command-nested-rules");
-
-require("./thread");
 
 require("./selectors");
 
@@ -1367,8 +1363,6 @@ require("./stylesheet");
 
 require("./units");
 
-require("./signatures");
-
 require("./styles");
 
 require("./view");
@@ -1377,7 +1371,7 @@ require("./poly-test/full");
 
 
 
-},{"./assignments":9,"./cassowary":10,"./command":12,"./command-nested-rules":11,"./conditions":13,"./domain":14,"./end-to-end":15,"./engine":16,"./matrix":17,"./perf":18,"./poly-test/full":19,"./selectors":20,"./signatures":21,"./styles":22,"./stylesheet":23,"./thread":24,"./units":25,"./view":26,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/signatures":6,"gss-engine/spec/thread":7}],9:[function(require,module,exports){
+},{"./assignments":9,"./command":11,"./command-nested-rules":10,"./conditions":12,"./domain":13,"./end-to-end":14,"./engine":15,"./matrix":16,"./perf":17,"./poly-test/full":18,"./selectors":19,"./styles":20,"./stylesheet":21,"./units":22,"./view":23,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/signatures":6,"gss-engine/spec/thread":7}],9:[function(require,module,exports){
 describe('Assignments', function() {
   return describe('with units', function() {
     return it('should compute', function(done) {
@@ -1409,143 +1403,6 @@ describe('Assignments', function() {
 
 
 },{}],10:[function(require,module,exports){
-var expect;
-
-expect = chai.expect;
-
-describe('Cassowary', function() {
-  var c;
-  c = GSS.Engine.prototype.Solver.prototype.Engine;
-  it('should be available', function() {
-    return expect(c).to.be.a('function');
-  });
-  it('var >= num', function() {
-    var ieq, solver, x;
-    solver = new c.SimplexSolver();
-    x = new c.Variable({
-      value: 10
-    });
-    ieq = new c.Inequality(x, c.GEQ, 100);
-    solver.addConstraint(ieq);
-    return expect(x.value).to.equal(100);
-  });
-  it('[x]==7; [y]==5; [x] - [y] == [z] // z is 2', function() {
-    var eq1, eq2, eq3, solver, x, y, z;
-    solver = new c.SimplexSolver();
-    x = new c.Variable();
-    y = new c.Variable();
-    z = new c.Variable();
-    eq1 = new c.Equation(x, 7);
-    eq2 = new c.Equation(y, 5);
-    eq3 = new c.Equation(c.minus(x, y), z);
-    solver.addConstraint(eq1);
-    solver.addConstraint(eq2);
-    solver.addConstraint(eq3);
-    expect(x.value).to.equal(7);
-    expect(y.value).to.equal(5);
-    return expect(z.value).to.equal(2);
-  });
-  it('top left right bottom // z is 2', function() {
-    var eq1, eq2, eq3, solver, x, y, z;
-    solver = new c.SimplexSolver();
-    x = new c.Variable();
-    y = new c.Variable();
-    z = new c.Variable();
-    eq1 = new c.Equation(x, 7);
-    eq2 = new c.Equation(y, 5);
-    eq3 = new c.Equation(c.minus(x, y), z);
-    solver.addConstraint(eq1);
-    solver.addConstraint(eq2);
-    solver.addConstraint(eq3);
-    expect(x.value).to.equal(7);
-    expect(y.value).to.equal(5);
-    return expect(z.value).to.equal(2);
-  });
-  it('plus expression', function() {
-    var aw, eq1, eq2, eq3, pad, solver, tw;
-    solver = new c.SimplexSolver();
-    solver.autoSolve = false;
-    aw = new c.Variable();
-    tw = new c.Variable();
-    pad = new c.Variable();
-    eq1 = new c.Equation(tw, 100, c.Strength.required);
-    eq2 = new c.Equation(aw, c.plus(tw, pad), c.Strength.required);
-    eq3 = new c.Equation(pad, 2, c.Strength.required);
-    solver.addConstraint(eq1).addConstraint(eq2).addConstraint(eq3);
-    solver.solve();
-    expect(aw.value).to.equal(102);
-    expect(tw.value).to.equal(100);
-    return expect(pad.value).to.equal(2);
-  });
-  it('times expression', function() {
-    var aw, eq1, eq2, solver, tw, zoom;
-    solver = new c.SimplexSolver();
-    solver.autoSolve = false;
-    aw = new c.Variable();
-    tw = new c.Variable();
-    zoom = new c.Variable();
-    solver.addEditVar(zoom);
-    solver.beginEdit();
-    solver.suggestValue(zoom, 2);
-    solver.solve();
-    eq1 = new c.Equation(tw, 100, c.Strength.required);
-    eq2 = new c.Equation(aw, c.times(tw, zoom.value), c.Strength.required);
-    solver.addConstraint(eq1).addConstraint(eq2);
-    solver.solve();
-    expect(aw.value).to.equal(200);
-    expect(tw.value).to.equal(100);
-    return expect(zoom.value).to.equal(2);
-  });
-  it('hierarchy', function() {
-    var eq1, eq2, eq3, solver, x;
-    solver = new c.SimplexSolver();
-    solver.autoSolve = false;
-    x = new c.Variable();
-    eq1 = new c.Equation(x, 100, c.Strength.strong);
-    eq2 = new c.Equation(x, 10, c.Strength.medium);
-    eq3 = new c.Equation(x, 1, c.Strength.weak);
-    solver.addConstraint(eq1).addConstraint(eq2).addConstraint(eq3);
-    solver.solve();
-    expect(x.value).to.equal(100);
-    solver.removeConstraint(eq1);
-    solver.solve();
-    expect(x.value).to.equal(10);
-    solver.removeConstraint(eq2);
-    solver.solve();
-    return expect(x.value).to.equal(1);
-  });
-  return it('weights', function() {
-    var eq1, eq2, solver, x;
-    solver = new c.SimplexSolver();
-    solver.autoSolve = false;
-    x = new c.Variable();
-    eq1 = new c.Inequality(x, c.GEQ, 100, c.Strength.medium, 0.5);
-    eq2 = new c.Inequality(x, c.GEQ, 10, c.Strength.medium, 0.3);
-    solver.addConstraint(eq1).addConstraint(eq2);
-    solver.solve();
-    expect(x.value).to.equal(100);
-    solver.removeConstraint(eq1);
-    solver.solve();
-    expect(x.value).to.equal(10);
-    solver.addConstraint(eq1);
-    solver.solve();
-    expect(x.value).to.equal(100);
-    solver.solve();
-    solver.removeConstraint(eq2);
-    expect(x.value).to.equal(100);
-    solver.solve();
-    solver.removeConstraint(eq1);
-    solver.solve();
-    expect(x.value).to.equal(0);
-    solver.addConstraint(eq2);
-    solver.solve();
-    return expect(x.value).to.equal(10);
-  });
-});
-
-
-
-},{}],11:[function(require,module,exports){
 var fixtures, remove, stringify;
 
 stringify = function(o) {
@@ -3130,7 +2987,7 @@ describe('Nested Rules', function() {
 
 
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var Engine, assert, expect, remove, stringify;
 
 Engine = GSS.Engine;
@@ -3838,7 +3695,7 @@ describe('GSS commands', function() {
 
 
 
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var Engine, assert, expect, fixtures, remove;
 
 Engine = GSS;
@@ -3909,7 +3766,7 @@ xdescribe('Conditions', function() {
 
 
 
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var assert, expect;
 
 assert = chai.assert;
@@ -3941,7 +3798,7 @@ describe('Domain', function() {
       });
     });
   });
-  describe('solvers in worker', function() {
+  return describe('solvers in worker', function() {
     this.timeout(60000);
     it('should receieve measurements from document to make substitutions', function(done) {
       var problem, root;
@@ -4013,178 +3870,11 @@ describe('Domain', function() {
       });
     });
   });
-  xdescribe('framed domains', function(done) {
-    it('should not merge expressions of a framed domain in worker', function() {
-      var problem;
-      window.$engine = engine = new GSS(true);
-      problem = [['framed', ['>=', ['get', 'a'], 1]], ['==', ['get', 'b'], 2], ['==', ['get', 'b'], ['get', 'a'], 'strong']];
-      return engine.solve(problem, function(solution) {
-        expect(solution).to.eql({
-          a: 1,
-          b: 1
-        });
-        return engine.solve(['>=', ['get', 'a', '', 'something'], 3], function(solution) {
-          expect(solution).to.eql({
-            a: 3,
-            b: 3
-          });
-          return engine.solve(['>=', ['get', 'b'], 4], function(solution) {
-            expect(solution).to.eql({});
-            return engine.solve(['>=', ['get', 'c'], ['*', 2, ['get', 'b']]], function(solution) {
-              expect(solution).to.eql({
-                c: 6
-              });
-              return engine.solve(['remove', 'something'], function(solution) {
-                expect(solution).to.eql({
-                  a: 1,
-                  b: 1,
-                  c: 2
-                });
-                return done();
-              });
-            });
-          });
-        });
-      });
-    });
-    it('should not merge expressions of a framed domain', function() {
-      var problem;
-      window.$engine = engine = new GSS;
-      problem = [['framed', ['>=', ['get', 'a'], 1]], ['==', ['get', 'b'], 2], ['==', ['get', 'b'], ['get', 'a'], 'strong']];
-      expect(engine.solve(problem)).to.eql({
-        a: 1,
-        b: 1
-      });
-      expect(engine.domains[2].constraints.length).to.eql(1);
-      expect(engine.domains[3].constraints.length).to.eql(2);
-      expect(engine.solve(['>=', ['get', 'a', '', 'something'], 3])).to.eql({
-        a: 3,
-        b: 3
-      });
-      expect(engine.domains[2].constraints.length).to.eql(2);
-      expect(engine.domains[3].constraints.length).to.eql(2);
-      expect(engine.solve(['>=', ['get', 'b'], 4])).to.eql({});
-      expect(engine.domains[2].constraints.length).to.eql(2);
-      expect(engine.domains[3].constraints.length).to.eql(3);
-      expect(engine.solve(['>=', ['get', 'c'], ['*', 2, ['get', 'b']]])).to.eql({
-        c: 6
-      });
-      expect(engine.domains[2].constraints.length).to.eql(2);
-      expect(engine.domains[3].constraints.length).to.eql(4);
-      expect(engine.solve(['remove', 'something'])).to.eql({
-        a: 1,
-        b: 1,
-        c: 2
-      });
-      expect(engine.domains[2].constraints.length).to.eql(1);
-      return expect(engine.domains[3].constraints.length).to.eql(4);
-    });
-    return it('should be able to export multiple framed variables into one domain', function() {
-      var A, B, C, problem;
-      window.$engine = engine = new GSS;
-      problem = [['framed', ['>=', ['get', 'a'], 1]], ['framed', ['>=', ['get', 'b'], 2]], ['==', ['get', 'c'], ['+', ['get', 'a'], ['get', 'b']]]];
-      expect(engine.solve(problem)).to.eql({
-        a: 1,
-        b: 2,
-        c: 3
-      });
-      A = engine.domains[2];
-      B = engine.domains[3];
-      C = engine.domains[4];
-      expect(A.constraints.length).to.eql(1);
-      expect(B.constraints.length).to.eql(1);
-      expect(C.constraints.length).to.eql(1);
-      expect(engine.solve(['==', ['get', 'a', '', 'aa'], -1])).to.eql({
-        a: -1,
-        c: 1
-      });
-      expect(A.constraints.length).to.eql(2);
-      expect(B.constraints.length).to.eql(1);
-      expect(C.constraints.length).to.eql(1);
-      expect(engine.solve(['==', ['get', 'b', '', 'bb'], -2])).to.eql({
-        b: -2,
-        c: -3
-      });
-      expect(A.constraints.length).to.eql(2);
-      expect(B.constraints.length).to.eql(2);
-      expect(C.constraints.length).to.eql(1);
-      expect(engine.solve(['==', ['get', 'c', '', 'cc'], 10])).to.eql({
-        c: 10
-      });
-      expect(A.constraints.length).to.eql(2);
-      expect(B.constraints.length).to.eql(2);
-      expect(C.constraints.length).to.eql(2);
-      expect(engine.solve(['remove', 'aa'])).to.eql({
-        a: 1
-      });
-      expect(A.constraints.length).to.eql(1);
-      expect(B.constraints.length).to.eql(2);
-      expect(C.constraints.length).to.eql(2);
-      expect(engine.solve(['remove', 'cc'])).to.eql({
-        c: -1
-      });
-      expect(A.constraints.length).to.eql(1);
-      expect(B.constraints.length).to.eql(2);
-      expect(C.constraints.length).to.eql(1);
-      expect(engine.solve(['remove', 'bb'])).to.eql({
-        c: 3,
-        b: 2
-      });
-      expect(A.constraints.length).to.eql(1);
-      expect(B.constraints.length).to.eql(1);
-      return expect(C.constraints.length).to.eql(1);
-    });
-  });
-  return describe('variable graphs', function() {
-    it('should unmerge multiple domains', function() {
-      var problem;
-      engine = new GSS;
-      problem = [['==', ['get', 'a'], 1], ['==', ['get', 'b'], ['get', 'c']]];
-      expect(engine.solve(problem)).to.eql({
-        a: 1,
-        b: 0,
-        c: 0
-      });
-      expect(engine.solve([['==', ['get', 'c'], ['*', 2, ['get', 'a']]]], 'my_tracker_path')).to.eql({
-        b: 2,
-        c: 2
-      });
-      return expect(engine.solve([['remove', 'my_tracker_path']])).to.eql({
-        b: 0,
-        c: 0
-      });
-    });
-    return it('should merge multiple domains', function() {
-      var problem;
-      engine = new GSS;
-      problem = [['==', ['get', 'result'], ['+', ['get', 'a'], 1]], ['<=', ['get', 'b'], 4], ['>=', ['get', 'b'], 2]];
-      expect(engine.solve(problem)).to.eql({
-        result: 0,
-        a: -1,
-        b: 4
-      });
-      expect(engine.solve([['>=', ['get', 'a'], 5]])).to.eql({
-        result: 6,
-        a: 5
-      });
-      expect(engine.solve([['>=', ['get', 'c'], ['+', ['get', 'b'], 6]]])).to.eql({
-        c: 10
-      });
-      expect(engine.solve([['==', ['get', 'b'], 3]])).to.eql({
-        c: 9,
-        b: 3
-      });
-      return expect(engine.solve([['<=', ['get', 'c'], ['get', 'result']]])).to.eql({
-        a: 8,
-        result: 9
-      });
-    });
-  });
 });
 
 
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var assert, expect, remove, stringify;
 
 assert = chai.assert;
@@ -6783,7 +6473,7 @@ describe('End - to - End', function() {
 
 
 
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var Engine, assert, expect, fixtures, remove;
 
 Engine = GSS.Engine;
@@ -7450,7 +7140,7 @@ describe('GSS engine', function() {
 
 
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var assert, expect, property;
 
 expect = chai.expect;
@@ -7832,7 +7522,7 @@ describe('Matrix', function() {
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var Engine, assert, expect, remove, stringify;
 
 Engine = GSS.Engine;
@@ -7951,7 +7641,7 @@ describe('Perf', function() {
 
 
 
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var DEMOS, assert, expect, remove, roughAssert;
 
 DEMOS = {
@@ -8325,7 +8015,7 @@ describe('Full page tests', function() {
 
 
 
-},{}],20:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -8445,285 +8135,7 @@ describe('Selectors', function() {
 
 
 
-},{}],21:[function(require,module,exports){
-var assert, expect;
-
-expect = chai.expect;
-
-assert = chai.assert;
-
-describe('Signatures', function() {
-  var engine;
-  engine = null;
-  describe('dispatched by argument types', function() {
-    var PrimitiveCommand;
-    PrimitiveCommand = GSS.Engine.prototype.Command.extend({
-      signature: [
-        {
-          left: ['String', 'Variable'],
-          right: ['Number']
-        }
-      ]
-    }, {
-      'primitive': function() {}
-    });
-    before(function() {
-      engine = new GSS;
-      engine.input.PrimitiveCommand = PrimitiveCommand;
-      return engine.input.compile(true);
-    });
-    describe('with primitive', function() {
-      return it('should match property function definition', function() {
-        expect(engine.input.Command(['primitive', 'test'])).to.not.be.an["instanceof"](PrimitiveCommand.primitive);
-        expect(engine.input.Command(['primitive', 'test', 10])).to.be.an["instanceof"](PrimitiveCommand.primitive);
-        expect(engine.input.Command(['primitive', 'test', 'test'])).to.not.be.an["instanceof"](PrimitiveCommand.primitive);
-        expect(engine.input.Command(['undeclared', 'test', 10])).to.not.be.an["instanceof"](PrimitiveCommand.primitive);
-        return expect(engine.input.Command(['undeclared', 'test', 'test'])).to.be.an["instanceof"](engine.input.Default);
-      });
-    });
-    describe('with variables', function() {
-      return it('should match property function definition', function() {
-        expect(engine.input.Command(['primitive', ['get', 'test']])).to.not.be.an["instanceof"](PrimitiveCommand.primitive);
-        expect(engine.input.Command(['primitive', ['get', 'test'], 10])).to.be.an["instanceof"](PrimitiveCommand.primitive);
-        expect(engine.input.Command(['primitive', ['get', 'test'], 'test'])).to.not.be.an["instanceof"](PrimitiveCommand.primitive);
-        expect(engine.input.Command(['primitive', ['get', 'test'], ['get', 'test']])).to.not.be.an["instanceof"](PrimitiveCommand.primitive);
-        return expect(engine.input.Command(['undeclared', ['get', 'test'], 10])).to.be.an["instanceof"](engine.input.Default);
-      });
-    });
-    return describe('with expressions', function() {
-      return it('should match property function definition', function() {
-        expect(engine.input.Command(['primitive', ['+', ['get', 'test'], 1]])).to.not.be.an["instanceof"](PrimitiveCommand.primitive);
-        expect(engine.input.Command(['primitive', ['+', ['get', 'test'], 1], 10])).to.be.an["instanceof"](PrimitiveCommand.primitive);
-        expect(engine.input.Command(['primitive', ['+', ['get', 'test'], 1], 'test'])).to.not.be.an["instanceof"](PrimitiveCommand.primitive);
-        expect(engine.input.Command(['primitive', ['+', ['get', 'test'], 1], ['+', ['get', 'test'], 1]])).to.not.be.an["instanceof"](PrimitiveCommand.primitive);
-        return expect(engine.input.Command(['undeclared', ['+', ['get', 'test'], 1], 10])).to.be.an["instanceof"](engine.input.Default);
-      });
-    });
-  });
-  describe('dispatched with optional arguments', function() {
-    var UnorderedCommand;
-    UnorderedCommand = GSS.Engine.prototype.Command.extend({
-      signature: [
-        [
-          {
-            left: ['String', 'Variable'],
-            right: ['Number'],
-            mode: ['Number']
-          }
-        ]
-      ]
-    }, {
-      'unordered': function() {}
-    });
-    before(function() {
-      engine = new GSS;
-      engine.input.UnorderedCommand = UnorderedCommand;
-      return engine.input.compile(true);
-    });
-    describe('and no required arguments', function() {
-      return it('should match property function definition', function() {
-        expect(engine.input.Command(['unordered', 'test'])).to.be.an["instanceof"](UnorderedCommand.unordered);
-        expect(engine.input.Command(['unordered', 'test', 10])).to.be.an["instanceof"](UnorderedCommand.unordered);
-        expect(engine.input.Command(['unordered', 'test', 10, 20])).to.be.an["instanceof"](UnorderedCommand.unordered);
-        expect(engine.input.Command(['unordered', 10, 'test', 20])).to.be.an["instanceof"](UnorderedCommand.unordered);
-        expect(engine.input.Command(['unordered', 10, 20, 'test'])).to.be.an["instanceof"](UnorderedCommand.unordered);
-        expect(engine.input.Command(['unordered', 10, 20, 'test', 30])).to.not.be.an["instanceof"](UnorderedCommand.unordered);
-        return expect(engine.input.Command(['unordered', 'test', 'test'])).to.not.be.an["instanceof"](UnorderedCommand.unordered);
-      });
-    });
-    describe('with variables', function() {
-      return it('should match property function definition', function() {
-        expect(engine.input.Command(['unordered', ['get', 'test']])).to.be.an["instanceof"](UnorderedCommand.unordered);
-        expect(engine.input.Command(['unordered', ['get', 'test'], 10])).to.be.an["instanceof"](UnorderedCommand.unordered);
-        expect(engine.input.Command(['unordered', ['get', 'test'], 'test'])).to.not.be.an["instanceof"](UnorderedCommand.unordered);
-        expect(engine.input.Command(['unordered', ['get', 'test'], ['get', 'test']])).to.not.be.an["instanceof"](UnorderedCommand.unordered);
-        return expect(engine.input.Command(['undeclared', ['get', 'test'], 10])).to.be.an["instanceof"](engine.input.Default);
-      });
-    });
-    return describe('with expressions', function() {
-      return it('should match property function definition', function() {
-        expect(engine.input.Command(['unordered', ['+', ['get', 'test'], 1]])).to.be.an["instanceof"](UnorderedCommand.unordered);
-        expect(engine.input.Command(['unordered', ['+', ['get', 'test'], 1], 10])).to.be.an["instanceof"](UnorderedCommand.unordered);
-        expect(engine.input.Command(['unordered', ['+', ['get', 'test'], 1], 'test'])).to.not.be.an["instanceof"](UnorderedCommand.unordered);
-        expect(engine.input.Command(['unordered', ['+', ['get', 'test'], 1], ['+', ['get', 'test'], 1]])).to.not.be.an["instanceof"](UnorderedCommand.unordered);
-        return expect(engine.input.Command(['undeclared', ['+', ['get', 'test'], 1], 10])).to.be.an["instanceof"](engine.input.Default);
-      });
-    });
-  });
-  describe('optional group with order specific type declaration', function() {
-    before(function() {
-      engine = new GSS;
-      engine.input.FancyTypes = GSS.Engine.prototype.Command.extend({
-        signature: [
-          [
-            {
-              left: ['String', 'Variable'],
-              right: ['Number', 'String'],
-              mode: ['Number', 'Variable']
-            }
-          ]
-        ]
-      }, {
-        'fancy': function() {}
-      });
-      return engine.input.compile(true);
-    });
-    return it('should respect type order', function() {
-      expect(engine.input.Command(['fancy', 'test']).permutation).to.eql([0]);
-      expect(engine.input.Command(['fancy', 'test', 'test']).permutation).to.eql([0, 1]);
-      expect(engine.input.Command(['fancy', 1]).permutation).to.eql([1]);
-      expect(engine.input.Command(['fancy', 1, 1]).permutation).to.eql([1, 2]);
-      expect(engine.input.Command(['fancy', 1, 'a']).permutation).to.eql([1, 0]);
-      expect(engine.input.Command(['fancy', 1, 'a', 1]).permutation).to.eql([1, 0, 2]);
-      expect(engine.input.Command(['fancy', 'a', 1]).permutation).to.eql([0, 1]);
-      return expect(engine.input.Command(['fancy', 'a', 1, 2]).permutation).to.eql([0, 1, 2]);
-    });
-  });
-  describe('optional groups and mixed with optional groups', function() {
-    var OptionalGroupCommand;
-    OptionalGroupCommand = GSS.Engine.prototype.Command.extend({
-      signature: [
-        {
-          left: ['Variable', 'String']
-        }, [
-          {
-            a: ['String'],
-            b: ['Number']
-          }
-        ], {
-          right: ['Number']
-        }, [
-          {
-            c: ['Number']
-          }
-        ]
-      ]
-    }, {
-      'optional': function() {}
-    });
-    before(function() {
-      engine = new GSS;
-      engine.input.OptionalGroupCommand = OptionalGroupCommand;
-      return engine.input.compile(true);
-    });
-    describe('and no required arguments', function() {
-      return it('should match property function definition', function() {
-        expect(engine.input.Command(['optional', 'test'])).to.not.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', 'test', 10])).to.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', 'test', 10, 20])).to.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', 'test', 10, 'test', 20])).to.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', 'test', 10, 20, 'test'])).to.not.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', 'test', 10, 'test', 20, 30])).to.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', 'test', 'test'])).to.not.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', 'test', 10, 'test', 20, 30]).permutation).to.eql([0, 2, 1, 3, 4]);
-        expect(engine.input.Command(['optional', 'test', 10, 'test', 20]).permutation).to.eql([0, 2, 1, 3]);
-        return expect(engine.input.Command(['optional', 'test', 10, 20]).permutation).to.eql([0, 2, 3]);
-      });
-    });
-    describe('with variables', function() {
-      return it('should match property function definition', function() {
-        expect(engine.input.Command(['optional', ['get', 'test']])).to.not.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', ['get', 'test'], 10])).to.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', ['get', 'test'], 'test'])).to.not.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', ['get', 'test'], ['get', 'test']])).to.not.be.an["instanceof"](OptionalGroupCommand.optional);
-        return expect(engine.input.Command(['undeclared', ['get', 'test'], 10])).to.be.an["instanceof"](engine.input.Default);
-      });
-    });
-    return describe('with expressions', function() {
-      return it('should match property function definition', function() {
-        expect(engine.input.Command(['optional', ['+', ['get', 'test'], 1]])).to.not.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', ['+', ['get', 'test'], 1], 10])).to.be.an["instanceof"](OptionalGroupCommand.optional);
-        expect(engine.input.Command(['optional', ['+', ['get', 'test'], 1], 'test'])).to.not.be.an["instanceof"](OptionalGroupCommand.optional);
-        return expect(engine.input.Command(['optional', ['+', ['get', 'test'], 1], 'test', 10])).to.be.an["instanceof"](OptionalGroupCommand.optional);
-      });
-    });
-  });
-  describe('dispatched subclassed with dynamic condition', function() {
-    var DynamicCommand, WrapperCommand;
-    WrapperCommand = GSS.Engine.prototype.Command.extend({
-      signature: [
-        {
-          left: ['DynamicCommand'],
-          right: ['Number']
-        }
-      ]
-    }, {
-      'wrapper': function(a) {
-        return ['wrapper', a];
-      }
-    });
-    DynamicCommand = GSS.Engine.prototype.Command.extend({
-      type: 'DynamicCommand',
-      signature: []
-    }, {
-      'dynamic': function(a) {
-        return [666];
-      }
-    });
-    DynamicCommand.Positive = DynamicCommand.extend({
-      kind: 'auto',
-      condition: function(engine, operation) {
-        return operation.parent[2] > 0;
-      }
-    });
-    DynamicCommand.Negative = DynamicCommand.extend({
-      kind: 'auto',
-      condition: function(engine, operation) {
-        return operation.parent[2] < 0;
-      }
-    });
-    before(function() {
-      engine = new GSS;
-      engine.input.WrapperCommand = WrapperCommand;
-      engine.input.DynamicCommand = DynamicCommand;
-      return engine.input.compile(true);
-    });
-    return it('should dispatch command', function() {
-      var cmd;
-      engine.input.Command(cmd = ['wrapper', ['dynamic'], 0]);
-      expect(cmd[1].command).to.be.an["instanceof"](DynamicCommand.dynamic);
-      engine.input.Command(cmd = ['wrapper', ['dynamic'], +1]);
-      expect(cmd[1].command).to.be.an["instanceof"](DynamicCommand.Positive);
-      engine.input.Command(cmd = ['wrapper', ['dynamic'], -1]);
-      return expect(cmd[1].command).to.be.an["instanceof"](DynamicCommand.Negative);
-    });
-  });
-  return describe('dispatched with object as callee', function() {
-    var ObjectCommand;
-    ObjectCommand = GSS.Engine.prototype.Command.extend({
-      signature: [
-        {
-          left: ['Variable', 'String']
-        }, [
-          {
-            c: ['Number']
-          }
-        ]
-      ]
-    }, {
-      'object': function(a, b, c) {
-        return [a, b, c];
-      }
-    });
-    before(function() {
-      engine = new GSS;
-      engine.input.ObjectCommand = ObjectCommand;
-      return engine.input.compile(true);
-    });
-    return it('should dispatch command', function() {
-      var z;
-      z = {
-        title: 'God Object'
-      };
-      expect(engine.input.Command([z, 1, 'v'])).to.not.be.an["instanceof"](ObjectCommand.object);
-      return expect(engine.input.Command([z, 'v', 1])).to.be.an["instanceof"](ObjectCommand.object);
-    });
-  });
-});
-
-
-
-},{}],22:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -8907,7 +8319,7 @@ describe('Styles', function() {
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var IE10, assert, expect;
 
 expect = chai.expect;
@@ -9401,202 +8813,7 @@ describe('Stylesheet', function() {
 
 
 
-},{}],24:[function(require,module,exports){
-var assert, expect;
-
-expect = chai.expect;
-
-assert = chai.assert;
-
-describe('Cassowary Thread', function() {
-  it('should instantiate', function() {
-    var thread;
-    return thread = new GSS;
-  });
-  it('[x]==7; [y]==5; [x] - [y] == [z] // z is 2', function(done) {
-    var thread;
-    thread = new GSS;
-    thread.solve([['==', ['get', 'z'], ['-', ['get', 'x'], ['get', 'y']]], ['==', ['get', 'x'], 7], ['==', ['get', 'y'], 5]]);
-    chai.expect(thread.values).to.eql({
-      x: 7,
-      y: 5,
-      z: 2
-    });
-    return done();
-  });
-  it('hierarchy', function(done) {
-    var thread;
-    thread = new GSS;
-    thread.solve([['==', ['get', 'x'], 100, 'strong'], ['==', ['get', 'x'], 10, 'medium'], ['==', ['get', 'x'], 1, 'weak'], ['==', ['get', 'y'], 1, 'weak'], ['==', ['get', 'y'], 10, 'medium'], ['==', ['get', 'y'], 101, 'strong']]);
-    chai.expect(thread.values).to.eql({
-      "x": 100,
-      "y": 101
-    });
-    return done();
-  });
-  it('order of operations', function(done) {
-    var thread;
-    thread = new GSS;
-    thread.solve([['==', ['get', 'w'], 100, 'required'], ['==', ['get', 'igap'], 3, 'required'], ['==', ['get', 'ogap'], 20, 'required'], ['==', ['get', 'md'], ['/', ['-', ['get', 'w'], ['*', ['get', 'ogap'], 2]], 4], 'required'], ['==', ['get', 'span3'], ['+', ['*', ['get', 'md'], 3], ['*', ['get', 'igap'], 2]], 'required']]);
-    chai.expect(thread.values).to.eql({
-      "w": 100,
-      "igap": 3,
-      "ogap": 20,
-      "md": 15,
-      "span3": 51
-    });
-    return done();
-  });
-  it('$12322[width] == [grid-col]; ...', function(done) {
-    var thread;
-    thread = new GSS;
-    thread.solve([['==', ['get', '$12322[width]'], ['get', 'grid-col']], ['==', ['get', '$34222[width]'], ['get', 'grid-col']], ['==', 100, ['get', 'grid-col']]]);
-    chai.expect(thread.values).to.eql({
-      "$12322[width]": 100,
-      "$34222[width]": 100,
-      "grid-col": 100
-    });
-    return done();
-  });
-  it('Serial Suggests with plus expression', function(done) {
-    var thread;
-    thread = new GSS({
-      pad: 1
-    });
-    thread.solve([['==', ['+', ['get', 'target-width'], ['get', 'pad']], ['get', 'actual-width']], ['==', ['get', 'target-width'], 100]]);
-    chai.expect(thread.values).to.eql({
-      "target-width": 100,
-      "actual-width": 101,
-      pad: 1
-    });
-    thread.solve({
-      pad: 2
-    });
-    chai.expect(thread.updated.solution).to.eql({
-      "pad": 2,
-      "actual-width": 102
-    });
-    thread.solve({
-      pad: 4
-    });
-    chai.expect(thread.updated.solution).to.eql({
-      "pad": 4,
-      "actual-width": 104
-    });
-    return done();
-  });
-  it('intrinsic mock', function(done) {
-    var thread;
-    thread = new GSS({
-      'intrinsic-width': 999
-    });
-    thread.solve([['==', ['get', 'width'], 100, 'weak'], ['==', ['get', 'width'], ['get', 'intrinsic-width'], 'require']]);
-    chai.expect(thread.values).to.eql({
-      'intrinsic-width': 999,
-      "width": 999
-    });
-    return done();
-  });
-  it('intrinsic var is immutable with suggestion', function() {
-    var thread;
-    thread = new GSS({
-      'intrinsic-width': 100
-    });
-    thread.solve([['==', ['get', 'hgap'], 20, 'required'], ['==', ['get', 'width'], ['+', ['get', 'intrinsic-width'], ['get', 'hgap']], 'required'], ['==', ['get', 'width'], 20, 'strong']]);
-    return chai.expect(thread.values).to.eql({
-      "width": 120,
-      "hgap": 20,
-      'intrinsic-width': 100
-    });
-  });
-  it('tracking & removing by get tracker', function(done) {
-    var thread;
-    thread = new GSS();
-    thread.solve([['==', ['get', 'x'], 100, 'strong']], 'x-tracker');
-    thread.solve([['==', ['get', 'x'], 10, 'weak']]);
-    chai.expect(thread.values).to.eql({
-      "x": 100
-    });
-    thread.solve(['remove', 'x-tracker']);
-    chai.expect(thread.values).to.eql({
-      "x": 10
-    });
-    return done();
-  });
-  describe('dom prop helpers', function() {
-    it('varexp - right', function() {
-      var thread;
-      thread = new GSS();
-      thread.solve([['==', ['get', '$112[x]'], 10], ['==', ['get', '$112', 'right'], 100]]);
-      return expect(thread.values).to.eql({
-        "$112[x]": 10,
-        "$112[width]": 90
-      });
-    });
-    it('varexp - center-x', function() {
-      var thread;
-      thread = new GSS();
-      thread.solve([['==', ['get', '$112[x]'], 10], ['==', ['get', '$112', 'center-x'], 110]]);
-      return expect(thread.values).to.eql({
-        "$112[x]": 10,
-        "$112[width]": 200
-      });
-    });
-    it('varexp - bottom', function() {
-      var thread;
-      thread = new GSS();
-      thread.solve([['==', ['get', '$112[height]'], 10], ['==', ['get', '$112', 'bottom'], 100]]);
-      return expect(thread.values).to.eql({
-        "$112[height]": 10,
-        "$112[y]": 90
-      });
-    });
-    return it('varexp - center-y', function() {
-      var thread;
-      thread = new GSS();
-      thread.solve([['==', ['get', '$112[height]'], 100], ['==', ['get', '$112', 'center-y'], 51]]);
-      return expect(thread.values).to.eql({
-        "$112[height]": 100,
-        "$112[y]": 1
-      });
-    });
-  });
-  return describe('Tracking', function() {
-    it('tracking by path', function() {
-      var thread;
-      thread = new GSS(document.createElement('div'));
-      thread.solve([['==', ['get', '$222[line-height]'], 1.6]]);
-      thread.solve([['==', ['get', '$112[x]'], 10], ['==', ['get', '$112', 'right'], 100]], '.box');
-      expect(thread.values).to.eql({
-        "$222[line-height]": 1.6,
-        "$112[x]": 10,
-        "$112[width]": 90
-      });
-      thread.solve(['remove', '.box']);
-      return expect(thread.updated.solution).to.eql({
-        "$112[x]": null,
-        "$112[width]": null
-      });
-    });
-    return it('tracking by selector', function() {
-      var thread;
-      thread = new GSS();
-      thread.solve([['==', ['get', '$112[x]'], 50, 'strong']], '.box$112');
-      thread.solve([['==', ['get', '$112[x]'], 1000, 'required']], '.big-box$112');
-      expect(thread.updated.solution).to.eql({
-        "$112[x]": 1000
-      });
-      thread.solve([['remove', '.big-box$112']]);
-      return expect(thread.updated.solution).to.eql({
-        "$112[x]": 50
-      });
-    });
-  });
-});
-
-
-
-},{}],25:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var assert, expect, remove;
 
 expect = chai.expect;
@@ -9729,7 +8946,7 @@ describe('Units', function() {
 
 
 
-},{}],26:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var assert, expect, remove;
 
 assert = chai.assert;
