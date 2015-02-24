@@ -1,6 +1,5 @@
 Engine   = require('gss-engine/src/Engine')
 
-
 class Document extends Engine
   @Measurement:   require('./types/Measurement')
   @Primitive:     require('./types/Primitive')
@@ -19,7 +18,7 @@ class Document extends Engine
 
     Gradient:     require('./types/Gradient')
     Matrix:       require('./types/Matrix')
-    Easing:       require('./types/Easing')
+    Range:        require('./types/Range')
     Color:        require('./types/Color')
     URL:          require('./types/URL')
 
