@@ -449,7 +449,6 @@ class Document extends Engine
       if @values[id + '[intrinsic-' + property + ']']?
         continue
 
-      console.info(property)
       if (property == 'x' || property == 'y') 
         key = 'positions'
       else if prop = @output.properties[property]
