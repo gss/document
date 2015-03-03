@@ -295,8 +295,8 @@ assert = chai.assert;
 expect = chai.expect;
 
 remove = function(el) {
-  var ref;
-  return el != null ? (ref = el.parentNode) != null ? ref.removeChild(el) : void 0 : void 0;
+  var _ref;
+  return el != null ? (_ref = el.parentNode) != null ? _ref.removeChild(el) : void 0 : void 0;
 };
 
 fixtures = document.getElementById('fixtures');
@@ -787,8 +787,8 @@ assert = chai.assert;
 expect = chai.expect;
 
 remove = function(el) {
-  var ref;
-  return el != null ? (ref = el.parentNode) != null ? ref.removeChild(el) : void 0 : void 0;
+  var _ref;
+  return el != null ? (_ref = el.parentNode) != null ? _ref.removeChild(el) : void 0 : void 0;
 };
 
 fixtures = null;
@@ -1339,6 +1339,10 @@ require("gss-engine/spec/assignments");
 
 require("./assignments");
 
+require("gss-engine/spec/assignments");
+
+require("./ranges");
+
 require("./matrix");
 
 require("./end-to-end");
@@ -1371,7 +1375,7 @@ require("./poly-test/full");
 
 
 
-},{"./assignments":9,"./command":11,"./command-nested-rules":10,"./conditions":12,"./domain":13,"./end-to-end":14,"./engine":15,"./matrix":16,"./perf":17,"./poly-test/full":18,"./selectors":19,"./styles":20,"./stylesheet":21,"./units":22,"./view":23,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/signatures":6,"gss-engine/spec/thread":7}],9:[function(require,module,exports){
+},{"./assignments":9,"./command":11,"./command-nested-rules":10,"./conditions":12,"./domain":13,"./end-to-end":14,"./engine":15,"./matrix":16,"./perf":17,"./poly-test/full":18,"./ranges":19,"./selectors":20,"./styles":21,"./stylesheet":22,"./units":23,"./view":24,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/signatures":6,"gss-engine/spec/thread":7}],9:[function(require,module,exports){
 describe('Assignments', function() {
   return describe('with units', function() {
     return it('should compute', function(done) {
@@ -8016,6 +8020,259 @@ describe('Full page tests', function() {
 
 
 },{}],19:[function(require,module,exports){
+describe('Ranges', function() {
+  var engine;
+  engine = null;
+  before(function() {
+    engine = new GSS(document.createElement('div'));
+    return engine.compile();
+  });
+  describe('types', function() {
+    return it('should use proper range type', function() {
+      expect(engine.output.Command(['...', 10])).to.not.be.instanceOf(engine.output.Transition);
+      expect(engine.output.Command(['...', ['ms', 10]])).to.be.instanceOf(engine.output.Transition);
+      return expect(engine.output.Command(['...', ['+', ['ms', 10], 20]])).to.be.instanceOf(engine.output.Transition);
+    });
+  });
+  return describe('mappers', function() {
+    describe('with static range on the left', function() {
+      xdescribe('and static range on the right', function() {
+        return it('should not do anything', function() {});
+      });
+      xdescribe('and value range on the right', function() {
+        return it('should not do anything', function() {});
+      });
+      describe('and transition on the right', function() {
+        describe('with lower boundary', function() {
+          describe('with upper boundary', function() {
+            describe('without delay', function() {
+              return it('should start transition', function(done) {
+                var counter, listener;
+                counter = 0;
+                engine.addEventListener('solved', listener = function(solution) {
+                  if (++counter === 1) {
+                    return expect(solution.A).to.eql(0);
+                  } else if (solution.A === 1) {
+                    return engine.remove('tracking');
+                  } else if (solution.A === null) {
+                    engine.removeEventListener('solved', listener);
+                    return done();
+                  }
+                });
+                return engine.solve(['=', ['get', 'A'], ['map', ['...', 0, 1], ['...', false, ['ms', 10]]]], 'tracking');
+              });
+            });
+            xdescribe('with implicit range', function() {
+              return describe('without delay', function() {
+                return it('should start transition', function(done) {
+                  var counter, listener;
+                  counter = 0;
+                  engine.addEventListener('solved', listener = function(solution) {
+                    if (++counter === 1) {
+                      return expect(solution.A).to.eql(0);
+                    } else if (solution.A === 1) {
+                      return engine.remove('tracking');
+                    } else if (solution.A === null) {
+                      engine.removeEventListener('solved', listener);
+                      return done();
+                    }
+                  });
+                  return engine.solve(['=', ['get', 'A'], ['map', ['>', 0, 1], ['...', false, ['ms', 10]]]], 'tracking');
+                });
+              });
+            });
+            describe('with implicit range starting from half', function() {
+              return describe('without delay', function() {
+                return it('should start transition', function(done) {
+                  var counter, listener;
+                  counter = 0;
+                  engine.addEventListener('solved', listener = function(solution) {
+                    if (++counter === 1) {
+                      return expect(solution.A).to.eql(0.5);
+                    } else if (solution.A === 1) {
+                      return engine.remove('tracking');
+                    } else if (solution.A === null) {
+                      engine.removeEventListener('solved', listener);
+                      return done();
+                    }
+                  });
+                  return engine.solve(['=', ['get', 'A'], ['map', ['<', 0, ['<', 0.5, 1]], ['...', false, ['ms', 10]]]], 'tracking');
+                });
+              });
+            });
+            return describe('with delay', function() {
+              return it('should start transition', function(done) {
+                var first, listener;
+                first = true;
+                engine.addEventListener('solved', listener = function(solution) {
+                  if (first) {
+                    first = false;
+                    return expect(solution.A).to.eql(0);
+                  } else if (solution.A === 1) {
+                    return engine.remove('tracking');
+                  } else if (solution.A === null) {
+                    engine.removeEventListener('solved', listener);
+                    return done();
+                  }
+                });
+                return engine.solve(['=', ['get', 'A'], ['map', ['...', 0, 1], ['...', ['ms', 10], ['ms', 20]]]], 'tracking');
+              });
+            });
+          });
+          return describe('without upper boundary', function() {
+            describe('without delay', function() {
+              return it('should start transition', function(done) {
+                var counter, listener;
+                counter = 0;
+                engine.addEventListener('solved', listener = function(solution) {
+                  if (++counter === 1) {
+                    return expect(solution.A).to.eql(0);
+                  } else if (solution.A >= 1) {
+                    return engine.remove('tracking');
+                  } else if (solution.A === null) {
+                    engine.removeEventListener('solved', listener);
+                    return done();
+                  }
+                });
+                return engine.solve(['=', ['get', 'A'], ['map', ['...', 0, false], ['...', false, ['ms', 10]]]], 'tracking');
+              });
+            });
+            return describe('with delay', function() {
+              return it('should start transition', function(done) {
+                var counter, listener;
+                counter = 0;
+                engine.addEventListener('solved', listener = function(solution) {
+                  if (++counter === 1) {
+                    return expect(solution.A).to.eql(0);
+                  } else if (solution.A >= 1) {
+                    return engine.remove('tracking');
+                  } else if (solution.A === null) {
+                    engine.removeEventListener('solved', listener);
+                    return done();
+                  }
+                });
+                return engine.solve(['=', ['get', 'A'], ['map', ['...', 0, false], ['...', ['ms', 10], ['ms', 20]]]], 'tracking');
+              });
+            });
+          });
+        });
+        return describe('without lower boundary', function() {
+          describe('with upper boundary', function() {
+            describe('without delay', function() {
+              return it('should start transition', function(done) {
+                var counter, listener;
+                counter = 0;
+                engine.addEventListener('solved', listener = function(solution) {
+                  if (++counter === 1) {
+                    return expect(solution.A).not.to.eql(1);
+                  } else if (solution.A === 1) {
+                    return engine.remove('tracking');
+                  } else if (solution.A === null) {
+                    engine.removeEventListener('solved', listener);
+                    return done();
+                  }
+                });
+                engine.solve(['=', ['get', 'A'], ['map', 1, ['...', false, ['ms', 20]]]], 'tracking');
+                return expect(engine.values.A).to.not.eql(void 0);
+              });
+            });
+            return describe('with delay', function() {
+              return it('should start transition', function(done) {
+                var first, listener;
+                first = true;
+                engine.addEventListener('solved', listener = function(solution) {
+                  if (first) {
+                    first = false;
+                    return expect(solution.A).to.not.eql(-1);
+                  } else if (solution.A === 1) {
+                    return engine.remove('tracking');
+                  } else if (solution.A === null) {
+                    engine.removeEventListener('solved', listener);
+                    return done();
+                  }
+                });
+                engine.solve(['=', ['get', 'A'], ['map', 1, ['...', ['ms', 10], ['ms', 100]]]], 'tracking');
+                return expect(engine.values.A).to.eql(void 0);
+              });
+            });
+          });
+          return describe('without upper boundary', function() {
+            describe('without delay', function() {
+              return it('should start transition', function(done) {
+                var counter, listener;
+                counter = 0;
+                engine.addEventListener('solved', listener = function(solution) {
+                  if (++counter === 1) {
+                    return expect(solution.A).not.to.eql(1);
+                  } else if (solution.A >= 1) {
+                    return engine.remove('tracking');
+                  } else if (solution.A === null) {
+                    engine.removeEventListener('solved', listener);
+                    return done();
+                  }
+                });
+                return engine.solve(['=', ['get', 'A'], ['map', ['...', false, false], ['...', false, ['ms', 20]]]], 'tracking');
+              });
+            });
+            return describe('with delay', function() {
+              return it('should start transition', function(done) {
+                var first, listener;
+                first = true;
+                engine.addEventListener('solved', listener = function(solution) {
+                  if (first) {
+                    first = false;
+                    return expect(solution.A).to.eql(-1);
+                  } else if (solution.A >= 1) {
+                    return engine.remove('tracking');
+                  } else if (solution.A === null) {
+                    engine.removeEventListener('solved', listener);
+                    return done();
+                  }
+                });
+                return engine.solve(['=', ['get', 'A'], ['map', ['...', false, false], ['...', ['ms', 10], ['ms', 20]]]], 'tracking');
+              });
+            });
+          });
+        });
+      });
+      return xdescribe('and spring on the right', function() {
+        return it('should start transition', function() {});
+      });
+    });
+    describe('with value range on the left', function() {
+      xdescribe('and static range on the right', function() {
+        return it('should map ranges', function() {});
+      });
+      xdescribe('and update property on the right', function() {
+        return it('should not do anything', function() {});
+      });
+      xdescribe('and transition on the right', function() {
+        return it('should not do anything', function() {});
+      });
+      return xdescribe('and spring on the right', function() {
+        return it('should start transition', function() {});
+      });
+    });
+    return describe('with transition range on the left', function() {
+      xdescribe('and static range on the right', function() {
+        return it('should map ranges over time', function() {});
+      });
+      xdescribe('and update property on the right', function() {
+        return it('should map ranges over time', function() {});
+      });
+      xdescribe('and transition on the right', function() {
+        return it('should do nothing', function() {});
+      });
+      return xdescribe('and spring on the right', function() {
+        return it('should start transition', function() {});
+      });
+    });
+  });
+});
+
+
+
+},{}],20:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -8135,7 +8392,7 @@ describe('Selectors', function() {
 
 
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -8319,7 +8576,7 @@ describe('Styles', function() {
 
 
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var IE10, assert, expect;
 
 expect = chai.expect;
@@ -8813,7 +9070,7 @@ describe('Stylesheet', function() {
 
 
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var assert, expect, remove;
 
 expect = chai.expect;
@@ -8946,7 +9203,7 @@ describe('Units', function() {
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var assert, expect, remove;
 
 assert = chai.assert;

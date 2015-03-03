@@ -16,9 +16,10 @@ class Document extends Engine
     Properties:   require('./properties/Styles')
     Unit:         Document.Unit::Numeric
 
+    Transition:   require('./commands/Transition')
+
     Gradient:     require('./types/Gradient')
     Matrix:       require('./types/Matrix')
-    Range:        require('./types/Range')
     Color:        require('./types/Color')
     URL:          require('./types/URL')
 
@@ -162,8 +163,6 @@ class Document extends Engine
         @data.verify(@scope, 'height')
         
         @propagate @data.solve()
-    apply: ->
-
 
     remove: (path) ->
       @input.Stylesheet.remove(@, path)
@@ -200,6 +199,12 @@ class Document extends Engine
         for element in removed
           @identity.unset(element)
         update.removed = undefined
+        
+      if @ranges
+        requestAnimationFrame =>
+          @solve 'Transition', ->
+            @updating.ranges = true
+            return
 
 
     resize: (e = '::window') ->
@@ -210,8 +215,8 @@ class Document extends Engine
           if @updating.resizing
             return @updating.resizing = 'scheduled'
           @updating.resizing = 'computing'
-        @once 'solve', ->
-          requestAnimationFrame ->
+        @once 'finish', ->
+          requestAnimationFrame =>
             if @updated?.resizing == 'scheduled'
               @triggerEvent('resize')
       else

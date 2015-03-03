@@ -1,111 +1,315 @@
-assert = chai.assert
-expect = chai.expect
+
 
 describe 'Ranges', ->
-  describe 'constructor', ->
-    it 'should create range', ->
-      engine = new GSS(document.createElement('div'))
-      engine.solve(['...', 10]).expect([null, 10])
-      engine.solve(['...', null, 10]).expect([null, 10])
-      engine.solve(['...', null, 20]).expect([10, 20])
-      engine.solve(['...', 20, null]).expect([20])
+  engine = null
+  before ->
+    engine = new GSS(document.createElement('div'))
+    engine.compile()
 
-    it 'should clip by starting point', ->
-      engine = new GSS(document.createElement('div'))
-      # from(5)
-      engine.solve(
-        ['...', 
-          5
-        ]
-      )
+  describe 'types', ->
+    it 'should use proper range type', ->
+      expect(engine.output.Command(['...', 10])).to.not.be.instanceOf(engine.output.Transition)
+      expect(engine.output.Command(['...', ['ms', 10]])).to.be.instanceOf(engine.output.Transition)
+      expect(engine.output.Command(['...', ['+', ['ms', 10], 20]])).to.be.instanceOf(engine.output.Transition)
+  
 
-      # 1 ... 20 from(10) 
-      engine.solve(
-        ['...', 
-          10
-          ['...', 1, 20]
-        ]
-      )
+  describe 'mappers', ->
+    describe 'with static range on the left', ->
+      xdescribe 'and static range on the right', ->
+        it 'should not do anything', ->
+
+      xdescribe 'and value range on the right', ->
+        it 'should not do anything', ->
+
+      describe 'and transition on the right', ->
+        describe 'with lower boundary', ->
+          describe 'with upper boundary', ->
+
+            describe 'without delay', ->
+              it 'should start transition', (done) ->
+                counter = 0
+                engine.addEventListener 'solved', listener = (solution) ->
+                  if ++counter == 1
+                    expect(solution.A).to.eql(0)
+                  else if solution.A == 1
+                    engine.remove('tracking')
+                  else if solution.A == null
+                    engine.removeEventListener('solved', listener)
+                    done()
+
+                engine.solve(['=', ['get', 'A'], ['map', 
+                  [
+                    '...',
+                    0,
+                    1
+                  ],
+
+                  [
+                    '...',
+                    false,
+                    ['ms', 10]
+                  ]
+                ]], 'tracking')
+
+            xdescribe 'with implicit range', ->
+              describe 'without delay', ->
+                it 'should start transition', (done) ->
+                  counter = 0
+                  engine.addEventListener 'solved', listener = (solution) ->
+                    if ++counter == 1
+                      expect(solution.A).to.eql(0)
+                    else if solution.A == 1
+                      engine.remove('tracking')
+                    else if solution.A == null
+                      engine.removeEventListener('solved', listener)
+                      done()
+
+                  # 0 > 1 -> 10ms
+                  engine.solve(['=', ['get', 'A'], ['map', 
+                    [
+                      '>',
+                      0,
+                      1
+                    ],
+
+                    [
+                      '...',
+                      false,
+                      ['ms', 10]
+                    ]
+                  ]], 'tracking')
+
+            describe 'with implicit range starting from half', ->
+              describe 'without delay', ->
+                it 'should start transition', (done) ->
+                  counter = 0
+                  engine.addEventListener 'solved', listener = (solution) ->
+                    if ++counter == 1
+                      expect(solution.A).to.eql(0.5)
+                    else if solution.A == 1
+                      engine.remove('tracking')
+                    else if solution.A == null
+                      engine.removeEventListener('solved', listener)
+                      done()
+                  # 0 < 0.5 < 1 -> 10ms
+                  engine.solve(['=', ['get', 'A'], ['map', 
+                    ['<', 
+                      0, 
+                      ['<',
+                        0.5,
+                        1]]
+
+                    [
+                      '...',
+                      false,
+                      ['ms', 10]
+                    ]
+                  ]], 'tracking')
 
 
-    it 'should clip by ending point', ->
-      engine = new GSS(document.createElement('div'))
-      # 1 ... 20 to(10) 
-      engine.solve(
-        ['...',   
-          ['...', 1, 20]
-          10
-        ]
-      )
+            describe 'with delay', ->
+              it 'should start transition', (done) ->
+                first = true
+                engine.addEventListener 'solved', listener = (solution) ->
+                  if first
+                    first = false
+                    expect(solution.A).to.eql(0)
+                  else if solution.A == 1
+                    engine.remove('tracking')
+                  else if solution.A == null
+                    engine.removeEventListener('solved', listener)
+                    done()
 
-      # to(5)
-      engine.solve(
-        ['...', 
-          null,
-          5
-        ]
-      )
+                # 0 ... 1 -> 10ms ... 20ms
+                engine.solve(['=', ['get', 'A'], ['map', 
+                  [
+                    '...',
+                    0,
+                    1
+                  ],
+
+                  [
+                    '...',
+                    ['ms', 10],
+                    ['ms', 20]
+                  ]
+                ]], 'tracking')
+          describe 'without upper boundary', ->
+            describe 'without delay', ->
+              it 'should start transition', (done) ->
+                counter = 0
+                engine.addEventListener 'solved', listener = (solution) ->
+                  if ++counter == 1
+                    expect(solution.A).to.eql(0)
+                  else if solution.A >= 1
+                    engine.remove('tracking')
+                  else if solution.A == null
+                    engine.removeEventListener('solved', listener)
+                    done()
+
+                engine.solve(['=', ['get', 'A'], ['map', 
+                  [
+                    '...',
+                    0,
+                    false
+                  ],
+
+                  [
+                    '...',
+                    false,
+                    ['ms', 10]
+                  ]
+                ]], 'tracking')
 
 
-    describe 'mapper', ->
-      describe 'mapped explicitly'
-        it 'should map one range to another', ->
-          engine = new GSS(document.createElement('div'))
-          # 1 ... 20 -> -20 ... -1 
-          engine.solve(['--',
-            ['...', 1, 20]
-            ['...', -20, -1]
-          ])
+            describe 'with delay', ->
+              it 'should start transition', (done) ->
+                counter = 0
+                engine.addEventListener 'solved', listener = (solution) ->
+                  if ++counter == 1
+                    expect(solution.A).to.eql(0)
+                  else if solution.A >= 1
+                    engine.remove('tracking')
+                  else if solution.A == null
+                    engine.removeEventListener('solved', listener)
+                    done()
 
-      describe 'with transformation', ->
-        it 'should map one range to another with', ->
-          engine = new GSS(document.createElement('div'))
-          # 1 ... 2 ease out -> 3 ... 4 quad in 
-          engine.solve(['--',
-            ['out',
-              ['ease',
-                ['...', 1, 2]
-              ]
-            ]
-            ['in',
-              ['quad', 
-                ['...', 3, 4]
-              ]
-            ]
-          ])
+                # 0 ... 1 -> 10ms ... 20ms
+                engine.solve(['=', ['get', 'A'], ['map', 
+                  [
+                    '...',
+                    0,
+                    false
+                  ],
 
-      describe 'with modifiers', ->
-        it 'should default to double clip', ->
-          engine = new GSS(document.createElement('div'))
-          # 1 ... 2 -> 3 ... 4
-          engine.solve(['--',
-            ['...', 1, 2]
-            ['...', 3, 4]
-          ])
+                  [
+                    '...',
+                    ['ms', 10],
+                    ['ms', 20]
+                  ]
+                ]], 'tracking')
+        describe 'without lower boundary', ->
+          describe 'with upper boundary', ->
+            describe 'without delay', ->
+              it 'should start transition', (done) ->
+                counter = 0
+                engine.addEventListener 'solved', listener = (solution) ->
+                  if ++counter == 1
+                    expect(solution.A).not.to.eql(1)
+                  else if solution.A == 1
+                    engine.remove('tracking')
+                  else if solution.A == null
+                    engine.removeEventListener('solved', listener)
+                    done()
 
-        it 'should force LTR order and invert modifiers', ->
-          engine = new GSS(document.createElement('div'))
-          # 1 ... 2 ~<- 3 ... 4
-          engine.solve(['-~',
-            ['...', 3, 4]
-            ['...', 1, 2]
-          ])
+                # 1 -> 10ms ... 20ms
+                engine.solve(['=', ['get', 'A'], ['map', 
+                  1,
+                  [
+                    '...',
+                    false
+                    ['ms', 20]
+                  ]
+                ]], 'tracking')
 
-      describe 'with time', ->
-        it 'should map one range to another with', ->
-          engine = new GSS(document.createElement('div'))
-          # 1 ... 2 => 100 ms
-          engine.solve(['~-',
-            ['out',
-              ['ease',
-                ['...', 1, 2]
-              ]
-            ]
-            ['in',
-              ['quad', 
-                ['...', 3, 4]
-              ]
-            ]
-          ])
+                expect(engine.values.A).to.not.eql(undefined)
 
-  describe 'binders', ->
+            describe 'with delay', ->
+              it 'should start transition', (done) ->
+                first = true
+                engine.addEventListener 'solved', listener = (solution) ->
+                  if first
+                    first = false
+                    expect(solution.A).to.not.eql(-1)
+                  else if solution.A == 1
+                    engine.remove('tracking')
+                  else if solution.A == null
+                    engine.removeEventListener('solved', listener)
+                    done()
+
+                engine.solve(['=', ['get', 'A'], ['map', 
+                  1,
+                  [
+                    '...',
+                    ['ms', 10],
+                    ['ms', 100]
+                  ]
+                ]], 'tracking')
+
+                expect(engine.values.A).to.eql(undefined)
+
+          describe 'without upper boundary', ->
+            describe 'without delay', ->
+              it 'should start transition', (done) ->
+                counter = 0
+                engine.addEventListener 'solved', listener = (solution) ->
+                  if ++counter == 1
+                    expect(solution.A).not.to.eql(1)
+                  else if solution.A >= 1
+                    engine.remove('tracking')
+                  else if solution.A == null
+                    engine.removeEventListener('solved', listener)
+                    done()
+
+                # 1 -> 10ms ... 20ms
+                engine.solve(['=', ['get', 'A'], ['map', 
+                  ['...', false, false],
+                  [
+                    '...',
+                    false
+                    ['ms', 20]
+                  ]
+                ]], 'tracking')
+
+            describe 'with delay', ->
+              it 'should start transition', (done) ->
+                first = true
+                engine.addEventListener 'solved', listener = (solution) ->
+                  if first
+                    first = false
+                    expect(solution.A).to.eql(-1)
+                  else if solution.A >= 1
+                    engine.remove('tracking')
+                  else if solution.A == null
+                    engine.removeEventListener('solved', listener)
+                    done()
+
+                engine.solve(['=', ['get', 'A'], ['map', 
+                  ['...', false, false],
+                  [
+                    '...',
+                    ['ms', 10],
+                    ['ms', 20]
+                  ]
+                ]], 'tracking')
+
+      xdescribe 'and spring on the right', ->
+        it 'should start transition', ->
+
+
+    describe 'with value range on the left', ->
+      xdescribe 'and static range on the right', ->
+        it 'should map ranges', ->
+
+      xdescribe 'and update property on the right', ->
+        it 'should not do anything', ->
+
+      xdescribe 'and transition on the right', ->
+        it 'should not do anything', ->
+
+      xdescribe 'and spring on the right', ->
+        it 'should start transition', ->
+
+
+    describe 'with transition range on the left', ->
+      xdescribe 'and static range on the right', ->
+        it 'should map ranges over time', ->
+
+      xdescribe 'and update property on the right', ->
+        it 'should map ranges over time', ->
+
+      xdescribe 'and transition on the right', ->
+        it 'should do nothing', ->
+
+      xdescribe 'and spring on the right', ->
+        it 'should start transition', ->

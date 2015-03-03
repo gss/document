@@ -30,6 +30,9 @@
     "grunt-mocha-phantomjs": "~0.4.0",
     "grunt-saucelabs": "^8.4.1"
   },
+  "browserify": {
+      "transform": ["coffeeify"]
+  },
   "keywords": [],
   "scripts": {
     "test": "grunt test"
@@ -39,6 +42,6 @@
     "./vendor"
   ],
   "dependencies": {
-    "gss-engine": "git://github.com/gss/engine.git#balkanization"
+    "gss-engine": "/Users/invizko/Sites/engine"
   }
 }

@@ -11,10 +11,10 @@ module.exports = ->
 
     browserify:
       options:
-        transform: ['coffeeify']
+        #transform: ['coffeeify']
         browserifyOptions:
           extensions: ['.coffee']
-          #fullPaths: false
+          fullPaths: false
       dist:
         files: [{
           expand: true
@@ -28,7 +28,7 @@ module.exports = ->
         files:
           'spec/js/specs.js': ['spec/all.coffee']
         options:
-          transform: ['coffeeify']
+          #transform: ['coffeeify']
           browserifyOptions:
             #debug: true
             extensions: ['.coffee']
