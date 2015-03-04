@@ -5249,22 +5249,17 @@ Range.Modifier = (function(superClass) {
 
   Modifier.prototype.before = function(args, domain, operation, continuation, scope, ascender, ascending) {
     if (typeof args[0] !== 'number' || typeof args[1] === 'number') {
-      if (operation[0].indexOf('>') > -1) {
-        if (typeof args[1] === 'number') {
-          return this.scale(args[0], args[1], null);
-        } else {
-          return this.scale(args[1], null, args[0]);
-        }
-      } else {
+      if (operation[0].indexOf('>') === -1) {
         return this.scale(args[0], null, args[1]);
+      } else if (typeof args[1] === 'number') {
+        return this.scale(args[0], args[1], null);
       }
     } else {
-      if (operation[0].indexOf('>') > -1) {
-        return this.scale(args[1], null, args[0]);
-      } else {
+      if (operation[0].indexOf('>') === -1) {
         return this.scale(args[1], args[0], null);
       }
     }
+    return this.scale(args[1], null, args[0]);
   };
 
   Modifier.prototype.scale = function(range, start, finish) {
@@ -7895,7 +7890,6 @@ Document = (function(superClass) {
         parent = parent.parent;
         if (parent.command.type === 'Iterator') {
           ruled = true;
-          debugger;
         }
         if (!ruled && parent.command.type === 'Condition' && !parent.command.global) {
           break;
@@ -9902,46 +9896,6 @@ Stylesheet = (function(superClass) {
       if (generated.style.length === 0) {
         sheet.deleteRule(index);
       }
-
-      /*
-      generated.style.cssText +=  ';' + property + ':' + value
-      
-       * Replace old property
-      if (i = text.indexOf(' ' + property + ':')) == -1
-        if (i = text.indexOf('{' + property + ':')) == -1
-          i = text.indexOf(';' + property + ':')
-        else i++
-      else i++
-      
-      if i > -1
-        unless (j = text.indexOf(';', i) + 1)
-          j = text.length - 1
-      
-       * Add property
-      else
-        i = j = text.length - 1
-      
-      if (prop = value) != ''
-        prop = property + ':' + value
-      
-      text = text.substring(0, i) + prop + text.substring(j)
-      
-      sheet.deleteRule(index)
-      index = sheet.insertRule(text, index)
-      
-      next = undefined
-      if needle == operation.index
-        needle++
-      for index in [needle ... watchers.length]
-        if ops = watchers[index]
-          next = @getRule(watchers[ops[0]][0])
-          if next != rule
-            sheet.deleteRule(previous.length)
-          break
-      if !next
-        sheet.deleteRule(previous.length)
-           * Insert rule
-       */
     } else {
       body = property + ':' + value;
       selectors = this.getSelector(stylesheet, operation);
@@ -10056,11 +10010,14 @@ Stylesheet = (function(superClass) {
   };
 
   Stylesheet.prototype.watch = function(engine, operation, continuation, stylesheet, value) {
-    var i, meta, name1, watchers;
+    var i, meta, name1, ref, watchers;
     watchers = this.getWatchers(engine, stylesheet);
     meta = (watchers[name1 = operation.index] || (watchers[name1] = []));
     if ((i = meta.indexOf(continuation)) > -1) {
       return i === 0;
+    }
+    if (((ref = watchers[continuation]) != null ? ref.indexOf(operation) : void 0) > -1) {
+      debugger;
     }
     (watchers[continuation] || (watchers[continuation] = [])).push(operation);
     return meta.push(continuation) === 1;
@@ -10505,16 +10462,12 @@ Transition = (function(superClass) {
   });
 
   Transition.prototype.update = function(range, engine, operation, continuation, scope) {
-    var end, start, time, value;
+    var end, start, started, time, value;
     start = range[0] || 0;
     end = range[1] || 0;
     time = new Date;
-    if (range[4]) {
-
-    } else {
-      range[4] = time;
-    }
-    value = (time - range[4] - start) / ((end - start) || 1);
+    started = range[4] || (range[4] = time);
+    value = (time - started - start) / ((end - start) || 1);
     this.ascend(engine, operation, continuation, scope, value, true);
     if (value >= 1) {
       return true;
@@ -11292,13 +11245,13 @@ Matrix = (function(superClass) {
       matrix = mat4.create();
       mat4.rotate(matrix, matrix, maxR * 360 * (Math.PI / 180), [rX / maxR, rY / maxR, rZ / maxR]);
     }
-    if (sX !== 1 || sY !== 1 || sZ !== 1) {
-      matrix || (matrix = mat4.create());
-      mat4.scale(matrix, matrix, [sX, sY, sZ]);
-    }
     if (tX || tY || tZ) {
       matrix || (matrix = mat4.create());
       mat4.translate(matrix, matrix, [tX, tY, tZ]);
+    }
+    if (sX !== 1 || sY !== 1 || sZ !== 1) {
+      matrix || (matrix = mat4.create());
+      mat4.scale(matrix, matrix, [sX, sY, sZ]);
     }
     return matrix;
   };

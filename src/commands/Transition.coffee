@@ -16,19 +16,12 @@ class Transition extends Range.Progress
   update: (range, engine, operation, continuation, scope) ->
     start = range[0] || 0
     end   = range[1] || 0
-
     time = new Date
-    #if time - (range[2] || 0) > range[1]
-    if range[4]
-
-    else
-      range[4] = time
-
-
-
-    value = (time - range[4] - start) / ((end - start) || 1)
+    started = range[4] ||= time
+    value = (time - started - start) / ((end - start) || 1)
 
     @ascend(engine, operation, continuation, scope, value, true)
+
     if value >= 1
       return true
 

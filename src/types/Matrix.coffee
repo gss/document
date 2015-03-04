@@ -11,12 +11,12 @@ class Matrix extends Command
       maxR = Math.max(rX, rY, rZ)
       matrix = mat4.create()
       mat4.rotate(matrix, matrix, maxR * 360 * (Math.PI / 180), [rX / maxR, rY / maxR, rZ / maxR])
-    if sX != 1 || sY != 1 || sZ != 1
-      matrix ||= mat4.create()
-      mat4.scale(matrix, matrix, [sX, sY, sZ])
     if tX || tY || tZ
       matrix ||= mat4.create()
       mat4.translate(matrix, matrix, [tX, tY, tZ])
+    if sX != 1 || sY != 1 || sZ != 1
+      matrix ||= mat4.create()
+      mat4.scale(matrix, matrix, [sX, sY, sZ])
     return matrix
 
   matrix: ->

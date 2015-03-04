@@ -357,7 +357,6 @@ class Document extends Engine
         parent = parent.parent
         if parent.command.type == 'Iterator'
           ruled = true
-          debugger
         if !ruled && parent.command.type == 'Condition' && !parent.command.global
           break
 

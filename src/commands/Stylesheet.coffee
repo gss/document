@@ -73,46 +73,6 @@ class Stylesheet extends Command.List
       generated.style[property] = value
       if generated.style.length == 0
         sheet.deleteRule(index)
-      ###
-      generated.style.cssText +=  ';' + property + ':' + value
-      
-      # Replace old property
-      if (i = text.indexOf(' ' + property + ':')) == -1
-        if (i = text.indexOf('{' + property + ':')) == -1
-          i = text.indexOf(';' + property + ':')
-        else i++
-      else i++
-
-      if i > -1
-        unless (j = text.indexOf(';', i) + 1)
-          j = text.length - 1
-      
-      # Add property
-      else
-        i = j = text.length - 1
-      
-      if (prop = value) != ''
-        prop = property + ':' + value
-      
-      text = text.substring(0, i) + prop + text.substring(j)
-      
-      sheet.deleteRule(index)
-      index = sheet.insertRule(text, index)
-
-      next = undefined
-      if needle == operation.index
-        needle++
-      for index in [needle ... watchers.length]
-        if ops = watchers[index]
-          next = @getRule(watchers[ops[0]][0])
-          if next != rule
-            sheet.deleteRule(previous.length)
-          break
-      if !next
-        sheet.deleteRule(previous.length)
-    # Insert rule
-      ###
-    
     else
       body = property + ':' + value
       selectors = @getSelector(stylesheet, operation)
@@ -197,6 +157,8 @@ class Stylesheet extends Command.List
     if (i = meta.indexOf(continuation)) > -1
       return i == 0
 
+    if watchers[continuation]?.indexOf(operation) > -1
+      debugger
     (watchers[continuation] ||= []).push(operation)
     return meta.push(continuation) == 1
 
