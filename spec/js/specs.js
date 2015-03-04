@@ -295,8 +295,8 @@ assert = chai.assert;
 expect = chai.expect;
 
 remove = function(el) {
-  var _ref;
-  return el != null ? (_ref = el.parentNode) != null ? _ref.removeChild(el) : void 0 : void 0;
+  var ref;
+  return el != null ? (ref = el.parentNode) != null ? ref.removeChild(el) : void 0 : void 0;
 };
 
 fixtures = document.getElementById('fixtures');
@@ -787,8 +787,8 @@ assert = chai.assert;
 expect = chai.expect;
 
 remove = function(el) {
-  var _ref;
-  return el != null ? (_ref = el.parentNode) != null ? _ref.removeChild(el) : void 0 : void 0;
+  var ref;
+  return el != null ? (ref = el.parentNode) != null ? ref.removeChild(el) : void 0 : void 0;
 };
 
 fixtures = null;
@@ -4232,12 +4232,12 @@ describe('End - to - End', function() {
         container.innerHTML = "<style type=\"text/gss\" scoped>\n  #css-only-dump {\n    line-height: 12px;\n  }\n</style>\n<div id=\"css-only-dump\"></div>";
         return engine.once('solve', function(e) {
           var dumper;
-          delete engine.output.properties['line-height'];
           expect(getSource(engine.tag('style')[1])).to.equal("#css-only-dump{font-size:12px;}");
           dumper = engine.id('css-only-dump');
           dumper.parentNode.removeChild(dumper);
           return engine.once('solve', function(e) {
             expect(getSource(engine.tag('style')[1])).to.equal("");
+            delete engine.output.properties['line-height'].property;
             return done();
           });
         });
@@ -5966,7 +5966,31 @@ describe('End - to - End', function() {
         });
       });
     });
-    describe('TODO!!!! contextual @if @else with vanilla CSS', function() {
+    describe('contextual @if @else with vanilla CSS rules', function() {
+      return it('should compute values', function(done) {
+        var listen;
+        listen = function(e) {
+          expect(engine.id('box1').style.width).to.eql('9px');
+          expect(engine.id('box2').style.width).to.eql('19px');
+          expect(window.getComputedStyle(engine.id("box1"), null).getPropertyValue("margin-top")).to.equal("0px");
+          expect(window.getComputedStyle(engine.id("box2"), null).getPropertyValue("margin-top")).to.equal("0px");
+          expect(window.getComputedStyle(engine.id("box1"), null).getPropertyValue("padding-top")).to.equal("1px");
+          expect(window.getComputedStyle(engine.id("box2"), null).getPropertyValue("padding-top")).to.equal("1px");
+          expect(String(window.getComputedStyle(engine.id("box1"), null).getPropertyValue("z-index"))).to.equal("3");
+          expect(String(window.getComputedStyle(engine.id("box2"), null).getPropertyValue("z-index"))).to.equal("2");
+          expect(engine.id("box1").style.paddingTop).to.eql('');
+          expect(engine.id("box2").style.paddingTop).to.eql('');
+          expect(engine.id("box1").style.marginTop).to.eql('');
+          expect(engine.id("box2").style.marginTop).to.eql('');
+          expect(String(engine.id("box1").style.zIndex)).to.eql('3');
+          expect(String(engine.id("box2").style.zIndex)).to.eql('2');
+          return done();
+        };
+        container.innerHTML = "<div id=\"box1\" class=\"box\"></div>\n<div id=\"box2\" class=\"box\"></div>\n<style type=\"text/gss\">\n          \n  #box1[width] == 9;\n  #box2[width] == 19;\n          \n  @if &[intrinsic-width] < 10 {\n    .box {\n      margin-top: 1px;\n    }\n  }\n  @if &[intrinsic-width] > 10 {\n    .box {\n      padding-top: 1px;\n    }\n  }\n  .box {\n    position: absolute;\n    @if ::[width] < 10 {\n      z-index: 3;\n    }\n    @else {\n      z-index: 2;\n    }\n  }\n          \n</style>";
+        return engine.once('solve', listen);
+      });
+    });
+    describe('contextual @if @else with vanilla CSS', function() {
       return it('should compute values', function(done) {
         var listen;
         listen = function(e) {
@@ -8781,6 +8805,29 @@ describe('Stylesheet', function() {
           });
         });
       });
+      describe('with simple self-referential selectors', function() {
+        return it('should include generaeted rules', function(done) {
+          container.innerHTML = "<style type=\"text/gss\" id=\"gss2\">\n  #box1 {\n    & {\n      width: 1px;\n    }\n  }\n</style>\n<div class=\"outer\">\n  <div class=\"box\" id=\"box1\"></div>\n  <div class=\"box\" id=\"box2\"></div>\n</div>";
+          return engine.then(function() {
+            var rule;
+            expect((function() {
+              var i, len, ref, results;
+              ref = engine.stylesheets[0].sheet.cssRules;
+              results = [];
+              for (i = 0, len = ref.length; i < len; i++) {
+                rule = ref[i];
+                results.push(normalizeSelector(rule.cssText));
+              }
+              return results;
+            })()).to.eql(["#box1 { width: 1px; }"]);
+            expect(engine.id('box1').getAttribute('matches')).to.eql('#box1');
+            expect(engine.id('box1').offsetWidth).to.eql(1);
+            expect(engine.id('box2').getAttribute('matches')).to.eql(null);
+            expect(engine.id('box2').offsetWidth).to.not.eql(1);
+            return done();
+          });
+        });
+      });
       describe('with multiple selectors', function() {
         return it('should include generaeted rules', function(done) {
           container.innerHTML = "<style type=\"text/gss\" id=\"gss2\">\n  .outer {\n    .box, .zox {\n      width: 1px;\n    }\n  }\n</style>\n<div class=\"outer\">\n  <div class=\"box\" id=\"box1\"></div>\n  <div class=\"box\" id=\"box2\"></div>\n</div>";
@@ -8891,6 +8938,29 @@ describe('Stylesheet', function() {
               return results;
             })()).to.eql([IE10 ? "#box1.box, .box.outer { width: 1px; }" : "#box1.box, .outer.box { width: 1px; }"]);
             expect(engine.id('box1').getAttribute('matches')).to.eql('#box1,.outer #box1,.outer' + GSS.Engine.prototype.Command.prototype.DESCEND + '&.box');
+            expect(engine.id('box1').offsetWidth).to.eql(1);
+            expect(engine.id('box2').getAttribute('matches')).to.eql(null);
+            expect(engine.id('box2').offsetWidth).to.not.eql(1);
+            return done();
+          });
+        });
+      });
+      describe('with simple self-referential selectors', function() {
+        return it('should include generaeted rules', function(done) {
+          container.innerHTML = "<style type=\"text/gss\" id=\"gss2\">\n\n  #box1, .outer {\n    & {\n      width: 1px;\n    }\n  }\n</style>\n<div class=\"outer\">\n  <div class=\"box\" style=\"float: left\" id=\"box1\"></div>\n  <div class=\"box\" style=\"float: left\" id=\"box2\"></div>\n</div>";
+          return engine.then(function() {
+            var rule;
+            expect((function() {
+              var i, len, ref, results;
+              ref = engine.stylesheets[0].sheet.cssRules;
+              results = [];
+              for (i = 0, len = ref.length; i < len; i++) {
+                rule = ref[i];
+                results.push(normalizeSelector(rule.cssText));
+              }
+              return results;
+            })()).to.eql(["#box1, .outer { width: 1px; }"]);
+            expect(engine.id('box1').getAttribute('matches')).to.eql('#box1,.outer');
             expect(engine.id('box1').offsetWidth).to.eql(1);
             expect(engine.id('box2').getAttribute('matches')).to.eql(null);
             expect(engine.id('box2').offsetWidth).to.not.eql(1);

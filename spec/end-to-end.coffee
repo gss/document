@@ -507,13 +507,13 @@ describe 'End - to - End', ->
           <div id="css-only-dump"></div>
           """
         engine.once 'solve', (e) ->
-          delete engine.output.properties['line-height']
           expect(getSource(engine.tag('style')[1])).to.equal "#css-only-dump{font-size:12px;}"
 
           dumper = engine.id('css-only-dump')
           dumper.parentNode.removeChild(dumper)
           engine.once 'solve', (e) ->
             expect(getSource(engine.tag('style')[1])).to.equal ""
+            delete engine.output.properties['line-height'].property
 
             done()   
       
@@ -2778,8 +2778,70 @@ describe 'End - to - End', ->
           done()
     
   
+    describe 'contextual @if @else with vanilla CSS rules', ->
+  
+      it 'should compute values', (done) ->
+        listen = (e) ->
+          expect(engine.id('box1').style.width).to.eql '9px'
+          expect(engine.id('box2').style.width).to.eql '19px'
+          #expect(window.getComputedStyle(engine.id("box1"),null).
+          #  getPropertyValue("z-index")).to.equal "auto"
+          #expect(window.getComputedStyle(engine.id("box2"),null).
+          #  getPropertyValue("z-index")).to.equal "auto"
+
+          expect(window.getComputedStyle(engine.id("box1"),null).
+            getPropertyValue("margin-top")).to.equal "0px"
+          expect(window.getComputedStyle(engine.id("box2"),null).
+            getPropertyValue("margin-top")).to.equal "0px" 
+          expect(window.getComputedStyle(engine.id("box1"),null).
+            getPropertyValue("padding-top")).to.equal "1px"
+          expect(window.getComputedStyle(engine.id("box2"),null).
+            getPropertyValue("padding-top")).to.equal "1px"
+          expect(String window.getComputedStyle(engine.id("box1"),null).
+            getPropertyValue("z-index")).to.equal "3"
+          expect(String window.getComputedStyle(engine.id("box2"),null).
+            getPropertyValue("z-index")).to.equal "2"
+          expect(engine.id("box1").style.paddingTop).to.eql ''
+          expect(engine.id("box2").style.paddingTop).to.eql '' 
+          expect(engine.id("box1").style.marginTop).to.eql ''
+          expect(engine.id("box2").style.marginTop).to.eql ''   
+          expect(String engine.id("box1").style.zIndex).to.eql '3'
+          expect(String engine.id("box2").style.zIndex).to.eql '2'     
+          done()          
     
-    describe 'TODO!!!! contextual @if @else with vanilla CSS', ->
+        container.innerHTML =  """
+            <div id="box1" class="box"></div>
+            <div id="box2" class="box"></div>
+            <style type="text/gss">
+          
+              #box1[width] == 9;
+              #box2[width] == 19;
+          
+              @if &[intrinsic-width] < 10 {
+                .box {
+                  margin-top: 1px;
+                }
+              }
+              @if &[intrinsic-width] > 10 {
+                .box {
+                  padding-top: 1px;
+                }
+              }
+              .box {
+                position: absolute;
+                @if ::[width] < 10 {
+                  z-index: 3;
+                }
+                @else {
+                  z-index: 2;
+                }
+              }
+          
+            </style>
+          """
+        engine.once 'solve', listen
+    
+    describe 'contextual @if @else with vanilla CSS', ->
   
       it 'should compute values', (done) ->
         listen = (e) ->

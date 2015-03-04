@@ -214,6 +214,34 @@ describe 'Stylesheet', ->
             done()
 
 
+      describe 'with simple self-referential selectors', ->
+        it 'should include generaeted rules', (done) ->
+          container.innerHTML = """
+            <style type="text/gss" id="gss2">
+              #box1 {
+                & {
+                  width: 1px;
+                }
+              }
+            </style>
+            <div class="outer">
+              <div class="box" id="box1"></div>
+              <div class="box" id="box2"></div>
+            </div>
+          """
+          engine.then ->
+            expect(
+              for rule in engine.stylesheets[0].sheet.cssRules
+                normalizeSelector rule.cssText
+            ).to.eql ["#box1 { width: 1px; }"]
+            expect(engine.id('box1').getAttribute('matches')).to.eql '#box1'
+            expect(engine.id('box1').offsetWidth).to.eql 1
+            expect(engine.id('box2').getAttribute('matches')).to.eql null
+            expect(engine.id('box2').offsetWidth).to.not.eql 1
+            
+            done()
+
+
 
       describe 'with multiple selectors', ->
         it 'should include generaeted rules', (done) ->
@@ -354,6 +382,36 @@ describe 'Stylesheet', ->
               else
                 "#box1.box, .outer.box { width: 1px; }"]
             expect(engine.id('box1').getAttribute('matches')).to.eql '#box1,.outer #box1,.outer' + GSS.Engine::Command::DESCEND + '&.box'
+            expect(engine.id('box1').offsetWidth).to.eql 1
+            expect(engine.id('box2').getAttribute('matches')).to.eql null
+            expect(engine.id('box2').offsetWidth).to.not.eql 1
+            done()
+
+
+      describe 'with simple self-referential selectors', ->
+        it 'should include generaeted rules', (done) ->
+          container.innerHTML = """
+            <style type="text/gss" id="gss2">
+
+              #box1, .outer {
+                & {
+                  width: 1px;
+                }
+              }
+            </style>
+            <div class="outer">
+              <div class="box" style="float: left" id="box1"></div>
+              <div class="box" style="float: left" id="box2"></div>
+            </div>
+          """
+          engine.then ->
+            expect(
+              for rule in engine.stylesheets[0].sheet.cssRules
+                normalizeSelector rule.cssText
+            ).to.eql [
+              "#box1, .outer { width: 1px; }"
+            ]
+            expect(engine.id('box1').getAttribute('matches')).to.eql '#box1,.outer'
             expect(engine.id('box1').offsetWidth).to.eql 1
             expect(engine.id('box2').getAttribute('matches')).to.eql null
             expect(engine.id('box2').offsetWidth).to.not.eql 1

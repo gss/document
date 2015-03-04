@@ -52,6 +52,40 @@ class Document extends Engine
         @get(id, 'translate-z') || 0
       )
 
+
+    # Style assignment
+    Document::Output::StyleAssignment = Document::Output::Assignment.extend {
+      signature: [
+        [object:   ['Query', 'Selector']]
+        property: ['String']
+        value:    ['Any']
+      ]
+
+      log: ->
+      unlog: ->
+
+      # Register assignment within parent rule 
+      # by its auto-incremented property local to operation list
+      advices: [
+        (engine, operation, command) ->
+          parent = operation
+          rule = undefined
+          while parent.parent
+            if !rule && parent[0] == 'rule'
+              rule = parent
+            parent = parent.parent
+
+          operation.index ||= parent.assignments = (parent.assignments || 0) + 1
+          if rule
+            (rule.properties ||= []).push(operation.index)
+          return
+      ]
+    },
+      'set': (object, property, value, engine, operation, continuation, scope) ->
+        engine.setStyle? object || scope, property, value, continuation, operation
+        
+        return
+
   
   class Document::Data extends Engine::Data
     immediate:    true
@@ -321,7 +355,10 @@ class Document extends Engine
     if parent = operation
       while parent.parent
         parent = parent.parent
-        if parent.command.type == 'Condition' && !parent.command.global
+        if parent.command.type == 'Iterator'
+          ruled = true
+          debugger
+        if !ruled && parent.command.type == 'Condition' && !parent.command.global
           break
 
       if parent.command.parse

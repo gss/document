@@ -46,12 +46,12 @@ var l=this.rows.get(this._objective);a.trace&&console.log(l);var m=b.strength.sy
 
 },{}],4:[function(require,module,exports){
 var Command,
-  __slice = [].slice,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  slice = [].slice,
+  hasProp = {}.hasOwnProperty,
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Command = (function() {
-  var _i, _results;
+  var l, results;
 
   Command.prototype.type = 'Command';
 
@@ -108,7 +108,7 @@ Command = (function() {
   };
 
   Command.prototype.descend = function(engine, operation, continuation, scope, ascender, ascending) {
-    var args, argument, command, contd, extras, i, index, length, shift, _i, _ref;
+    var args, argument, command, contd, extras, i, index, l, length, ref, ref1, shift;
     length = operation.length - 1 + this.padding;
     args = Array(length);
     index = 0;
@@ -132,9 +132,9 @@ Command = (function() {
       }
       args[this.permutation[index - 1] + shift] = argument;
     }
-    extras = (_ref = this.extras) != null ? _ref : this.execute.length - length;
+    extras = (ref = this.extras) != null ? ref : this.execute.length - length;
     if (extras > 0) {
-      for (i = _i = 0; _i < extras; i = _i += 1) {
+      for (i = l = 0, ref1 = extras; l < ref1; i = l += 1) {
         args.push(arguments[i]);
       }
     }
@@ -169,10 +169,10 @@ Command = (function() {
   };
 
   Command.prototype.contextualize = function(args, engine, operation, continuation, scope, ascender, ascending) {
-    var command, context, parent, _ref;
+    var command, context, parent, ref;
     if (ascender === -1 && (ascending != null)) {
       args[0] = this.precontextualize(engine, scope, ascending);
-    } else if (context = operation.context || ((parent = operation.parent) && ((_ref = parent.command) != null ? _ref.sequence : void 0) && parent.context)) {
+    } else if (context = operation.context || ((parent = operation.parent) && ((ref = parent.command) != null ? ref.sequence : void 0) && parent.context)) {
       args[0] = this.precontextualize(engine, scope, (command = context.command).key != null ? context[0] === '&' ? scope : this.getByPath(engine, this.delimit(continuation)) : command.solve(context.domain || engine, context, continuation, scope, -2));
     }
     return operation.context && 1 || 0;
@@ -291,10 +291,10 @@ Command = (function() {
   };
 
   Command.descend = function(command, engine, operation) {
-    var advices, argument, cmd, proto, result, type, _i, _j, _len, _len1;
+    var advices, argument, cmd, l, len, len1, m, proto, result, type;
     if (advices = command.advices) {
-      for (_i = 0, _len = advices.length; _i < _len; _i++) {
-        type = advices[_i];
+      for (l = 0, len = advices.length; l < len; l++) {
+        type = advices[l];
         result = (proto = type.prototype).condition ? proto.condition(engine, operation, command) : type(engine, operation, command);
         if (!result) {
           continue;
@@ -312,8 +312,8 @@ Command = (function() {
         break;
       }
     }
-    for (_j = 0, _len1 = operation.length; _j < _len1; _j++) {
-      argument = operation[_j];
+    for (m = 0, len1 = operation.length; m < len1; m++) {
+      argument = operation[m];
       if (cmd = argument.command) {
         Command.descend(cmd, engine, argument);
       }
@@ -340,9 +340,9 @@ Command = (function() {
   };
 
   Command.prototype.patch = function(engine, operation, continuation, scope, replacement) {
-    var domain, op, _ref;
+    var domain, op, ref;
     op = this.sanitize(engine, operation, void 0, replacement);
-    if (!((_ref = op.parent.command) != null ? _ref.boundaries : void 0)) {
+    if (!((ref = op.parent.command) != null ? ref.boundaries : void 0)) {
       op = op.parent;
     }
     domain = replacement || engine;
@@ -352,24 +352,24 @@ Command = (function() {
   };
 
   Command.prototype.transfer = function(engine, operation, continuation, scope, ascender, ascending, top, replacement) {
-    var domain, meta, parent, path, value, _ref, _ref1, _ref2;
+    var domain, meta, parent, path, ref, ref1, ref2, value;
     if ((meta = this.getMeta(operation)) && !engine.finalized) {
       for (path in operation.variables) {
         if ((value = (replacement || engine).values[path]) != null) {
           (meta.values || (meta.values = {}))[path] = value;
-        } else if ((_ref = meta.values) != null ? _ref[path] : void 0) {
+        } else if ((ref = meta.values) != null ? ref[path] : void 0) {
           delete meta.values[path];
         }
       }
     }
     if (top) {
       parent = operation;
-      while (((_ref1 = parent.parent) != null ? _ref1.domain : void 0) === parent.domain && !parent.parent.command.boundaries) {
+      while (((ref1 = parent.parent) != null ? ref1.domain : void 0) === parent.domain && !parent.parent.command.boundaries) {
         operation = parent;
         parent = parent.parent;
       }
       if (!(domain = parent.domain)) {
-        if (domain = (_ref2 = parent.command.domains) != null ? _ref2[parent.indexOf(operation)] : void 0) {
+        if (domain = (ref2 = parent.command.domains) != null ? ref2[parent.indexOf(operation)] : void 0) {
           domain = engine[domain];
         }
       }
@@ -406,9 +406,9 @@ Command = (function() {
   Command.prototype.retrieve = function() {};
 
   Command.prototype.permutation = (function() {
-    _results = [];
-    for (_i = 0; _i < 640; _i++){ _results.push(_i); }
-    return _results;
+    results = [];
+    for (l = 0; l < 640; l++){ results.push(l); }
+    return results;
   }).apply(this);
 
   Command.prototype.padding = 0;
@@ -416,7 +416,7 @@ Command = (function() {
   Command.prototype.extras = void 0;
 
   Command.prototype.toExpression = function(operation) {
-    var i, str, _j, _k, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+    var i, m, n, ref, ref1, ref2, ref3, ref4, ref5, str;
     switch (typeof operation) {
       case 'number':
         return operation;
@@ -432,32 +432,32 @@ Command = (function() {
         }
       } else if (str.match(/^[a-zA-Z]/)) {
         str += '(';
-        for (i = _j = 1, _ref = operation.length; _j < _ref; i = _j += 1) {
+        for (i = m = 1, ref = operation.length; m < ref; i = m += 1) {
           if (i > 1) {
             str += ', ';
           }
-          str += this.toExpression((_ref1 = operation[i]) != null ? _ref1 : '');
+          str += this.toExpression((ref1 = operation[i]) != null ? ref1 : '');
         }
         return str + ')';
       } else {
-        return this.toExpression((_ref2 = operation[1]) != null ? _ref2 : '') + str + this.toExpression((_ref3 = operation[2]) != null ? _ref3 : '');
+        return this.toExpression((ref2 = operation[1]) != null ? ref2 : '') + str + this.toExpression((ref3 = operation[2]) != null ? ref3 : '');
       }
     }
     str = '';
-    for (i = _k = 0, _ref4 = operation.length; _k < _ref4; i = _k += 1) {
+    for (i = n = 0, ref4 = operation.length; n < ref4; i = n += 1) {
       if (i) {
         str += ', ';
       }
-      str += this.toExpression((_ref5 = operation[i]) != null ? _ref5 : '');
+      str += this.toExpression((ref5 = operation[i]) != null ? ref5 : '');
     }
     return str;
   };
 
   Command.prototype.sanitize = function(engine, operation, ascend, replacement) {
-    var argument, parent, _j, _len;
+    var argument, len, m, parent;
     if (ascend !== false) {
-      for (_j = 0, _len = operation.length; _j < _len; _j++) {
-        argument = operation[_j];
+      for (m = 0, len = operation.length; m < len; m++) {
+        argument = operation[m];
         if (ascend !== argument) {
           if (argument.push && (engine === true || (argument != null ? argument.domain : void 0) === engine)) {
             if (argument[0] === 'get' && engine !== true) {
@@ -572,15 +572,15 @@ Command = (function() {
   };
 
   Command.orphanize = function(operation) {
-    var arg, _j, _len;
+    var arg, len, m;
     if (operation.domain) {
       operation.domain = void 0;
     }
     if (operation.variables) {
       operation.variables = void 0;
     }
-    for (_j = 0, _len = operation.length; _j < _len; _j++) {
-      arg = operation[_j];
+    for (m = 0, len = operation.length; m < len; m++) {
+      arg = operation[m];
       if (arg != null ? arg.push : void 0) {
         this.orphanize(arg);
       }
@@ -589,12 +589,12 @@ Command = (function() {
   };
 
   Command.compile = function(engine, command, force) {
-    var Types, aliases, name, property, proto, value, _base, _j, _len, _ref, _ref1;
+    var Types, aliases, base, len, m, name, property, proto, ref, ref1, value;
     if (!command) {
       if (engine.proto.hasOwnProperty('$signatures') && !force) {
-        _ref = engine.proto.$signatures;
-        for (property in _ref) {
-          value = _ref[property];
+        ref = engine.proto.$signatures;
+        for (property in ref) {
+          value = ref[property];
           engine.signatures[property] = value;
         }
       } else {
@@ -607,9 +607,9 @@ Command = (function() {
           }
         }
         engine.proto.$signatures = {};
-        _ref1 = engine.signatures;
-        for (property in _ref1) {
-          value = _ref1[property];
+        ref1 = engine.signatures;
+        for (property in ref1) {
+          value = ref1[property];
           engine.proto.$signatures[property] = value;
         }
       }
@@ -637,10 +637,10 @@ Command = (function() {
             if (value.__super__ === command) {
               this.register(engine.signatures, property, value, Types);
               if (engine.helps) {
-                (_base = engine.$prototype)[property] || (_base[property] = this.Helper(engine, property));
+                (base = engine.$prototype)[property] || (base[property] = this.Helper(engine, property));
                 if (aliases = value.prototype.helpers) {
-                  for (_j = 0, _len = aliases.length; _j < _len; _j++) {
-                    name = aliases[_j];
+                  for (m = 0, len = aliases.length; m < len; m++) {
+                    name = aliases[m];
                     engine.$prototype[name] = engine.$prototype[property];
                   }
                 }
@@ -656,17 +656,17 @@ Command = (function() {
 
   Command.Helper = function(engine, name) {
     return function() {
-      var arg, args, command, extras, index, length, parent, permutation, permuted, result, _j, _len, _ref;
+      var arg, args, command, extras, index, len, length, m, parent, permutation, permuted, ref, result;
       args = Array.prototype.slice.call(arguments);
       command = Command.match(engine, [name].concat(args)).prototype;
       if (!(parent = command.constructor.__super__)) {
-        return this.engine.solve([name].concat(__slice.call(arguments)));
+        return this.engine.solve([name].concat(slice.call(arguments)));
       }
       length = command.padding;
       if (command.hasOwnProperty('permutation')) {
         length += (permutation = command.permutation).length;
         permuted = [];
-        for (index = _j = 0, _len = args.length; _j < _len; index = ++_j) {
+        for (index = m = 0, len = args.length; m < len; index = ++m) {
           arg = args[index];
           permuted[permutation[index]] = arg;
         }
@@ -675,7 +675,7 @@ Command = (function() {
       if (length > args.length) {
         args.length = length;
       }
-      if (extras = (_ref = command.extras) != null ? _ref : command.execute.length) {
+      if (extras = (ref = command.extras) != null ? ref : command.execute.length) {
         args.push(this.input);
         if (extras > 1) {
           args.push(args);
@@ -712,7 +712,7 @@ Command = (function() {
    */
 
   Command.sign = function(command, object) {
-    var signature, signatures, signed, storage, _j, _len;
+    var len, m, signature, signatures, signed, storage;
     if (signed = command.signed) {
       return signed;
     }
@@ -722,8 +722,8 @@ Command = (function() {
     } else if (signature === false) {
       storage.push(['default']);
     } else if (signatures = object.signatures) {
-      for (_j = 0, _len = signatures.length; _j < _len; _j++) {
-        signature = signatures[_j];
+      for (m = 0, len = signatures.length; m < len; m++) {
+        signature = signatures[m];
         this.get(command, storage, signature);
       }
     }
@@ -731,29 +731,29 @@ Command = (function() {
   };
 
   Command.permute = function(arg, permutation) {
-    var group, i, index, j, keys, position, values, _j, _k, _l, _len, _len1, _m, _ref, _ref1, _ref2;
+    var group, i, index, j, keys, len, len1, m, n, o, p, position, ref, ref1, ref2, values;
     keys = Object.keys(arg);
     if (!permutation) {
       return keys;
     }
     values = Object.keys(arg);
     group = [];
-    for (index = _j = 0, _len = permutation.length; _j < _len; index = ++_j) {
+    for (index = m = 0, len = permutation.length; m < len; index = ++m) {
       position = permutation[index];
       if (position !== null) {
         group[position] = keys[index];
       }
     }
-    for (i = _k = _ref = permutation.length, _ref1 = keys.length; _k < _ref1; i = _k += 1) {
-      for (j = _l = 0, _ref2 = keys.length; _l < _ref2; j = _l += 1) {
+    for (i = n = ref = permutation.length, ref1 = keys.length; n < ref1; i = n += 1) {
+      for (j = o = 0, ref2 = keys.length; o < ref2; j = o += 1) {
         if (group[j] == null) {
           group[j] = keys[i];
           break;
         }
       }
     }
-    for (_m = 0, _len1 = group.length; _m < _len1; _m++) {
-      arg = group[_m];
+    for (p = 0, len1 = group.length; p < len1; p++) {
+      arg = group[p];
       if (arg === void 0) {
         return;
       }
@@ -762,15 +762,15 @@ Command = (function() {
   };
 
   Command.getPermutation = function(args, properties) {
-    var arg, index, result, _j, _k, _len;
+    var arg, index, len, m, n, result;
     result = [];
-    for (index = _j = 0, _len = args.length; _j < _len; index = ++_j) {
+    for (index = m = 0, len = args.length; m < len; index = ++m) {
       arg = args[index];
       if (arg !== null) {
         result[arg] = properties[index];
       }
     }
-    for (index = _k = result.length - 1; _k >= 0; index = _k += -1) {
+    for (index = n = result.length - 1; n >= 0; index = n += -1) {
       arg = result[index];
       if (arg == null) {
         result.splice(index, 1);
@@ -780,15 +780,15 @@ Command = (function() {
   };
 
   Command.getPositions = function(args) {
-    var arg, index, result, value, _j, _k, _len;
+    var arg, index, len, m, n, result, value;
     result = [];
-    for (index = _j = 0, _len = args.length; _j < _len; index = ++_j) {
+    for (index = m = 0, len = args.length; m < len; index = ++m) {
       value = args[index];
       if (value != null) {
         result[value] = index;
       }
     }
-    for (index = _k = result.length - 1; _k >= 0; index = _k += -1) {
+    for (index = n = result.length - 1; n >= 0; index = n += -1) {
       arg = result[index];
       if (arg == null) {
         result.splice(index, 1);
@@ -798,16 +798,16 @@ Command = (function() {
   };
 
   Command.getProperties = function(signature) {
-    var a, arg, definition, properties, property, _j, _k, _len, _len1;
+    var a, arg, definition, len, len1, m, n, properties, property;
     if (properties = signature.properties) {
       return properties;
     }
     signature.properties = properties = [];
-    for (_j = 0, _len = signature.length; _j < _len; _j++) {
-      arg = signature[_j];
+    for (m = 0, len = signature.length; m < len; m++) {
+      arg = signature[m];
       if (arg.push) {
-        for (_k = 0, _len1 = arg.length; _k < _len1; _k++) {
-          a = arg[_k];
+        for (n = 0, len1 = arg.length; n < len1; n++) {
+          a = arg[n];
           for (property in a) {
             definition = a[property];
             properties.push(definition);
@@ -824,7 +824,7 @@ Command = (function() {
   };
 
   Command.generate = function(combinations, positions, properties, combination, length) {
-    var i, j, position, props, type, _j, _len, _ref;
+    var i, j, len, m, position, props, ref, type;
     if (combination) {
       i = combination.length;
     } else {
@@ -839,9 +839,9 @@ Command = (function() {
       combination.length = length;
       combination.push(positions);
     } else {
-      _ref = properties[i];
-      for (j = _j = 0, _len = _ref.length; _j < _len; j = ++_j) {
-        type = _ref[j];
+      ref = properties[i];
+      for (j = m = 0, len = ref.length; m < len; j = ++m) {
+        type = ref[j];
         if (j === 0) {
           combination.push(type);
         } else {
@@ -857,8 +857,8 @@ Command = (function() {
   };
 
   Command.write = function(command, storage, combination) {
-    var arg, i, last, proto, resolved, variant, _j, _ref, _ref1, _ref2;
-    for (i = _j = 0, _ref = combination.length; 0 <= _ref ? _j < _ref : _j > _ref; i = 0 <= _ref ? ++_j : --_j) {
+    var arg, i, last, m, proto, ref, ref1, ref2, resolved, variant;
+    for (i = m = 0, ref = combination.length; 0 <= ref ? m < ref : m > ref; i = 0 <= ref ? ++m : --m) {
       if ((arg = combination[i]) === 'default') {
         storage.Default = command;
       } else {
@@ -875,7 +875,7 @@ Command = (function() {
             proto = resolved.prototype;
             if (variant.prototype.condition) {
               if (!proto.hasOwnProperty('advices')) {
-                proto.advices = ((_ref1 = proto.advices) != null ? _ref1.slice() : void 0) || [];
+                proto.advices = ((ref1 = proto.advices) != null ? ref1.slice() : void 0) || [];
                 if (proto.condition) {
                   proto.advices.push(resolved);
                 }
@@ -883,7 +883,7 @@ Command = (function() {
               proto.advices.push(variant);
             } else {
               if (proto.condition) {
-                variant.prototype.advices = ((_ref2 = proto.advices) != null ? _ref2.slice() : void 0) || [resolved];
+                variant.prototype.advices = ((ref2 = proto.advices) != null ? ref2.slice() : void 0) || [resolved];
                 storage.resolved = variant;
               }
             }
@@ -896,7 +896,7 @@ Command = (function() {
   };
 
   Command.register = function(signatures, property, command, types) {
-    var Prototype, combination, execute, kind, proto, storage, subcommand, type, value, _j, _k, _len, _len1, _ref, _ref1;
+    var Prototype, combination, execute, kind, len, len1, m, n, proto, ref, ref1, storage, subcommand, type, value;
     storage = signatures[property] || (signatures[property] = {});
     for (type in types) {
       subcommand = types[type];
@@ -904,7 +904,7 @@ Command = (function() {
         if ((execute = proto[type]) || ((kind = subcommand.prototype.kind) && ((kind === 'auto') || (execute = proto[kind])))) {
           Prototype = subcommand.extend();
           for (property in proto) {
-            if (!__hasProp.call(proto, property)) continue;
+            if (!hasProp.call(proto, property)) continue;
             value = proto[property];
             Prototype.prototype[property] = value;
           }
@@ -916,30 +916,30 @@ Command = (function() {
           } else if (execute) {
             Prototype.prototype.execute = execute;
           }
-          _ref = this.sign(subcommand, Prototype.prototype);
-          for (_j = 0, _len = _ref.length; _j < _len; _j++) {
-            combination = _ref[_j];
+          ref = this.sign(subcommand, Prototype.prototype);
+          for (m = 0, len = ref.length; m < len; m++) {
+            combination = ref[m];
             this.write(Prototype, storage, combination);
           }
         }
       }
     }
-    _ref1 = this.sign(command, command.prototype);
-    for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
-      combination = _ref1[_k];
+    ref1 = this.sign(command, command.prototype);
+    for (n = 0, len1 = ref1.length; n < len1; n++) {
+      combination = ref1[n];
       this.write(command, storage, combination);
     }
   };
 
   Command.get = function(command, storage, signature, args, permutation) {
-    var arg, argument, group, i, j, k, keys, obj, property, _j, _k, _l, _len, _len1, _ref;
+    var arg, argument, group, i, j, k, keys, len, len1, m, n, o, obj, property, ref;
     args || (args = []);
     i = args.length;
     seeker: {;
-    for (_j = 0, _len = signature.length; _j < _len; _j++) {
-      arg = signature[_j];
+    for (m = 0, len = signature.length; m < len; m++) {
+      arg = signature[m];
       if (arg.push) {
-        for (k = _k = 0, _len1 = arg.length; _k < _len1; k = ++_k) {
+        for (k = n = 0, len1 = arg.length; n < len1; k = ++n) {
           obj = arg[k];
           j = 0;
           group = arg;
@@ -974,7 +974,7 @@ Command = (function() {
     }
     if (keys && (j != null)) {
       permutation || (permutation = []);
-      for (i = _l = 0, _ref = keys.length; _l < _ref; i = _l += 1) {
+      for (i = o = 0, ref = keys.length; o < ref; i = o += 1) {
         if (permutation.indexOf(i) === -1) {
           this.get(command, storage, signature, args.concat(args.length - j + i), permutation.concat(i));
         }
@@ -989,13 +989,13 @@ Command = (function() {
 
 })();
 
-Command.Sequence = (function(_super) {
-  __extends(Sequence, _super);
+Command.Sequence = (function(superClass) {
+  extend(Sequence, superClass);
 
   function Sequence() {}
 
   Sequence.prototype.descend = function(engine, operation, continuation, scope, ascender, ascending) {
-    var argument, command, index, result, _i, _ref, _ref1;
+    var argument, command, index, l, ref, ref1, result;
     if (ascender > -1) {
       index = ascender + 1;
       result = ascending;
@@ -1003,7 +1003,7 @@ Command.Sequence = (function(_super) {
       result = ascending;
       continuation = this.delimit(continuation, this.ASCEND);
     }
-    for (index = _i = _ref = index || 0, _ref1 = operation.length; _i < _ref1; index = _i += 1) {
+    for (index = l = ref = index || 0, ref1 = operation.length; l < ref1; index = l += 1) {
       argument = operation[index];
       argument.parent || (argument.parent = operation);
       if (command = argument.command || engine.Command(argument)) {
@@ -1028,10 +1028,10 @@ Command.Sequence = (function(_super) {
   };
 
   Sequence.prototype.release = function(result, engine, operation, continuation, scope) {
-    var parent, _base;
+    var base, parent;
     parent = operation.parent;
     if (operation === parent[parent.length - 1]) {
-      return typeof (_base = parent.parent.command).release === "function" ? _base.release(result, engine, parent, continuation, scope) : void 0;
+      return typeof (base = parent.parent.command).release === "function" ? base.release(result, engine, parent, continuation, scope) : void 0;
     }
   };
 
@@ -1057,15 +1057,15 @@ Command.Sequence = (function(_super) {
 
 })(Command);
 
-Command.List = (function(_super) {
-  __extends(List, _super);
+Command.List = (function(superClass) {
+  extend(List, superClass);
 
   List.prototype.type = 'List';
 
   List.prototype.condition = function(engine, operation) {
-    var parent, _ref;
+    var parent, ref;
     if (parent = operation.parent) {
-      return ((_ref = parent.command.List) != null ? _ref[parent.indexOf(operation)] : void 0) || parent[0] === true;
+      return ((ref = parent.command.List) != null ? ref[parent.indexOf(operation)] : void 0) || parent[0] === true;
     } else {
       return !operation[0].command.Sequence;
     }
@@ -1084,8 +1084,8 @@ Command.List = (function(_super) {
   };
 
   List.prototype.descend = function(engine, operation, continuation, scope, ascender, ascending) {
-    var argument, command, index, _i, _len;
-    for (index = _i = 0, _len = operation.length; _i < _len; index = ++_i) {
+    var argument, command, index, l, len;
+    for (index = l = 0, len = operation.length; l < len; index = ++l) {
       argument = operation[index];
       if (argument != null ? argument.push : void 0) {
         argument.parent || (argument.parent = operation);
@@ -1102,16 +1102,16 @@ Command.List = (function(_super) {
 
 Command.Sequence.prototype.advices = [Command.List];
 
-Command.Default = (function(_super) {
-  __extends(Default, _super);
+Command.Default = (function(superClass) {
+  extend(Default, superClass);
 
   Default.prototype.type = 'Default';
 
   Default.prototype.extras = 2;
 
   Default.prototype.execute = function() {
-    var args, engine, operation, _i;
-    args = 3 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 2) : (_i = 0, []), engine = arguments[_i++], operation = arguments[_i++];
+    var args, engine, l, operation;
+    args = 3 <= arguments.length ? slice.call(arguments, 0, l = arguments.length - 2) : (l = 0, []), engine = arguments[l++], operation = arguments[l++];
     args.unshift(operation[0]);
     return args;
   };
@@ -1122,8 +1122,8 @@ Command.Default = (function(_super) {
 
 })(Command);
 
-Command.Object = (function(_super) {
-  __extends(Object, _super);
+Command.Object = (function(superClass) {
+  extend(Object, superClass);
 
   function Object() {}
 
@@ -1131,8 +1131,8 @@ Command.Object = (function(_super) {
 
 })(Command);
 
-Command.Meta = (function(_super) {
-  __extends(Meta, _super);
+Command.Meta = (function(superClass) {
+  extend(Meta, superClass);
 
   function Meta() {
     return Meta.__super__.constructor.apply(this, arguments);
@@ -1182,7 +1182,7 @@ State:
                                 as [operation, key, scope] triplets
  */
 var Domain,
-  __hasProp = {}.hasOwnProperty;
+  hasProp = {}.hasOwnProperty;
 
 Domain = (function() {
   Domain.prototype.strategy = void 0;
@@ -1220,7 +1220,7 @@ Domain = (function() {
   };
 
   Domain.prototype.solve = function(operation, continuation, scope, ascender, ascending) {
-    var commands, commited, result, transacting, _ref;
+    var commands, commited, ref, result, transacting;
     transacting = this.transact();
     if (typeof operation === 'object') {
       if (operation instanceof Array) {
@@ -1234,7 +1234,7 @@ Domain = (function() {
       this.Constraint.prototype.reset(this);
     }
     if (typeof result !== 'object') {
-      if (result = (_ref = this.perform) != null ? _ref.apply(this, arguments) : void 0) {
+      if (result = (ref = this.perform) != null ? ref.apply(this, arguments) : void 0) {
         result = this.apply(result);
       }
     }
@@ -1248,19 +1248,19 @@ Domain = (function() {
   };
 
   Domain.prototype.watch = function(object, property, operation, continuation, scope) {
-    var id, j, obj, observers, path, prop, value, watchers, _base, _base1, _base2;
+    var base, base1, base2, id, j, obj, observers, path, prop, value, watchers;
     this.setup();
     path = this.getPath(object, property);
     value = this.get(path);
     if (this.indexOfTriplet(this.watchers[path], operation, continuation, scope) === -1) {
-      observers = (_base = this.watched)[continuation] || (_base[continuation] = []);
+      observers = (base = this.watched)[continuation] || (base[continuation] = []);
       observers.push(operation, path, scope);
-      watchers = (_base1 = this.watchers)[path] || (_base1[path] = []);
+      watchers = (base1 = this.watchers)[path] || (base1[path] = []);
       watchers.push(operation, continuation, scope);
       if (this.subscribe && watchers.length === 3) {
         if ((j = path.indexOf('[')) > -1) {
           id = path.substring(0, j);
-          obj = (_base2 = (this.subscribers || (this.subscribers = {})))[id] || (_base2[id] = {});
+          obj = (base2 = (this.subscribers || (this.subscribers = {})))[id] || (base2[id] = {});
           prop = path.substring(j + 1, path.length - 1);
           obj[prop] = true;
           this.subscribe(id, prop, path);
@@ -1271,7 +1271,7 @@ Domain = (function() {
   };
 
   Domain.prototype.unwatch = function(object, property, operation, continuation, scope) {
-    var id, index, j, obj, observers, old, path, prop, watchers, _base;
+    var base, id, index, j, obj, observers, old, path, prop, watchers;
     path = this.getPath(object, property);
     observers = this.watched[continuation];
     index = this.indexOfTriplet(observers, operation, path, scope);
@@ -1287,7 +1287,7 @@ Domain = (function() {
       if (this.subscribe) {
         if ((j = path.indexOf('[')) > -1) {
           id = path.substring(0, j);
-          obj = (_base = this.subscribers)[id] || (_base[id] = {});
+          obj = (base = this.subscribers)[id] || (base[id] = {});
           prop = path.substring(j + 1, path.length - 1);
           old = obj[prop];
           delete obj[prop];
@@ -1344,16 +1344,16 @@ Domain = (function() {
   };
 
   Domain.prototype.set = function(object, property, value, continuation, operation) {
-    var i, old, op, path, stack, updated, _base, _i, _len, _ref;
+    var base, i, k, len, old, op, path, ref, stack, updated;
     path = this.getPath(object, property);
     old = this.values[path];
     if (value != null) {
       value = value.valueOf();
     }
     if (continuation) {
-      _ref = stack = (_base = (this.stacks || (this.stacks = {})))[path] || (_base[path] = []);
-      for (i = _i = 0, _len = _ref.length; _i < _len; i = _i += 3) {
-        op = _ref[i];
+      ref = stack = (base = (this.stacks || (this.stacks = {})))[path] || (base[path] = []);
+      for (i = k = 0, len = ref.length; k < len; i = k += 3) {
+        op = ref[i];
         if (op === operation && stack[i + 1] === continuation) {
           if (value != null) {
             stack[i + 2] = value;
@@ -1396,9 +1396,9 @@ Domain = (function() {
   };
 
   Domain.prototype.callback = function(path, value) {
-    var command, constraint, index, op, operation, url, values, variable, watcher, watchers, worker, workers, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
-    if (watchers = (_ref = this.watchers) != null ? _ref[path] : void 0) {
-      for (index = _i = 0, _len = watchers.length; _i < _len; index = _i += 3) {
+    var command, constraint, index, k, l, len, len1, len2, m, op, operation, ref, ref1, ref2, url, values, variable, watcher, watchers, worker, workers;
+    if (watchers = (ref = this.watchers) != null ? ref[path] : void 0) {
+      for (index = k = 0, len = watchers.length; k < len; index = k += 3) {
         watcher = watchers[index];
         if (!watcher) {
           break;
@@ -1417,12 +1417,12 @@ Domain = (function() {
       return;
     }
     if (!(this instanceof this.Solver) && (variable = this.variables[path])) {
-      _ref1 = variable.constraints;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        constraint = _ref1[_j];
-        _ref2 = constraint.operations;
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          operation = _ref2[_k];
+      ref1 = variable.constraints;
+      for (l = 0, len1 = ref1.length; l < len1; l++) {
+        constraint = ref1[l];
+        ref2 = constraint.operations;
+        for (m = 0, len2 = ref2.length; m < len2; m++) {
+          operation = ref2[m];
           if (op = operation.variables[path]) {
             if (op.domain && op.domain.displayName !== this.displayName) {
               if (!watchers || watchers.indexOf(op) === -1) {
@@ -1450,7 +1450,7 @@ Domain = (function() {
     var object, property, value;
     object = {};
     for (property in this) {
-      if (!__hasProp.call(this, property)) continue;
+      if (!hasProp.call(this, property)) continue;
       value = this[property];
       if (property !== 'engine' && property !== 'observers' && property !== 'watchers' && property !== 'values') {
         object[property] = value;
@@ -1464,23 +1464,23 @@ Domain = (function() {
   };
 
   Domain.prototype.add = function(path, value) {
-    var group, _base;
-    group = (_base = (this.paths || (this.paths = {})))[path] || (_base[path] = []);
+    var base, group;
+    group = (base = (this.paths || (this.paths = {})))[path] || (base[path] = []);
     group.push(value);
   };
 
   Domain.prototype.transform = function(result) {
-    var nullified, path, replaced, value, variable, _ref, _ref1, _ref2;
+    var nullified, path, ref, ref1, ref2, replaced, value, variable;
     if (result == null) {
       result = {};
     }
     nullified = this.nullified;
     replaced = this.replaced;
     if (this.declared) {
-      _ref = this.declared;
-      for (path in _ref) {
-        variable = _ref[path];
-        value = (_ref1 = variable.value) != null ? _ref1 : 0;
+      ref = this.declared;
+      for (path in ref) {
+        variable = ref[path];
+        value = (ref1 = variable.value) != null ? ref1 : 0;
         if (this.values[path] !== value) {
           if (path.charAt(0) !== '%') {
             if (result[path] == null) {
@@ -1497,7 +1497,7 @@ Domain = (function() {
       for (path in nullified) {
         variable = nullified[path];
         if (path.charAt(0) !== '%') {
-          result[path] = (_ref2 = this.data.values[path]) != null ? _ref2 : null;
+          result[path] = (ref2 = this.data.values[path]) != null ? ref2 : null;
         }
         this.nullify(variable);
       }
@@ -1540,13 +1540,13 @@ Domain = (function() {
   };
 
   Domain.prototype.remove = function() {
-    var contd, i, observer, operation, operations, path, property, stack, stacks, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2;
-    for (_i = 0, _len = arguments.length; _i < _len; _i++) {
-      path = arguments[_i];
+    var contd, i, k, l, len, len1, m, observer, operation, operations, path, property, ref, ref1, ref2, stack, stacks;
+    for (k = 0, len = arguments.length; k < len; k++) {
+      path = arguments[k];
       if (stacks = this.stacks) {
-        _ref = this.stacks;
-        for (property in _ref) {
-          stack = _ref[property];
+        ref = this.stacks;
+        for (property in ref) {
+          stack = ref[property];
           while ((i = stack.indexOf(path)) > -1) {
             stack.splice(i - 1, 3);
             if (stack.length < i) {
@@ -1559,9 +1559,9 @@ Domain = (function() {
         }
       }
       if (this.watched) {
-        _ref1 = this.Query.prototype.getVariants(path) || [path];
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          contd = _ref1[_j];
+        ref1 = this.Query.prototype.getVariants(path) || [path];
+        for (l = 0, len1 = ref1.length; l < len1; l++) {
+          contd = ref1[l];
           if (observer = this.watched[contd]) {
             while (observer[0]) {
               this.unwatch(observer[1], void 0, observer[0], contd, observer[2]);
@@ -1569,8 +1569,8 @@ Domain = (function() {
           }
         }
       }
-      if (operations = (_ref2 = this.paths) != null ? _ref2[path] : void 0) {
-        for (i = _k = operations.length - 1; _k >= 0; i = _k += -1) {
+      if (operations = (ref2 = this.paths) != null ? ref2[path] : void 0) {
+        for (i = m = operations.length - 1; m >= 0; i = m += -1) {
           operation = operations[i];
           operation.command.remove(this, operation, path);
         }
@@ -1579,14 +1579,14 @@ Domain = (function() {
   };
 
   Domain.prototype["export"] = function(constraints) {
-    var constraint, operation, operations, ops, _i, _j, _len, _len1;
+    var constraint, k, l, len, len1, operation, operations, ops;
     if (constraints || (constraints = this.constraints)) {
       operations = [];
-      for (_i = 0, _len = constraints.length; _i < _len; _i++) {
-        constraint = constraints[_i];
+      for (k = 0, len = constraints.length; k < len; k++) {
+        constraint = constraints[k];
         if (ops = constraint.operations) {
-          for (_j = 0, _len1 = ops.length; _j < _len1; _j++) {
-            operation = ops[_j];
+          for (l = 0, len1 = ops.length; l < len1; l++) {
+            operation = ops[l];
             operations.push(operation.parent);
           }
         }
@@ -1649,7 +1649,7 @@ Domain = (function() {
   };
 
   Domain.compile = function(engine) {
-    var EngineDomain, EngineDomainWrapper, domain, name, property, value, _ref;
+    var EngineDomain, EngineDomainWrapper, domain, name, property, ref, value;
     for (name in engine) {
       domain = engine[name];
       if (domain.prototype && domain.prototype instanceof Domain) {
@@ -1662,9 +1662,9 @@ Domain = (function() {
         EngineDomain.prototype.proto = domain;
         EngineDomain.prototype.engine = engine;
         EngineDomain.prototype.displayName = name;
-        _ref = domain.prototype;
-        for (property in _ref) {
-          value = _ref[property];
+        ref = domain.prototype;
+        for (property in ref) {
+          value = ref[property];
           EngineDomain.prototype[property] = value;
         }
         engine[name.toLowerCase()] = new EngineDomain();
@@ -1674,7 +1674,7 @@ Domain = (function() {
   };
 
   Domain.prototype.Property = function(property, reference, properties) {
-    var index, key, left, path, right, value, _base;
+    var base, index, key, left, path, right, value;
     if (typeof property === 'object') {
       if (property.push) {
         return properties[reference] = this.Style(property, reference, properties);
@@ -1685,7 +1685,7 @@ Domain = (function() {
             path = reference.replace(']', '-' + key + ']');
             left = reference.substring(0, index);
             right = path.substring(index + 1, path.length - 1);
-            (_base = properties[left])[right] || (_base[right] = this.Property(value, path, properties));
+            (base = properties[left])[right] || (base[right] = this.Property(value, path, properties));
           } else if (reference.match(/^[a-z]/i)) {
             path = reference + '-' + key;
           } else {
@@ -1731,7 +1731,7 @@ Domains are either independent constraint graphs or
 pseudo-solvers like DOM measurements.
  */
 var Engine,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Engine = (function() {
   Engine.prototype.Command = require('./Command');
@@ -1757,7 +1757,7 @@ Engine = (function() {
   Engine.prototype.Exporter = require('./utilities/Exporter');
 
   function Engine(data, url) {
-    var events, property, value, _i, _len, _ref;
+    var events, k, len, property, ref, value;
     this.engine = this;
     this.$prototype = Engine.prototype;
     if ((url != null) && (typeof Worker !== "undefined" && Worker !== null)) {
@@ -1765,9 +1765,9 @@ Engine = (function() {
     }
     this.eventHandler = this.handleEvent.bind(this);
     this.listeners = {};
-    _ref = [this.events, this.$events, this.$$events];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      events = _ref[_i];
+    ref = [this.events, this.$events, this.$$events];
+    for (k = 0, len = ref.length; k < len; k++) {
+      events = ref[k];
       this.addListeners(events);
     }
     this.observers = {};
@@ -1837,7 +1837,7 @@ Engine = (function() {
   };
 
   Engine.prototype.transact = function() {
-    var arg, args, index, problematic, reason, _i, _len;
+    var arg, args, index, k, len, problematic, reason;
     if (typeof arguments[0] === 'string') {
       reason = arguments[0];
       if (typeof arguments[1] === 'string') {
@@ -1855,7 +1855,7 @@ Engine = (function() {
       this.compile();
     }
     problematic = void 0;
-    for (index = _i = 0, _len = args.length; _i < _len; index = ++_i) {
+    for (index = k = 0, len = args.length; k < len; index = ++k) {
       arg = args[index];
       if (arg && typeof arg !== 'string') {
         if (problematic) {
@@ -1878,7 +1878,7 @@ Engine = (function() {
   };
 
   Engine.prototype.commit = function(solution, update) {
-    var _ref;
+    var ref;
     if (update == null) {
       update = this.updating;
     }
@@ -1895,7 +1895,7 @@ Engine = (function() {
       }
       this.triggerEvent('assign', update);
       this.triggerEvent('perform', update);
-      if ((_ref = update.busy) != null ? _ref.length : void 0) {
+      if ((ref = update.busy) != null ? ref.length : void 0) {
         return update;
       }
       if (this.write(update) || ((update.written || update.reflown) && update.isDone())) {
@@ -1915,13 +1915,13 @@ Engine = (function() {
   };
 
   Engine.prototype.resolve = function(domain, problems, index, update) {
-    var problem, result, _i, _len;
+    var k, len, problem, result;
     if (domain && !domain.solve && domain.postMessage) {
       update.postMessage(domain, problems);
       update.await(domain.url);
       return domain;
     }
-    for (index = _i = 0, _len = problems.length; _i < _len; index = ++_i) {
+    for (index = k = 0, len = problems.length; k < len; index = ++k) {
       problem = problems[index];
       if (problem instanceof Array && problem.length === 1 && problem[0] instanceof Array) {
         problem = problems[index] = problem[0];
@@ -1944,7 +1944,7 @@ Engine = (function() {
   };
 
   Engine.prototype.broadcast = function(problems, update, insert) {
-    var broadcasted, i, index, locals, other, others, path, problem, property, remove, removes, result, stacks, url, value, worker, working, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3, _ref4;
+    var broadcasted, i, index, k, l, len, len1, len2, len3, locals, m, n, other, others, path, problem, property, ref, ref1, ref2, ref3, ref4, remove, removes, result, stacks, url, value, worker, working;
     if (update == null) {
       update = this.updating;
     }
@@ -1962,8 +1962,8 @@ Engine = (function() {
     if (problems[0] === 'remove') {
       removes.push(problems);
     } else {
-      for (_i = 0, _len = problems.length; _i < _len; _i++) {
-        problem = problems[_i];
+      for (k = 0, len = problems.length; k < len; k++) {
+        problem = problems[k];
         if (problem[0] === 'remove') {
           removes.push(problem);
         } else {
@@ -1971,30 +1971,30 @@ Engine = (function() {
         }
       }
     }
-    _ref = [this.data, this.output].concat(this.domains);
-    for (i = _j = 0, _len1 = _ref.length; _j < _len1; i = ++_j) {
-      other = _ref[i];
+    ref = [this.data, this.output].concat(this.domains);
+    for (i = l = 0, len1 = ref.length; l < len1; i = ++l) {
+      other = ref[i];
       locals = [];
       other.changes = void 0;
       stacks = other.stacks;
-      for (_k = 0, _len2 = removes.length; _k < _len2; _k++) {
-        remove = removes[_k];
-        for (index = _l = 0, _len3 = remove.length; _l < _len3; index = ++_l) {
+      for (m = 0, len2 = removes.length; m < len2; m++) {
+        remove = removes[m];
+        for (index = n = 0, len3 = remove.length; n < len3; index = ++n) {
           path = remove[index];
           if (index === 0) {
             continue;
           }
-          if ((_ref1 = other.paths) != null ? _ref1[path] : void 0) {
+          if ((ref1 = other.paths) != null ? ref1[path] : void 0) {
             locals.push(path);
-          } else if (((_ref2 = other.watched) != null ? _ref2[path] : void 0) || other.stacks) {
+          } else if (((ref2 = other.watched) != null ? ref2[path] : void 0) || other.stacks) {
             other.remove(path);
           }
         }
       }
       if (other.changes) {
-        _ref3 = other.changes;
-        for (property in _ref3) {
-          value = _ref3[property];
+        ref3 = other.changes;
+        for (property in ref3) {
+          value = ref3[property];
           (result || (result = {}))[property] = value;
         }
         other.changes = void 0;
@@ -2011,12 +2011,12 @@ Engine = (function() {
     if (typeof problems[0] === 'string') {
       problems = [problems];
     }
-    _ref4 = this.workers;
-    for (url in _ref4) {
-      worker = _ref4[url];
+    ref4 = this.workers;
+    for (url in ref4) {
+      worker = ref4[url];
       working = problems.filter(function(command) {
-        var _ref5;
-        return command[0] !== 'remove' || ((_ref5 = worker.paths) != null ? _ref5[command[1]] : void 0);
+        var ref5;
+        return command[0] !== 'remove' || ((ref5 = worker.paths) != null ? ref5[command[1]] : void 0);
       });
       update.push(working, worker, true);
     }
@@ -2045,9 +2045,9 @@ Engine = (function() {
 
   Engine.prototype.$events = {
     perform: function(update) {
-      var _ref;
+      var ref;
       if (update.domains.length) {
-        if (!((_ref = update.busy) != null ? _ref.length : void 0)) {
+        if (!((ref = update.busy) != null ? ref.length : void 0)) {
           this.console.start('Solvers', update.problems.slice(update.index + 1));
           update.each(this.resolve, this);
           this.console.end(update.changes);
@@ -2073,12 +2073,12 @@ Engine = (function() {
       }
     },
     remove: function(path) {
-      var _ref;
+      var ref;
       this.output.remove(path);
-      return (_ref = this.updating) != null ? _ref.remove(path) : void 0;
+      return (ref = this.updating) != null ? ref.remove(path) : void 0;
     },
     assign: function(update) {
-      var assignments, changes, constraints, continuation, index, operation, path, ranges, tickers, _ref;
+      var assignments, changes, constraints, continuation, index, operation, path, ranges, ref, tickers;
       while (!!(assignments = update.assignments) + !!(ranges = update.ranges)) {
         if (assignments) {
           this.console.start('Assignments', assignments);
@@ -2093,9 +2093,9 @@ Engine = (function() {
         }
         if (ranges) {
           this.console.start('Ranges', this.ranges);
-          _ref = this.ranges;
-          for (continuation in _ref) {
-            tickers = _ref[continuation];
+          ref = this.ranges;
+          for (continuation in ref) {
+            tickers = ref[continuation];
             index = 0;
             while (operation = tickers[index]) {
               if (operation.command.update(tickers[index + 2], this, operation, continuation, ranges[index + 1])) {
@@ -2135,18 +2135,18 @@ Engine = (function() {
       return typeof self !== "undefined" && self !== null ? self.removeEventListener('error', this.eventHandler) : void 0;
     },
     message: function(e) {
-      var property, value, values, _base, _ref, _ref1;
-      values = (_base = e.target).values || (_base.values = {});
-      _ref = e.data;
-      for (property in _ref) {
-        value = _ref[property];
+      var base, property, ref, ref1, value, values;
+      values = (base = e.target).values || (base.values = {});
+      ref = e.data;
+      for (property in ref) {
+        value = ref[property];
         if (value != null) {
           values[property] = value;
         } else {
           delete values[property];
         }
       }
-      if ((_ref1 = this.updating) != null ? _ref1.busy.length : void 0) {
+      if ((ref1 = this.updating) != null ? ref1.busy.length : void 0) {
         this.updating.solutions[this.updating.solutions.indexOf(e.target, this.updating.index)] = e.data;
         this.updating.busy.splice(this.updating.busy.indexOf(e.target.url), 1);
         return this.commit(e.data);
@@ -2161,12 +2161,12 @@ Engine = (function() {
   };
 
   Engine.prototype.getWorkerURL = (function() {
-    var scripts, src, _ref, _ref1;
+    var ref, ref1, scripts, src;
     if (typeof document !== "undefined" && document !== null) {
       scripts = document.getElementsByTagName('script');
       src = scripts[scripts.length - 1].src;
       if (!src.match(/gss/i)) {
-        src = (_ref = document.querySelectorAll('script[src*=gss]')) != null ? (_ref1 = _ref[0]) != null ? _ref1.src : void 0 : void 0;
+        src = (ref = document.querySelectorAll('script[src*=gss]')) != null ? (ref1 = ref[0]) != null ? ref1.src : void 0 : void 0;
       }
     }
     return function(url) {
@@ -2181,7 +2181,7 @@ Engine = (function() {
   })();
 
   Engine.prototype.useWorker = function(url) {
-    var _base;
+    var base;
     if (typeof url !== 'string') {
       return;
     }
@@ -2191,11 +2191,11 @@ Engine = (function() {
     if (!url.match(/^http:/i) && (typeof location !== "undefined" && location !== null ? location.protocol.match(/^file:/i) : void 0)) {
       return;
     }
-    (_base = this.engine).worker || (_base.worker = this.engine.getWorker(url));
+    (base = this.engine).worker || (base.worker = this.engine.getWorker(url));
     this.solve = (function(_this) {
       return function(commands) {
-        var _base1;
-        (_base1 = _this.engine).updating || (_base1.updating = new _this.update);
+        var base1;
+        (base1 = _this.engine).updating || (base1.updating = new _this.update);
         _this.engine.updating.postMessage(_this.worker, commands);
         return _this.worker;
       };
@@ -2204,8 +2204,8 @@ Engine = (function() {
   };
 
   Engine.prototype.getWorker = function(url) {
-    var worker, _base, _base1, _base2;
-    worker = (_base = ((_base1 = this.engine).workers || (_base1.workers = {})))[url] || (_base[url] = (_base2 = (Engine.workers || (Engine.workers = {})))[url] || (_base2[url] = new Worker(url)));
+    var base, base1, base2, worker;
+    worker = (base = ((base1 = this.engine).workers || (base1.workers = {})))[url] || (base[url] = (base2 = (Engine.workers || (Engine.workers = {})))[url] || (base2[url] = new Worker(url)));
     worker.url || (worker.url = url);
     worker.addEventListener('message', this.engine.eventHandler);
     worker.addEventListener('error', this.engine.eventHandler);
@@ -2236,7 +2236,7 @@ Engine = (function() {
   };
 
   Engine.prototype.getPath = function(id, property) {
-    var _ref;
+    var ref;
     if (!property) {
       property = id;
       id = void 0;
@@ -2247,7 +2247,7 @@ Engine = (function() {
       if (typeof id !== 'string') {
         id = this.identify(id);
       }
-      if (id === ((_ref = this.scope) != null ? _ref._gss_id : void 0) && !this.data.check(id, property)) {
+      if (id === ((ref = this.scope) != null ? ref._gss_id : void 0) && !this.data.check(id, property)) {
         return property;
       }
       if (id.substring(0, 2) === '$"') {
@@ -2260,14 +2260,14 @@ Engine = (function() {
   Engine.prototype.url = false;
 
   Engine.prototype.getVariableDomain = function(operation, Default) {
-    var domain, op, _ref, _ref1, _ref2, _ref3;
+    var domain, op, ref, ref1, ref2, ref3;
     if (domain = this.getVariableDomainByConvention(operation)) {
       return domain;
     }
     if (Default) {
       return Default;
     }
-    if (op = (_ref = this.variables[operation[1]]) != null ? (_ref1 = _ref.constraints) != null ? (_ref2 = _ref1[0]) != null ? (_ref3 = _ref2.operations[0]) != null ? _ref3.domain : void 0 : void 0 : void 0 : void 0) {
+    if (op = (ref = this.variables[operation[1]]) != null ? (ref1 = ref.constraints) != null ? (ref2 = ref1[0]) != null ? (ref3 = ref2.operations[0]) != null ? ref3.domain : void 0 : void 0 : void 0 : void 0) {
       return op;
     }
     if (this.solver.url) {
@@ -2292,9 +2292,9 @@ Engine = (function() {
   };
 
   Engine.prototype.indexOfTriplet = function(array, a, b, c) {
-    var index, op, _i, _len;
+    var index, k, len, op;
     if (array) {
-      for (index = _i = 0, _len = array.length; _i < _len; index = _i += 3) {
+      for (index = k = 0, len = array.length; k < len; index = k += 3) {
         op = array[index];
         if (op === a && array[index + 1] === b && array[index + 2] === c) {
           return index;
@@ -2312,23 +2312,23 @@ Engine = (function() {
   };
 
   Engine.prototype.addListeners = function(listeners) {
-    var callback, name, _results;
-    _results = [];
+    var callback, name, results;
+    results = [];
     for (name in listeners) {
       callback = listeners[name];
-      _results.push(this.addEventListener(name, callback));
+      results.push(this.addEventListener(name, callback));
     }
-    return _results;
+    return results;
   };
 
   Engine.prototype.removeListeners = function(listeners) {
-    var callback, name, _results;
-    _results = [];
+    var callback, name, results;
+    results = [];
     for (name in listeners) {
       callback = listeners[name];
-      _results.push(this.removeEventListener(name, callback));
+      results.push(this.removeEventListener(name, callback));
     }
-    return _results;
+    return results;
   };
 
   Engine.prototype.once = function(type, fn) {
@@ -2337,8 +2337,8 @@ Engine = (function() {
   };
 
   Engine.prototype.addEventListener = function(type, fn) {
-    var _base;
-    return ((_base = this.listeners)[type] || (_base[type] = [])).push(fn);
+    var base;
+    return ((base = this.listeners)[type] || (base[type] = [])).push(fn);
   };
 
   Engine.prototype.removeEventListener = function(type, fn) {
@@ -2351,8 +2351,8 @@ Engine = (function() {
   };
 
   Engine.prototype.triggerEvent = function(type, a, b, c) {
-    var fn, group, index, j, method, _ref;
-    if (group = (_ref = this.listeners) != null ? _ref[type] : void 0) {
+    var fn, group, index, j, method, ref;
+    if (group = (ref = this.listeners) != null ? ref[type] : void 0) {
       index = 0;
       j = group.length;
       while (index < j) {
@@ -2425,7 +2425,7 @@ Engine = (function() {
 
 Engine.prototype.Identity = (function() {
   function Identity() {
-    this.set = __bind(this.set, this);
+    this.set = bind(this.set, this);
   }
 
   Identity.uid = 0;
@@ -2492,15 +2492,15 @@ if ((typeof self !== "undefined" && self !== null) && !self.window && self.onmes
     commands = [];
     removes = [];
     solution = engine.solve(function() {
-      var command, index, _i, _len, _ref;
+      var command, index, k, len, ref;
       if ((values = data[0]) && !values.push) {
-        for (index = _i = 0, _len = data.length; _i < _len; index = ++_i) {
+        for (index = k = 0, len = data.length; k < len; index = ++k) {
           command = data[index];
           if (index) {
             if (command[0] === 'remove') {
               removes.push(command);
             } else {
-              if (((_ref = command[0]) != null ? _ref.key : void 0) != null) {
+              if (((ref = command[0]) != null ? ref.key : void 0) != null) {
                 command[1].parent = command;
                 command.index = command[0].index;
               }
@@ -2569,8 +2569,8 @@ module.exports = Engine;
 var GSS;
 
 GSS = function() {
-  var argument, data, engine, id, index, parent, scope, url, _i, _len;
-  for (index = _i = 0, _len = arguments.length; _i < _len; index = ++_i) {
+  var argument, data, engine, i, id, index, len, parent, scope, url;
+  for (index = i = 0, len = arguments.length; i < len; index = ++i) {
     argument = arguments[index];
     if (!argument) {
       continue;
@@ -2623,13 +2623,13 @@ module.exports = GSS;
 
 },{"./Engine":6}],8:[function(require,module,exports){
 var Command, Query,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __hasProp = {}.hasOwnProperty;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Command = require('./Command');
 
-Query = (function(_super) {
-  __extends(Query, _super);
+Query = (function(superClass) {
+  extend(Query, superClass);
 
   Query.prototype.type = 'Query';
 
@@ -2638,23 +2638,23 @@ Query = (function(_super) {
   }
 
   Query.prototype.ascend = function(engine, operation, continuation, scope, result, ascender, ascending) {
-    var contd, node, parent, yielded, _base, _base1, _i, _len, _ref, _ref1;
+    var base, base1, contd, k, len, node, parent, ref1, ref2, yielded;
     if (parent = operation.parent) {
       if (this.isCollection(result)) {
-        for (_i = 0, _len = result.length; _i < _len; _i++) {
-          node = result[_i];
+        for (k = 0, len = result.length; k < len; k++) {
+          node = result[k];
           contd = this.fork(engine, continuation, node);
-          if (yielded = typeof (_base = parent.command)["yield"] === "function" ? _base["yield"](node, engine, operation, contd, scope, ascender, ascending) : void 0) {
-            if ((_ref = yielded.command) != null) {
-              _ref.solve(yielded.domain || engine, yielded, contd, scope, -1, node);
+          if (yielded = typeof (base = parent.command)["yield"] === "function" ? base["yield"](node, engine, operation, contd, scope, ascender, ascending) : void 0) {
+            if ((ref1 = yielded.command) != null) {
+              ref1.solve(yielded.domain || engine, yielded, contd, scope, -1, node);
             }
           } else {
             parent.command.solve(engine, parent, contd, scope, parent.indexOf(operation), node);
           }
         }
       } else {
-        if (yielded = typeof (_base1 = parent.command)["yield"] === "function" ? _base1["yield"](result, engine, operation, continuation, scope, ascender, ascending) : void 0) {
-          return (_ref1 = yielded.command) != null ? _ref1.solve(yielded.domain || engine, yielded, continuation, scope, -1, result) : void 0;
+        if (yielded = typeof (base1 = parent.command)["yield"] === "function" ? base1["yield"](result, engine, operation, continuation, scope, ascender, ascending) : void 0) {
+          return (ref2 = yielded.command) != null ? ref2.solve(yielded.domain || engine, yielded, continuation, scope, -1, result) : void 0;
         } else if ((ascender != null) || !this.hidden || !this.reference) {
           return parent.command.solve(engine, parent, continuation, scope, parent.indexOf(operation), result);
         } else {
@@ -2665,7 +2665,7 @@ Query = (function(_super) {
   };
 
   Query.prototype.serialize = function(operation) {
-    var argument, cmd, index, length, start, string, _i, _ref;
+    var argument, cmd, index, k, length, ref1, ref2, start, string;
     if (this.prefix != null) {
       string = this.prefix;
     } else {
@@ -2675,7 +2675,7 @@ Query = (function(_super) {
       start = 2;
     }
     length = operation.length;
-    for (index = _i = _ref = start || 1; _ref <= length ? _i < length : _i > length; index = _ref <= length ? ++_i : --_i) {
+    for (index = k = ref1 = start || 1, ref2 = length; ref1 <= ref2 ? k < ref2 : k > ref2; index = ref1 <= ref2 ? ++k : --k) {
       if (argument = operation[index]) {
         if (cmd = argument.command) {
           string += cmd.key;
@@ -2694,32 +2694,32 @@ Query = (function(_super) {
   };
 
   Query.prototype.push = function(operation, context) {
-    var arg, cmd, i, index, inherited, match, tag, tags, _i, _j, _k, _l, _len, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+    var arg, cmd, i, index, inherited, k, l, len, m, match, n, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, tag, tags;
     if (context) {
       if (this.proxy) {
         this.proxied = context.command.path;
       }
       this.inherit(context.command, inherited, context);
     }
-    for (index = _i = 1, _ref = operation.length; 1 <= _ref ? _i < _ref : _i > _ref; index = 1 <= _ref ? ++_i : --_i) {
-      if (cmd = (_ref1 = operation[index]) != null ? _ref1.command : void 0) {
+    for (index = k = 1, ref1 = operation.length; 1 <= ref1 ? k < ref1 : k > ref1; index = 1 <= ref1 ? ++k : --k) {
+      if (cmd = (ref2 = operation[index]) != null ? ref2.command : void 0) {
         inherited = this.inherit(cmd, inherited, context);
       }
     }
     if (tags = this.tags) {
-      for (i = _j = 0, _len = tags.length; _j < _len; i = ++_j) {
+      for (i = l = 0, len = tags.length; l < len; i = ++l) {
         tag = tags[i];
         if (context) {
           if (cmd = context.command) {
-            if ((((_ref2 = cmd.tags) != null ? _ref2.indexOf(tag) : void 0) > -1) && this.checkers[tag](this, cmd, operation, context, inherited)) {
+            if ((((ref3 = cmd.tags) != null ? ref3.indexOf(tag) : void 0) > -1) && this.checkers[tag](this, cmd, operation, context, inherited)) {
               inherited = this.mergers[tag](this, cmd, operation, context);
             }
           }
         }
         match = true;
-        for (index = _k = 1, _ref3 = operation.length; 1 <= _ref3 ? _k < _ref3 : _k > _ref3; index = 1 <= _ref3 ? ++_k : --_k) {
-          if (cmd = (_ref4 = (arg = operation[index])) != null ? _ref4.command : void 0) {
-            if (!(((_ref5 = cmd.tags) != null ? _ref5.indexOf(tag) : void 0) > -1) || !this.checkers[tag](this, cmd, operation, arg, inherited)) {
+        for (index = m = 1, ref4 = operation.length; 1 <= ref4 ? m < ref4 : m > ref4; index = 1 <= ref4 ? ++m : --m) {
+          if (cmd = (ref5 = (arg = operation[index])) != null ? ref5.command : void 0) {
+            if (!(((ref6 = cmd.tags) != null ? ref6.indexOf(tag) : void 0) > -1) || !this.checkers[tag](this, cmd, operation, arg, inherited)) {
               match = false;
               break;
             }
@@ -2727,8 +2727,8 @@ Query = (function(_super) {
         }
         if (match) {
           inherited = false;
-          for (index = _l = 1, _ref6 = operation.length; 1 <= _ref6 ? _l < _ref6 : _l > _ref6; index = 1 <= _ref6 ? ++_l : --_l) {
-            if (cmd = (_ref7 = (arg = operation[index])) != null ? _ref7.command : void 0) {
+          for (index = n = 1, ref7 = operation.length; 1 <= ref7 ? n < ref7 : n > ref7; index = 1 <= ref7 ? ++n : --n) {
+            if (cmd = (ref8 = (arg = operation[index])) != null ? ref8.command : void 0) {
               inherited = this.mergers[tag](this, cmd, operation, arg, inherited);
             }
           }
@@ -2764,9 +2764,9 @@ Query = (function(_super) {
   };
 
   Query.prototype.jump = function(engine, operation, continuation, scope, ascender, ascending) {
-    var tail, _ref, _ref1;
+    var ref1, ref2, tail;
     tail = this.tail;
-    if ((((_ref = tail[1]) != null ? (_ref1 = _ref.command) != null ? _ref1.key : void 0 : void 0) != null) && (ascender == null) && (continuation.lastIndexOf(this.PAIR) === continuation.indexOf(this.PAIR))) {
+    if ((((ref1 = tail[1]) != null ? (ref2 = ref1.command) != null ? ref2.key : void 0 : void 0) != null) && (ascender == null) && (continuation.lastIndexOf(this.PAIR) === continuation.indexOf(this.PAIR))) {
       return tail[1].command.solve(engine, tail[1], continuation, scope);
     }
     return this.head.command.perform(engine, this.head, continuation, scope, ascender, ascending);
@@ -2779,31 +2779,31 @@ Query = (function(_super) {
   Query.prototype.checkers = {};
 
   Query.prototype.before = function(args, engine, operation, continuation, scope, ascender, ascending) {
-    var alias, node, query, _ref, _ref1, _ref2, _ref3;
-    node = ((_ref = args[0]) != null ? _ref.nodeType : void 0) === 1 ? args[0] : scope;
+    var alias, node, query, ref1, ref2, ref3, ref4;
+    node = ((ref1 = args[0]) != null ? ref1.nodeType : void 0) === 1 ? args[0] : scope;
     query = this.getGlobalPath(engine, operation, continuation, node);
-    alias = ((_ref1 = engine.updating.aliases) != null ? _ref1[query] : void 0) || query;
-    if ((_ref2 = engine.updating.queries) != null ? _ref2.hasOwnProperty(alias) : void 0) {
+    alias = ((ref2 = engine.updating.aliases) != null ? ref2[query] : void 0) || query;
+    if ((ref3 = engine.updating.queries) != null ? ref3.hasOwnProperty(alias) : void 0) {
       return engine.updating.queries[alias];
     }
-    return (_ref3 = engine.updating.queries) != null ? _ref3[query] : void 0;
+    return (ref4 = engine.updating.queries) != null ? ref4[query] : void 0;
   };
 
   Query.prototype.after = function(args, result, engine, operation, continuation, scope) {
-    var added, alias, aliases, child, index, isCollection, node, old, path, query, removed, updating, _base, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    var added, alias, aliases, base, child, index, isCollection, k, l, len, len1, node, old, path, query, ref1, ref2, ref3, removed, updating;
     updating = engine.updating;
     node = this.precontextualize(engine, scope, args[0]);
     path = this.getLocalPath(engine, operation, continuation, node);
     if (!this.relative) {
       query = this.getGlobalPath(engine, operation, continuation, node);
       aliases = updating.aliases || (updating.aliases = {});
-      if (!(alias = aliases[query]) || alias.length > path.length || !((_ref = updating.queries) != null ? _ref.hasOwnProperty(alias) : void 0)) {
+      if (!(alias = aliases[query]) || alias.length > path.length || !((ref1 = updating.queries) != null ? ref1.hasOwnProperty(alias) : void 0)) {
         aliases[query] = path;
       }
     }
     old = this.get(engine, path);
     (updating.queries || (updating.queries = {}))[path] = result;
-    if ((_ref1 = updating.collections) != null ? _ref1.hasOwnProperty(path) : void 0) {
+    if ((ref2 = updating.collections) != null ? ref2.hasOwnProperty(path) : void 0) {
       old = updating.collections[path];
     } else if ((old == null) && (result && result.length === 0) && continuation) {
       old = this.getCanonicalCollection(engine, path);
@@ -2812,9 +2812,9 @@ Query = (function(_super) {
     if (old) {
       if (this.isCollection(old)) {
         removed = void 0;
-        for (index = _i = 0, _len = old.length; _i < _len; index = ++_i) {
+        for (index = k = 0, len = old.length; k < len; index = ++k) {
           child = old[index];
-          if (!old.scopes || ((_ref2 = old.scopes) != null ? _ref2[index] : void 0) === scope) {
+          if (!old.scopes || ((ref3 = old.scopes) != null ? ref3[index] : void 0) === scope) {
             if (!result || Array.prototype.indexOf.call(result, child) === -1) {
               (removed || (removed = [])).push(child);
             }
@@ -2830,10 +2830,10 @@ Query = (function(_super) {
       }
     }
     if (isCollection) {
-      (_base = engine.queries)[path] || (_base[path] = []);
+      (base = engine.queries)[path] || (base[path] = []);
       added = void 0;
-      for (_j = 0, _len1 = result.length; _j < _len1; _j++) {
-        child = result[_j];
+      for (l = 0, len1 = result.length; l < len1; l++) {
+        child = result[l];
         if (!old || Array.prototype.indexOf.call(old, child) === -1) {
           (added || (added = [])).push(child);
           added.isCollection = true;
@@ -2866,19 +2866,19 @@ Query = (function(_super) {
   };
 
   Query.prototype.subscribe = function(engine, operation, continuation, scope, node) {
-    var id, observers, _base, _base1;
+    var base, base1, id, observers;
     id = engine.identify(node);
-    observers = (_base = engine.engine.observers)[id] || (_base[id] = []);
+    observers = (base = engine.engine.observers)[id] || (base[id] = []);
     if (engine.indexOfTriplet(observers, operation, continuation, scope) === -1) {
-      if (typeof (_base1 = operation.command).prepare === "function") {
-        _base1.prepare(operation);
+      if (typeof (base1 = operation.command).prepare === "function") {
+        base1.prepare(operation);
       }
       return observers.push(operation, continuation, scope);
     }
   };
 
   Query.prototype.commit = function(engine, solution) {
-    var collection, contd, deferred, i, index, item, mutations, old, op, watcher, _i, _ref;
+    var collection, contd, deferred, i, index, item, k, mutations, old, op, ref1, watcher;
     if (mutations = engine.updating.mutations) {
       engine.console.start('Queries', mutations.slice());
       index = 0;
@@ -2897,10 +2897,10 @@ Query = (function(_super) {
         collection = this.get(engine, contd);
         op = deferred[index];
         if (!op.command.singular) {
-          if (old = (_ref = engine.updating.collections) != null ? _ref[contd] : void 0) {
+          if (old = (ref1 = engine.updating.collections) != null ? ref1[contd] : void 0) {
             collection = collection.slice();
             collection.isCollection = true;
-            for (i = _i = collection.length - 1; _i >= 0; i = _i += -1) {
+            for (i = k = collection.length - 1; k >= 0; i = k += -1) {
               item = collection[i];
               if (old.indexOf(item) > -1) {
                 collection.splice(i, 1);
@@ -2921,8 +2921,8 @@ Query = (function(_super) {
   };
 
   Query.prototype.add = function(engine, node, continuation, operation, scope, key, contd) {
-    var collection, dup, duplicates, el, index, keys, parent, paths, scopes, _base, _base1, _i, _j, _len, _len1, _ref;
-    collection = (_base = engine.queries)[continuation] || (_base[continuation] = []);
+    var base, base1, collection, dup, duplicates, el, index, k, keys, l, len, len1, parent, paths, ref1, scopes;
+    collection = (base = engine.queries)[continuation] || (base[continuation] = []);
     if (!collection.push) {
       return;
     }
@@ -2931,11 +2931,11 @@ Query = (function(_super) {
     paths = collection.paths || (collection.paths = []);
     scopes = collection.scopes || (collection.scopes = []);
     if (engine.pairs[continuation]) {
-      ((_base1 = engine.updating).pairs || (_base1.pairs = {}))[continuation] = true;
+      ((base1 = engine.updating).pairs || (base1.pairs = {}))[continuation] = true;
     }
     this.snapshot(engine, continuation, collection);
     if ((index = collection.indexOf(node)) === -1) {
-      for (index = _i = 0, _len = collection.length; _i < _len; index = ++_i) {
+      for (index = k = 0, len = collection.length; k < len; index = ++k) {
         el = collection[index];
         if (!this.comparePosition(el, node, keys[index], key)) {
           break;
@@ -2953,14 +2953,14 @@ Query = (function(_super) {
         }
       }
       if (parent[0] === 'rule') {
-        if ((_ref = engine.Stylesheet) != null) {
-          _ref.match(engine, node, continuation, true);
+        if ((ref1 = engine.Stylesheet) != null) {
+          ref1.match(engine, node, continuation, true);
         }
       }
       return true;
     } else if (!(scopes[index] === scope && paths[index] === contd)) {
       duplicates = (collection.duplicates || (collection.duplicates = []));
-      for (index = _j = 0, _len1 = duplicates.length; _j < _len1; index = ++_j) {
+      for (index = l = 0, len1 = duplicates.length; l < len1; index = ++l) {
         dup = duplicates[index];
         if (dup === node) {
           if (scopes[index] === scope && paths[index] === contd) {
@@ -2982,7 +2982,7 @@ Query = (function(_super) {
   };
 
   Query.prototype.unobserve = function(engine, id, path, continuation, scope) {
-    var index, observers, query, refs, subscope, watcher, _base, _results;
+    var base, index, observers, query, refs, results, subscope, watcher;
     if (typeof id === 'object') {
       observers = id;
       id = void 0;
@@ -2995,7 +2995,7 @@ Query = (function(_super) {
       refs = this.getVariants(path);
     }
     index = 0;
-    _results = [];
+    results = [];
     while (watcher = observers[index]) {
       query = observers[index + 1];
       if (refs && refs.indexOf(query) === -1) {
@@ -3005,25 +3005,25 @@ Query = (function(_super) {
       subscope = observers[index + 2];
       observers.splice(index, 3);
       if (id != null) {
-        if (typeof (_base = watcher.command).onClean === "function") {
-          _base.onClean(engine, watcher, query, watcher, subscope);
+        if (typeof (base = watcher.command).onClean === "function") {
+          base.onClean(engine, watcher, query, watcher, subscope);
         }
         this.clean(engine, watcher, query, watcher, subscope, continuation);
         if (!observers.length) {
-          _results.push(delete engine.observers[id]);
+          results.push(delete engine.observers[id]);
         } else {
-          _results.push(void 0);
+          results.push(void 0);
         }
       } else {
-        _results.push(void 0);
+        results.push(void 0);
       }
     }
-    return _results;
+    return results;
   };
 
   Query.prototype.snapshot = function(engine, key, collection) {
-    var c, collections, _base;
-    if ((collections = (_base = engine.updating).collections || (_base.collections = {})).hasOwnProperty(key)) {
+    var base, c, collections;
+    if ((collections = (base = engine.updating).collections || (base.collections = {})).hasOwnProperty(key)) {
       return;
     }
     if (collection != null ? collection.push : void 0) {
@@ -3046,15 +3046,15 @@ Query = (function(_super) {
   };
 
   Query.prototype.defer = function(engine, operation, continuation, scope) {
-    var _base;
-    (_base = engine.updating).deferred || (_base.deferred = []);
+    var base;
+    (base = engine.updating).deferred || (base.deferred = []);
     if (engine.indexOfTriplet(engine.updating.deferred, operation, continuation, scope) === -1) {
       return engine.updating.deferred.push(operation, continuation, scope);
     }
   };
 
   Query.prototype.removeFromCollection = function(engine, node, continuation, operation, scope, needle, contd) {
-    var collection, dup, duplicate, duplicates, index, keys, length, negative, paths, refs, scopes, _i, _len, _ref;
+    var collection, dup, duplicate, duplicates, index, k, keys, len, length, negative, paths, ref1, refs, scopes;
     collection = this.get(engine, continuation);
     length = collection.length;
     keys = collection.continuations;
@@ -3063,7 +3063,7 @@ Query = (function(_super) {
     duplicate = null;
     refs = this.getVariants(contd);
     if ((duplicates = collection.duplicates)) {
-      for (index = _i = 0, _len = duplicates.length; _i < _len; index = ++_i) {
+      for (index = k = 0, len = duplicates.length; k < len; index = ++k) {
         dup = duplicates[index];
         if (dup === node) {
           if (refs.indexOf(paths[length + index]) > -1 && scopes[length + index] === scope) {
@@ -3112,8 +3112,8 @@ Query = (function(_super) {
         this.chain(engine, collection[index - 1], node, continuation);
         this.chain(engine, node, collection[index], continuation);
         if (operation.parent[0] === 'rule') {
-          if ((_ref = engine.Stylesheet) != null) {
-            _ref.match(engine, node, continuation, false);
+          if ((ref1 = engine.Stylesheet) != null) {
+            ref1.match(engine, node, continuation, false);
           }
         }
         return true;
@@ -3122,7 +3122,7 @@ Query = (function(_super) {
   };
 
   Query.prototype.remove = function(engine, id, continuation, operation, scope, needle, recursion, contd) {
-    var collection, node, parent, ref, removed, _base, _base1;
+    var base, base1, collection, node, parent, ref, removed;
     if (needle == null) {
       needle = operation;
     }
@@ -3140,7 +3140,7 @@ Query = (function(_super) {
       }
     }
     if (engine.pairs[continuation]) {
-      ((_base = engine.updating).pairs || (_base.pairs = {}))[continuation] = true;
+      ((base = engine.updating).pairs || (base.pairs = {}))[continuation] = true;
     }
     collection = this.get(engine, continuation);
     if (collection && this.isCollection(collection)) {
@@ -3154,8 +3154,8 @@ Query = (function(_super) {
         ref = continuation;
       }
       if (parent = operation != null ? operation.parent : void 0) {
-        if (typeof (_base1 = parent.command).release === "function") {
-          _base1.release(node, engine, operation, ref, scope);
+        if (typeof (base1 = parent.command).release === "function") {
+          base1.release(node, engine, operation, ref, scope);
         }
       }
       this.unobserve(engine, id, ref, ref);
@@ -3222,14 +3222,14 @@ Query = (function(_super) {
   };
 
   Query.prototype.collect = function(engine, operation, path, scope, added, removed, recursion, contd) {
-    var collection, i, index, node, self, sorted, updated, _i, _len, _ref, _results;
+    var collection, i, index, k, len, node, ref1, results, self, sorted, updated;
     if (removed) {
       this.each(this.remove, engine, removed, path, operation, scope, operation, recursion, contd);
     }
     if (added) {
       this.each(this.add, engine, added, path, operation, scope, operation, contd);
     }
-    if ((_ref = (collection = this.get(engine, path))) != null ? _ref.continuations : void 0) {
+    if ((ref1 = (collection = this.get(engine, path))) != null ? ref1.continuations : void 0) {
       self = this;
       sorted = collection.slice().sort(function(a, b) {
         var i, j;
@@ -3238,8 +3238,8 @@ Query = (function(_super) {
         return self.comparePosition(a, b, collection.continuations[i], collection.continuations[j]) && -1 || 1;
       });
       updated = void 0;
-      _results = [];
-      for (index = _i = 0, _len = sorted.length; _i < _len; index = ++_i) {
+      results = [];
+      for (index = k = 0, len = sorted.length; k < len; index = ++k) {
         node = sorted[index];
         if (node !== collection[index]) {
           if (!updated) {
@@ -3258,25 +3258,25 @@ Query = (function(_super) {
           updated.paths[index] = collection.paths[i];
           updated.scopes[index] = collection.scopes[i];
           this.chain(engine, sorted[index - 1], node, path);
-          _results.push(this.chain(engine, node, sorted[index + 1], path));
+          results.push(this.chain(engine, node, sorted[index + 1], path));
         } else {
-          _results.push(void 0);
+          results.push(void 0);
         }
       }
-      return _results;
+      return results;
     }
   };
 
   Query.prototype.each = function(method, engine, result, continuation, operation, scope, needle, recursion, contd) {
-    var child, copy, returned, _i, _len;
+    var child, copy, k, len, returned;
     if (result == null) {
       result = void 0;
     }
     if (this.isCollection(result)) {
       copy = result.slice();
       returned = void 0;
-      for (_i = 0, _len = copy.length; _i < _len; _i++) {
-        child = copy[_i];
+      for (k = 0, len = copy.length; k < len; k++) {
+        child = copy[k];
         if (method.call(this, engine, child, continuation, operation, scope, needle, recursion, contd)) {
           returned = true;
         }
@@ -3288,7 +3288,7 @@ Query = (function(_super) {
   };
 
   Query.prototype.set = function(engine, path, result) {
-    var left, observers, old, _base, _ref;
+    var base, left, observers, old, ref1;
     old = engine.queries[path];
     this.snapshot(engine, path, old);
     if (result != null) {
@@ -3300,11 +3300,11 @@ Query = (function(_super) {
       }
     }
     path = this.getCanonicalPath(path);
-    _ref = engine.pairs;
-    for (left in _ref) {
-      observers = _ref[left];
+    ref1 = engine.pairs;
+    for (left in ref1) {
+      observers = ref1[left];
       if (observers.indexOf(path) > -1) {
-        ((_base = engine.updating).pairs || (_base.pairs = {}))[left] = true;
+        ((base = engine.updating).pairs || (base.pairs = {}))[left] = true;
       }
     }
   };
@@ -3325,11 +3325,11 @@ Query = (function(_super) {
   Query.prototype.nothing = function() {};
 
   Query.prototype.onRight = function(engine, operation, parent, continuation, scope, left, right) {
-    var index, op, pairs, pushed, _base, _base1, _i, _len, _ref;
+    var base, base1, index, k, len, op, pairs, pushed, ref1;
     right = this.getCanonicalPath(continuation.substring(0, continuation.length - 1));
-    _ref = engine.lefts;
-    for (index = _i = 0, _len = _ref.length; _i < _len; index = _i += 3) {
-      op = _ref[index];
+    ref1 = engine.lefts;
+    for (index = k = 0, len = ref1.length; k < len; index = k += 3) {
+      op = ref1[index];
       if (op === parent && engine.lefts[index + 2] === scope) {
         left = engine.lefts[index + 1];
         this.listen(engine, operation, continuation, scope, left, right);
@@ -3339,12 +3339,12 @@ Query = (function(_super) {
       return;
     }
     left = this.getCanonicalPath(left);
-    pairs = (_base = engine.pairs)[left] || (_base[left] = []);
+    pairs = (base = engine.pairs)[left] || (base[left] = []);
     if (pairs.indexOf(right) === -1) {
       pushed = pairs.push(right, operation, scope);
     }
     if (engine.updating.pairs !== false) {
-      ((_base1 = engine.updating).pairs || (_base1.pairs = {}))[left] = true;
+      ((base1 = engine.updating).pairs || (base1.pairs = {}))[left] = true;
     }
     return this.nothing;
   };
@@ -3383,7 +3383,7 @@ Query = (function(_super) {
   };
 
   Query.prototype.repair = function(engine, reversed) {
-    var dirty, index, pair, pairs, property, value, _i, _len, _ref;
+    var dirty, index, k, len, pair, pairs, property, ref1, value;
     if (!(dirty = engine.updating.pairs)) {
       return;
     }
@@ -3391,8 +3391,8 @@ Query = (function(_super) {
     engine.updating.pairs = false;
     for (property in dirty) {
       value = dirty[property];
-      if (pairs = (_ref = engine.pairs[property]) != null ? _ref.slice() : void 0) {
-        for (index = _i = 0, _len = pairs.length; _i < _len; index = _i += 3) {
+      if (pairs = (ref1 = engine.pairs[property]) != null ? ref1.slice() : void 0) {
+        for (index = k = 0, len = pairs.length; k < len; index = k += 3) {
           pair = pairs[index];
           this.pair(engine, property, pair, pairs[index + 1], pairs[index + 2], reversed);
         }
@@ -3411,10 +3411,10 @@ Query = (function(_super) {
   };
 
   Query.prototype.pad = function(value, length) {
-    var i, result, _i;
+    var i, k, ref1, result;
     if (value && !value.push) {
       result = [];
-      for (i = _i = 0; 0 <= length ? _i < length : _i > length; i = 0 <= length ? ++_i : --_i) {
+      for (i = k = 0, ref1 = length; 0 <= ref1 ? k < ref1 : k > ref1; i = 0 <= ref1 ? ++k : --k) {
         result.push(value);
       }
       result.single = true;
@@ -3443,7 +3443,7 @@ Query = (function(_super) {
   };
 
   Query.prototype.pair = function(engine, left, right, operation, scope, reversed) {
-    var I, J, added, cleaned, cleaning, contd, el, index, leftNew, leftOld, object, op, pair, removed, rightNew, rightOld, root, solved, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _n, _ref, _ref1;
+    var I, J, added, cleaned, cleaning, contd, el, index, k, l, leftNew, leftOld, len, len1, len2, len3, len4, m, n, o, object, op, p, pair, ref1, ref2, removed, rightNew, rightOld, root, solved;
     root = this.getRoot(operation);
     right = this.getPrefixPath(engine, left) + root.right.command.path;
     if (reversed) {
@@ -3479,7 +3479,7 @@ Query = (function(_super) {
     rightOld = this.pad(rightOld, J);
     removed = [];
     added = [];
-    for (index = _i = 0, _len = leftOld.length; _i < _len; index = ++_i) {
+    for (index = k = 0, len = leftOld.length; k < len; index = ++k) {
       object = leftOld[index];
       if (leftNew[index] !== object || rightOld[index] !== rightNew[index]) {
         if (rightOld && rightOld[index]) {
@@ -3491,15 +3491,15 @@ Query = (function(_super) {
       }
     }
     if (leftOld.length < leftNew.length) {
-      for (index = _j = _ref = leftOld.length, _ref1 = leftNew.length; _j < _ref1; index = _j += 1) {
+      for (index = l = ref1 = leftOld.length, ref2 = leftNew.length; l < ref2; index = l += 1) {
         if (rightNew[index]) {
           added.push([leftNew[index], rightNew[index]]);
         }
       }
     }
     cleaned = [];
-    for (_k = 0, _len1 = removed.length; _k < _len1; _k++) {
-      pair = removed[_k];
+    for (m = 0, len1 = removed.length; m < len1; m++) {
+      pair = removed[m];
       if (!pair[0] || !pair[1]) {
         continue;
       }
@@ -3511,8 +3511,8 @@ Query = (function(_super) {
       cleaned.push(contd);
     }
     solved = [];
-    for (_l = 0, _len2 = added.length; _l < _len2; _l++) {
-      pair = added[_l];
+    for (n = 0, len2 = added.length; n < len2; n++) {
+      pair = added[n];
       contd = left;
       contd += engine.identify(pair[0]);
       contd += this.PAIR;
@@ -3525,13 +3525,13 @@ Query = (function(_super) {
         engine.input.solve(op, contd + this.PAIR, scope, true);
       }
     }
-    for (_m = 0, _len3 = cleaned.length; _m < _len3; _m++) {
-      contd = cleaned[_m];
+    for (o = 0, len3 = cleaned.length; o < len3; o++) {
+      contd = cleaned[o];
       this.clean(engine, contd);
     }
     cleaning = true;
-    for (_n = 0, _len4 = leftNew.length; _n < _len4; _n++) {
-      el = leftNew[_n];
+    for (p = 0, len4 = leftNew.length; p < len4; p++) {
+      el = leftNew[p];
       if (el) {
         cleaning = false;
         break;
@@ -3543,23 +3543,23 @@ Query = (function(_super) {
   };
 
   Query.prototype.unpair = function(engine, left, scope, operation) {
-    var cleaning, contd, i, index, j, op, other, others, pairs, prefix, right, rights, top, _i, _j, _k, _l, _len, _len1, _ref, _ref1;
-    if (pairs = (_ref = engine.pairs) != null ? _ref[left] : void 0) {
+    var cleaning, contd, i, index, j, k, l, len, len1, m, n, op, other, others, pairs, prefix, ref1, ref2, right, rights, top;
+    if (pairs = (ref1 = engine.pairs) != null ? ref1[left] : void 0) {
       rights = [];
       top = this.getRoot(operation);
-      for (index = _i = 0, _len = pairs.length; _i < _len; index = _i += 3) {
+      for (index = k = 0, len = pairs.length; k < len; index = k += 3) {
         op = pairs[index];
         if (pairs[index + 2] === scope && this.getRoot(pairs[index + 1]) === top) {
           rights.push(index);
         }
       }
       cleaning = rights.slice();
-      _ref1 = engine.pairs;
-      for (prefix in _ref1) {
-        others = _ref1[prefix];
-        for (i = _j = 0, _len1 = others.length; _j < _len1; i = _j += 3) {
+      ref2 = engine.pairs;
+      for (prefix in ref2) {
+        others = ref2[prefix];
+        for (i = l = 0, len1 = others.length; l < len1; i = l += 3) {
           other = others[i];
-          for (j = _k = cleaning.length - 1; _k >= 0; j = _k += -1) {
+          for (j = m = cleaning.length - 1; m >= 0; j = m += -1) {
             index = cleaning[j];
             if (other === pairs[index] && (others !== pairs || scope !== others[i + 2])) {
               cleaning.splice(j, 1);
@@ -3567,8 +3567,8 @@ Query = (function(_super) {
           }
         }
       }
-      for (_l = rights.length - 1; _l >= 0; _l += -1) {
-        index = rights[_l];
+      for (n = rights.length - 1; n >= 0; n += -1) {
+        index = rights[n];
         right = pairs[index];
         this.unlisten(engine, scope._gss_id, this.PAIR, null, right.substring(1), void 0, scope, top);
         pairs.splice(index, 3);
@@ -3589,16 +3589,16 @@ Query = (function(_super) {
   };
 
   Query.prototype.listen = function(engine, operation, continuation, scope, left, right) {
-    var observers, _base;
-    observers = (_base = engine.pairs)[left] || (_base[left] = []);
+    var base, observers;
+    observers = (base = engine.pairs)[left] || (base[left] = []);
     if (engine.indexOfTriplet(observers, right, operation, scope) === -1) {
       return observers.push(right, operation, scope);
     }
   };
 
   Query.prototype.unlisten = function(engine, operation, continuation, scope, left, right) {
-    var index, observers, _base;
-    observers = (_base = engine.pairs)[left] || (_base[left] = []);
+    var base, index, observers;
+    observers = (base = engine.pairs)[left] || (base[left] = []);
     if ((index = engine.indexOfTriplet(observers, right, operation, scope)) !== -1) {
       return observers.splice(index, 3);
     }
@@ -3765,7 +3765,7 @@ Query = (function(_super) {
   };
 
   Query.prototype.match = function(engine, node, group, qualifier, changed, continuation) {
-    var change, contd, groupped, id, index, operation, path, scope, watchers, _i, _j, _len, _len1;
+    var change, contd, groupped, id, index, k, l, len, len1, operation, path, scope, watchers;
     if (!(id = engine.identify(node))) {
       return;
     }
@@ -3775,7 +3775,7 @@ Query = (function(_super) {
     if (continuation) {
       path = this.getCanonicalPath(continuation);
     }
-    for (index = _i = 0, _len = watchers.length; _i < _len; index = _i += 3) {
+    for (index = k = 0, len = watchers.length; k < len; index = k += 3) {
       operation = watchers[index];
       if (groupped = operation.command[group]) {
         contd = watchers[index + 1];
@@ -3790,8 +3790,8 @@ Query = (function(_super) {
         } else if (typeof changed === 'string') {
           this.qualify(engine, operation, contd, scope, groupped, changed, '*');
         } else {
-          for (_j = 0, _len1 = changed.length; _j < _len1; _j++) {
-            change = changed[_j];
+          for (l = 0, len1 = changed.length; l < len1; l++) {
+            change = changed[l];
             if (typeof change === 'string') {
               this.qualify(engine, operation, contd, scope, groupped, change, '*');
             } else {
@@ -3811,9 +3811,9 @@ Query = (function(_super) {
   };
 
   Query.prototype.notify = function(engine, continuation, scope) {
-    var index, watcher, watchers, _i, _len;
+    var index, k, len, watcher, watchers;
     if (watchers = engine.observers[engine.identify(scope)]) {
-      for (index = _i = 0, _len = watchers.length; _i < _len; index = _i += 3) {
+      for (index = k = 0, len = watchers.length; k < len; index = k += 3) {
         watcher = watchers[index];
         if (watchers[index + 1] + watcher.command.key === continuation) {
           this.schedule(engine, watcher, continuation, scope);
@@ -3823,9 +3823,9 @@ Query = (function(_super) {
   };
 
   Query.prototype.continuate = function(engine, scope) {
-    var contd, index, scoped, watcher, watchers, _i, _len;
+    var contd, index, k, len, scoped, watcher, watchers;
     if (watchers = engine.observers[engine.identify(scope)]) {
-      for (index = _i = 0, _len = watchers.length; _i < _len; index = _i += 3) {
+      for (index = k = 0, len = watchers.length; k < len; index = k += 3) {
         watcher = watchers[index];
         scoped = watchers[index + 2];
         contd = watcher.command["continue"](engine, watcher, watchers[index + 1], scoped);
@@ -3835,9 +3835,9 @@ Query = (function(_super) {
   };
 
   Query.prototype.uncontinuate = function(engine, scope) {
-    var index, watcher, watchers, _i, _len;
+    var index, k, len, watcher, watchers;
     if (watchers = engine.observers[engine.identify(scope)]) {
-      for (index = _i = 0, _len = watchers.length; _i < _len; index = _i += 3) {
+      for (index = k = 0, len = watchers.length; k < len; index = k += 3) {
         watcher = watchers[index];
         this.clean(engine, watcher, this.delimit(watchers[index + 1]), watcher, watchers[index + 2]);
       }
@@ -3845,12 +3845,12 @@ Query = (function(_super) {
   };
 
   Query.prototype.schedule = function(engine, operation, continuation, scope) {
-    var contd, index, last, length, mutations, other, stylesheet, watcher, _base, _i, _len;
-    mutations = (_base = engine.updating).mutations || (_base.mutations = []);
+    var base, contd, index, k, last, len, length, mutations, other, stylesheet, watcher;
+    mutations = (base = engine.updating).mutations || (base.mutations = []);
     length = (continuation || '').length;
     last = null;
     stylesheet = operation.stylesheet;
-    for (index = _i = 0, _len = mutations.length; _i < _len; index = _i += 3) {
+    for (index = k = 0, len = mutations.length; k < len; index = k += 3) {
       watcher = mutations[index];
       contd = mutations[index + 1] || '';
       if (watcher === operation && continuation === contd && scope === mutations[index + 2]) {
@@ -3868,22 +3868,22 @@ Query = (function(_super) {
   };
 
   Query.prototype.branch = function(engine) {
-    var collections, condition, conditions, index, path, queries, removed, _base, _base1, _i, _j, _k, _len, _len1, _len2;
+    var base, base1, collections, condition, conditions, index, k, l, len, len1, len2, m, path, queries, removed;
     if (conditions = engine.updating.branches) {
       engine.console.start('Branches', conditions.slice());
       engine.updating.branches = void 0;
       removed = engine.updating.branching = [];
-      for (index = _i = 0, _len = conditions.length; _i < _len; index = _i += 3) {
+      for (index = k = 0, len = conditions.length; k < len; index = k += 3) {
         condition = conditions[index];
         condition.command.unbranch(engine, condition, conditions[index + 1], conditions[index + 2]);
       }
       engine.triggerEvent('branch');
-      queries = (_base = engine.updating).queries || (_base.queries = {});
-      collections = (_base1 = engine.updating).collections || (_base1.collections = {});
+      queries = (base = engine.updating).queries || (base.queries = {});
+      collections = (base1 = engine.updating).collections || (base1.collections = {});
       this.repair(engine, true);
       engine.updating.branching = void 0;
-      for (_j = 0, _len1 = removed.length; _j < _len1; _j++) {
-        path = removed[_j];
+      for (l = 0, len1 = removed.length; l < len1; l++) {
+        path = removed[l];
         if (conditions.indexOf(path) > -1) {
           continue;
         }
@@ -3895,7 +3895,7 @@ Query = (function(_super) {
         }
         delete engine.queries[path];
       }
-      for (index = _k = 0, _len2 = conditions.length; _k < _len2; index = _k += 3) {
+      for (index = m = 0, len2 = conditions.length; m < len2; index = m += 3) {
         condition = conditions[index];
         condition.command.rebranch(engine, condition, conditions[index + 1], conditions[index + 2]);
       }
@@ -3929,12 +3929,12 @@ module.exports = Query;
 
 },{"./Command":4}],9:[function(require,module,exports){
 var Update, Updater,
-  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 Updater = function(engine) {
-  var Update, property, value, _ref;
+  var Update, property, ref, value;
   Update = function(problem, domain, parent, Domain, Auto) {
-    var arg, index, object, result, update, vardomain, _i, _len;
+    var arg, index, k, len, object, result, update, vardomain;
     if (this instanceof Update) {
       this.problems = problem && (domain.push && problem || [problem]) || [];
       this.domains = domain && (domain.push && domain || [domain]) || [];
@@ -3946,7 +3946,7 @@ Updater = function(engine) {
         Domain = this.output;
       }
     }
-    for (index = _i = 0, _len = problem.length; _i < _len; index = ++_i) {
+    for (index = k = 0, len = problem.length; k < len; index = ++k) {
       arg = problem[index];
       if (!(arg != null ? arg.push : void 0)) {
         continue;
@@ -3990,9 +3990,9 @@ Updater = function(engine) {
     }
   };
   if (this.prototype) {
-    _ref = this.prototype;
-    for (property in _ref) {
-      value = _ref[property];
+    ref = this.prototype;
+    for (property in ref) {
+      value = ref[property];
       Update.prototype[property] = value;
     }
   }
@@ -4008,11 +4008,11 @@ Update.compile = Updater;
 
 Update.prototype = {
   push: function(problems, domain, reverse) {
-    var index, other, position, _i, _len, _ref;
+    var index, k, len, other, position, ref;
     if (domain === void 0) {
-      _ref = problems.domains;
-      for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-        domain = _ref[index];
+      ref = problems.domains;
+      for (index = k = 0, len = ref.length; k < len; index = ++k) {
+        domain = ref[index];
         this.push(problems.problems[index], domain);
       }
       return this;
@@ -4035,12 +4035,12 @@ Update.prototype = {
     return position;
   },
   append: function(position, problems, reverse) {
-    var cmds, domain, problem, _i, _len;
+    var cmds, domain, k, len, problem;
     cmds = this.problems[position];
     domain = this.domains[position];
     this.mix(cmds, problems);
-    for (_i = 0, _len = problems.length; _i < _len; _i++) {
-      problem = problems[_i];
+    for (k = 0, len = problems.length; k < len; k++) {
+      problem = problems[k];
       if (domain) {
         this.setVariables(cmds, problem);
         this.reify(problem, domain);
@@ -4051,9 +4051,9 @@ Update.prototype = {
     }
   },
   insert: function(position, domain, problems) {
-    var problem, property, variable, variables, _i, _len;
-    for (_i = 0, _len = problems.length; _i < _len; _i++) {
-      problem = problems[_i];
+    var k, len, problem, property, variable, variables;
+    for (k = 0, len = problems.length; k < len; k++) {
+      problem = problems[k];
       this.setVariables(problems, problem);
     }
     this.domains.splice(position, 0, domain);
@@ -4070,14 +4070,14 @@ Update.prototype = {
     return this.connect(position);
   },
   splice: function(index) {
-    var domain, name, variable, _ref;
+    var domain, name, ref, variable;
     domain = this.domains[index];
     this.domains.splice(index, 1);
     this.problems.splice(index, 1);
     if (this.variables) {
-      _ref = this.variables;
-      for (name in _ref) {
-        variable = _ref[name];
+      ref = this.variables;
+      for (name in ref) {
+        variable = ref[name];
         if (variable >= index) {
           if (variable === index) {
             this.variables[name] = void 0;
@@ -4089,15 +4089,15 @@ Update.prototype = {
     }
   },
   wrap: function(operation, parent, Domain, Auto) {
-    var argument, domain, i, index, j, other, position, positions, problems, signed, _i, _j, _k, _l, _len, _len1, _len2, _len3, _m, _ref;
+    var argument, domain, i, index, j, k, l, len, len1, len2, len3, m, n, o, other, position, positions, problems, ref, signed;
     positions = void 0;
-    _ref = this.problems;
-    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-      problems = _ref[index];
+    ref = this.problems;
+    for (index = k = 0, len = ref.length; k < len; index = ++k) {
+      problems = ref[index];
       if (domain = this.domains[index]) {
         signed = typeof operation[0] !== 'string' || domain.signatures[operation[0]];
-        for (_j = 0, _len1 = operation.length; _j < _len1; _j++) {
-          argument = operation[_j];
+        for (l = 0, len1 = operation.length; l < len1; l++) {
+          argument = operation[l];
           if (signed && problems.indexOf(argument) > -1) {
             if (!other || (domain.Engine && !other.Engine)) {
               position = index;
@@ -4118,14 +4118,14 @@ Update.prototype = {
       this.push([operation], null);
       return;
     }
-    for (j = _k = positions.length - 1; _k >= 0; j = _k += -1) {
+    for (j = m = positions.length - 1; m >= 0; j = m += -1) {
       index = positions[j];
       if ((domain = this.domains[index]).displayName !== other.displayName) {
         positions.splice(j, 1);
       } else {
         problems = this.problems[index];
-        for (_l = 0, _len2 = operation.length; _l < _len2; _l++) {
-          argument = operation[_l];
+        for (n = 0, len2 = operation.length; n < len2; n++) {
+          argument = operation[n];
           if ((i = problems.indexOf(argument)) > -1) {
             if (argument.push) {
               this.reify(argument, other, domain);
@@ -4150,8 +4150,8 @@ Update.prototype = {
     }
     if (other) {
       operation.domain = other;
-      for (_m = 0, _len3 = operation.length; _m < _len3; _m++) {
-        argument = operation[_m];
+      for (o = 0, len3 = operation.length; o < len3; o++) {
+        argument = operation[o];
         if (argument.push) {
           operation.variables = argument.variables = this.setVariables(operation, argument, true);
         }
@@ -4165,16 +4165,16 @@ Update.prototype = {
     }
   },
   match: function(target, domain, positions) {
-    var Solver, i, index, problems, property, variable, variables, _ref;
+    var Solver, i, index, problems, property, ref, variable, variables;
     problems = this.problems[target];
     variables = this.variables || (this.variables = {});
     if (Solver = domain.Engine) {
-      _ref = problems.variables;
-      for (property in _ref) {
-        variable = _ref[property];
+      ref = problems.variables;
+      for (property in ref) {
+        variable = ref[property];
         if (variable.domain.Engine === Solver) {
           if (((i = variables[property]) != null) && (i !== target)) {
-            if (__indexOf.call((positions || (positions = [])), i) < 0) {
+            if (indexOf.call((positions || (positions = [])), i) < 0) {
               index = 0;
               while (positions[index] < i) {
                 index++;
@@ -4190,13 +4190,13 @@ Update.prototype = {
     return positions;
   },
   connect: function(target, positions) {
-    var a, b, condition, domain, from, i, index, j, to, _i, _j, _ref, _ref1, _ref2;
+    var a, b, condition, domain, from, i, index, j, k, l, ref, ref1, ref2, to;
     if (!(domain = this.domains[target])) {
       return;
     }
     if (positions || (positions = this.match(target, domain, positions))) {
       b = domain.constraints;
-      for (index = _i = 0, _ref = positions.length; _i < _ref; index = _i += 1) {
+      for (index = k = 0, ref = positions.length; k < ref; index = k += 1) {
         i = positions[index];
         a = this.domains[i].constraints;
         condition = a || b ? (a && a.length) < (b && b.length) : target < i;
@@ -4208,7 +4208,7 @@ Update.prototype = {
           to = i;
         }
         target = this.merge(from, to);
-        for (j = _j = _ref1 = index + 1, _ref2 = positions.length; _j < _ref2; j = _j += 1) {
+        for (j = l = ref1 = index + 1, ref2 = positions.length; l < ref2; j = l += 1) {
           if (positions[j] >= from) {
             positions[j]--;
           }
@@ -4218,7 +4218,7 @@ Update.prototype = {
     return target;
   },
   merge: function(from, to, parent) {
-    var Solver, domain, exported, other, prob, problems, property, result, variable, _i, _j, _len, _len1, _ref;
+    var Solver, domain, exported, k, l, len, len1, other, prob, problems, property, ref, result, variable;
     other = this.domains[to];
     problems = this.problems[from];
     result = this.problems[to];
@@ -4228,8 +4228,8 @@ Update.prototype = {
         exported = domain["export"]();
         domain.register(false);
       }
-      for (_i = 0, _len = problems.length; _i < _len; _i++) {
-        prob = problems[_i];
+      for (k = 0, len = problems.length; k < len; k++) {
+        prob = problems[k];
         if (result.indexOf(prob) === -1) {
           (exported || (exported = [])).push(prob);
         } else {
@@ -4243,15 +4243,15 @@ Update.prototype = {
     }
     if (exported) {
       this.mix(result, exported);
-      for (_j = 0, _len1 = exported.length; _j < _len1; _j++) {
-        prob = exported[_j];
+      for (l = 0, len1 = exported.length; l < len1; l++) {
+        prob = exported[l];
         this.setVariables(result, prob);
       }
       this.reify(exported, other, domain);
       if (Solver = domain.Engine) {
-        _ref = result.variables;
-        for (property in _ref) {
-          variable = _ref[property];
+        ref = result.variables;
+        for (property in ref) {
+          variable = ref[property];
           if (variable.domain.Engine === Solver) {
             (this.variables || (this.variables = {}))[property] = to;
           }
@@ -4262,46 +4262,46 @@ Update.prototype = {
     return to;
   },
   mix: function(result, exported) {
-    var index, prob, problem, _i, _j, _len, _len1, _ref, _results;
-    _results = [];
-    for (_i = 0, _len = exported.length; _i < _len; _i++) {
-      prob = exported[_i];
-      for (index = _j = 0, _len1 = result.length; _j < _len1; index = ++_j) {
+    var index, k, l, len, len1, prob, problem, ref, results;
+    results = [];
+    for (k = 0, len = exported.length; k < len; k++) {
+      prob = exported[k];
+      for (index = l = 0, len1 = result.length; l < len1; index = ++l) {
         problem = result[index];
-        if (((_ref = problem.index) != null ? _ref : Infinity) > prob.index) {
+        if (((ref = problem.index) != null ? ref : Infinity) > prob.index) {
           break;
         }
       }
-      _results.push(result.splice(index, 0, prob));
+      results.push(result.splice(index, 0, prob));
     }
-    return _results;
+    return results;
   },
   await: function(url) {
     return (this.busy || (this.busy = [])).push(url);
   },
   postMessage: function(url, message) {
-    var _base, _name;
-    return ((_base = (this.posted || (this.posted = {})))[_name = url.url || url] || (_base[_name] = [])).push(this.engine.clone(message));
+    var base, name1;
+    return ((base = (this.posted || (this.posted = {})))[name1 = url.url || url] || (base[name1] = [])).push(this.engine.clone(message));
   },
   terminate: function() {
-    var changes, command, commands, constants, first, group, i, message, path, paths, property, removes, url, value, values, worker, _i, _j, _k, _len, _len1, _ref, _ref1;
+    var changes, command, commands, constants, first, group, i, k, l, len, len1, m, message, path, paths, property, ref, ref1, removes, url, value, values, worker;
     if (this.posted) {
-      _ref = this.posted;
-      for (url in _ref) {
-        message = _ref[url];
+      ref = this.posted;
+      for (url in ref) {
+        message = ref[url];
         worker = this.engine.workers[url];
         paths = (worker.paths || (worker.paths = {}));
         values = (worker.values || (worker.values = {}));
         changes = {};
         commands = [changes];
         removes = [];
-        for (_i = 0, _len = message.length; _i < _len; _i++) {
-          group = message[_i];
-          for (_j = 0, _len1 = group.length; _j < _len1; _j++) {
-            command = group[_j];
+        for (k = 0, len = message.length; k < len; k++) {
+          group = message[k];
+          for (l = 0, len1 = group.length; l < len1; l++) {
+            command = group[l];
             first = command[0];
             if (first === 'remove') {
-              for (i = _k = 1, _ref1 = command.length; 1 <= _ref1 ? _k < _ref1 : _k > _ref1; i = 1 <= _ref1 ? ++_k : --_k) {
+              for (i = m = 1, ref1 = command.length; 1 <= ref1 ? m < ref1 : m > ref1; i = 1 <= ref1 ? ++m : --m) {
                 delete paths[command[i]];
                 removes.push(command[i]);
               }
@@ -4338,7 +4338,7 @@ Update.prototype = {
     }
   },
   each: function(callback, bind, solution) {
-    var domain, previous, property, result, variable, _ref, _ref1, _ref2;
+    var domain, previous, property, ref, ref1, ref2, result, variable;
     if (solution) {
       this.apply(solution);
     }
@@ -4349,16 +4349,16 @@ Update.prototype = {
     while ((domain = this.domains[++this.index]) !== void 0) {
       previous = domain;
       if (this.variables) {
-        _ref = this.variables;
-        for (property in _ref) {
-          variable = _ref[property];
+        ref = this.variables;
+        for (property in ref) {
+          variable = ref[property];
           if (variable <= this.index) {
             delete this.variables[property];
           }
         }
       }
       result = (this.solutions || (this.solutions = []))[this.index] = callback.call(bind || this, domain, this.problems[this.index], this.index, this);
-      if (((_ref1 = this.busy) != null ? _ref1.length : void 0) && this.busy.indexOf((_ref2 = this.domains[this.index + 1]) != null ? _ref2.url : void 0) === -1) {
+      if (((ref1 = this.busy) != null ? ref1.length : void 0) && this.busy.indexOf((ref2 = this.domains[this.index + 1]) != null ? ref2.url : void 0) === -1) {
         this.terminate();
         return result;
       }
@@ -4399,15 +4399,15 @@ Update.prototype = {
     return solution;
   },
   remove: function(continuation, problem) {
-    var i, index, problems, _i, _j, _ref;
+    var i, index, k, l, problems, ref;
     this.push([['remove', continuation]], null);
-    _ref = this.problems;
-    for (index = _i = _ref.length - 1; _i >= 0; index = _i += -1) {
-      problems = _ref[index];
+    ref = this.problems;
+    for (index = k = ref.length - 1; k >= 0; index = k += -1) {
+      problems = ref[index];
       if (index === this.index) {
         break;
       }
-      for (i = _j = problems.length - 1; _j >= 0; i = _j += -1) {
+      for (i = l = problems.length - 1; l >= 0; i = l += -1) {
         problem = problems[i];
         if (problem && problem[0] && problem[0].key === continuation) {
           problems.splice(i, 1);
@@ -4419,7 +4419,7 @@ Update.prototype = {
     }
   },
   perform: function(domain) {
-    var glob, globals, globs, _i, _len;
+    var glob, globals, globs, k, len;
     globals = this.domains.indexOf(null, this.index);
     if (globals > -1) {
       globs = this.problems[globals];
@@ -4428,8 +4428,8 @@ Update.prototype = {
           domain.remove.apply(domain, globs.slice(1));
         }
       } else {
-        for (_i = 0, _len = globs.length; _i < _len; _i++) {
-          glob = globs[_i];
+        for (k = 0, len = globs.length; k < len; k++) {
+          glob = globs[k];
           if (glob[0] === 'remove') {
             domain.remove.apply(domain, glob.slice(1));
           }
@@ -4454,12 +4454,12 @@ Update.prototype = {
     return result.variables;
   },
   reify: function(operation, domain, from) {
-    var arg, _i, _len;
+    var arg, k, len;
     if (operation.domain === from) {
       operation.domain = domain;
     }
-    for (_i = 0, _len = operation.length; _i < _len; _i++) {
-      arg = operation[_i];
+    for (k = 0, len = operation.length; k < len; k++) {
+      arg = operation[k];
       if (arg && arg.push) {
         this.reify(arg, domain, from);
       }
@@ -4467,24 +4467,24 @@ Update.prototype = {
     return operation;
   },
   cleanup: function(name, continuation) {
-    var length, old, prop, _results;
+    var length, old, prop, results;
     old = this[name];
     if (continuation) {
       if (old) {
         length = continuation.length;
-        _results = [];
+        results = [];
         for (prop in old) {
           if (prop.length > length) {
             if (prop.substring(0, length) === continuation) {
-              _results.push(delete old[prop]);
+              results.push(delete old[prop]);
             } else {
-              _results.push(void 0);
+              results.push(void 0);
             }
           } else {
-            _results.push(void 0);
+            results.push(void 0);
           }
         }
-        return _results;
+        return results;
       }
     } else {
       return this[name] = void 0;
@@ -4549,13 +4549,13 @@ module.exports = Update;
 
 },{}],10:[function(require,module,exports){
 var Condition, Query,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __hasProp = {}.hasOwnProperty;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Query = require('../Query');
 
-Condition = (function(_super) {
-  __extends(Condition, _super);
+Condition = (function(superClass) {
+  extend(Condition, superClass);
 
   Condition.prototype.type = 'Condition';
 
@@ -4630,17 +4630,17 @@ Condition = (function(_super) {
   };
 
   Condition.prototype.getOldValue = function(engine, continuation) {
-    var old, _ref, _ref1;
-    old = (_ref = (_ref1 = engine.updating.collections) != null ? _ref1[continuation] : void 0) != null ? _ref : 0;
+    var old, ref, ref1;
+    old = (ref = (ref1 = engine.updating.collections) != null ? ref1[continuation] : void 0) != null ? ref : 0;
     return old > 0 || (old === 0 && 1 / old !== -Infinity);
   };
 
   Condition.prototype.ascend = function(engine, operation, continuation, scope, result) {
-    var condition, conditions, contd, index, length, _base, _i, _len;
-    if (conditions = ((_base = engine.updating).branches || (_base.branches = []))) {
+    var base, condition, conditions, contd, i, index, len, length;
+    if (conditions = ((base = engine.updating).branches || (base.branches = []))) {
       if (engine.indexOfTriplet(conditions, operation, continuation, scope) === -1) {
         length = continuation.length;
-        for (index = _i = 0, _len = conditions.length; _i < _len; index = _i += 3) {
+        for (index = i = 0, len = conditions.length; i < len; index = i += 3) {
           condition = conditions[index];
           contd = conditions[index + 1];
           if (contd.length >= length) {
@@ -4668,8 +4668,8 @@ Condition = (function(_super) {
   };
 
   Condition.prototype.unbranch = function(engine, operation, continuation, scope) {
-    var increment, old, _ref;
-    if (old = (_ref = engine.updating.collections) != null ? _ref[continuation] : void 0) {
+    var increment, old, ref;
+    if (old = (ref = engine.updating.collections) != null ? ref[continuation] : void 0) {
       increment = this.getOldValue(engine, continuation) ? -1 : 1;
       if ((engine.queries[continuation] += increment) === 0) {
         this.clean(engine, continuation, continuation, operation, scope);
@@ -4679,7 +4679,7 @@ Condition = (function(_super) {
   };
 
   Condition.prototype["yield"] = function(result, engine, operation, continuation, scope) {
-    var old, path, scoped, value, _base, _ref;
+    var base, old, path, ref, scoped, value;
     if (!(operation.parent.indexOf(operation) > 1)) {
       if (operation[0].key != null) {
         continuation = operation[0].key;
@@ -4698,8 +4698,8 @@ Condition = (function(_super) {
       if (result && !value) {
         value = -0;
       }
-      ((_base = engine.updating).collections || (_base.collections = {}))[path] = value;
-      if (old = (_ref = engine.updating.collections) != null ? _ref[path] : void 0) {
+      ((base = engine.updating).collections || (base.collections = {}))[path] = value;
+      if (old = (ref = engine.updating.collections) != null ? ref[path] : void 0) {
         if (this.getOldValue(engine, path) === !!result) {
           return true;
         }
@@ -4715,7 +4715,7 @@ Condition = (function(_super) {
 
 Condition.Global = Condition.extend({
   condition: function(engine, operation, command) {
-    var argument, _i, _len;
+    var argument, i, len;
     if (command) {
       operation = operation[1];
     }
@@ -4726,8 +4726,8 @@ Condition.Global = Condition.extend({
     } else if (operation[0] === '&') {
       return false;
     }
-    for (_i = 0, _len = operation.length; _i < _len; _i++) {
-      argument = operation[_i];
+    for (i = 0, len = operation.length; i < len; i++) {
+      argument = operation[i];
       if (argument && argument.push && this.condition(engine, argument) === false) {
         return false;
       }
@@ -4739,15 +4739,15 @@ Condition.Global = Condition.extend({
 
 Condition.Selector = Condition.extend({
   condition: function(engine, operation, command) {
-    var argument, _i, _len;
+    var argument, i, len;
     if (command) {
       operation = operation[1];
     }
     if (operation.command.type === 'Selector' && (operation.length > 1 || (operation.parent.command.type === 'Selector' && operation.parent.command.type === 'Iterator'))) {
       return true;
     }
-    for (_i = 0, _len = operation.length; _i < _len; _i++) {
-      argument = operation[_i];
+    for (i = 0, len = operation.length; i < len; i++) {
+      argument = operation[i];
       if (argument && argument.push && this.condition(engine, argument)) {
         return true;
       }
@@ -4818,24 +4818,24 @@ Constraint = Command.extend({
     return hash;
   },
   fetch: function(engine, operation) {
-    var constraint, operations, signature, _ref, _ref1;
-    if (operations = (_ref = engine.operations) != null ? _ref[operation.hash || (operation.hash = this.toExpression(operation))] : void 0) {
+    var constraint, operations, ref, ref1, signature;
+    if (operations = (ref = engine.operations) != null ? ref[operation.hash || (operation.hash = this.toExpression(operation))] : void 0) {
       for (signature in operations) {
         constraint = operations[signature];
-        if (((_ref1 = engine.constraints) != null ? _ref1.indexOf(constraint) : void 0) > -1) {
+        if (((ref1 = engine.constraints) != null ? ref1.indexOf(constraint) : void 0) > -1) {
           return constraint;
         }
       }
     }
   },
   declare: function(engine, constraint) {
-    var constraints, definition, op, path, _ref, _ref1, _ref2, _ref3;
-    _ref = constraint.variables;
-    for (path in _ref) {
-      op = _ref[path];
+    var constraints, definition, op, path, ref, ref1, ref2, ref3;
+    ref = constraint.variables;
+    for (path in ref) {
+      op = ref[path];
       if (definition = engine.variables[path]) {
         constraints = definition.constraints || (definition.constraints = []);
-        if (((_ref1 = constraints[0]) != null ? (_ref2 = _ref1.operations[0]) != null ? (_ref3 = _ref2.parent.values) != null ? _ref3[path] : void 0 : void 0 : void 0) == null) {
+        if (((ref1 = constraints[0]) != null ? (ref2 = ref1.operations[0]) != null ? (ref3 = ref2.parent.values) != null ? ref3[path] : void 0 : void 0 : void 0) == null) {
           if (constraints.indexOf(constraint) === -1) {
             constraints.push(constraint);
           }
@@ -4844,18 +4844,18 @@ Constraint = Command.extend({
     }
   },
   undeclare: function(engine, constraint, quick) {
-    var i, matched, object, op, other, path, _i, _len, _ref, _ref1, _ref2, _ref3;
-    _ref = constraint.variables;
-    for (path in _ref) {
-      op = _ref[path];
+    var i, j, len, matched, object, op, other, path, ref, ref1, ref2, ref3;
+    ref = constraint.variables;
+    for (path in ref) {
+      op = ref[path];
       if (object = engine.variables[path]) {
-        if ((i = (_ref1 = object.constraints) != null ? _ref1.indexOf(constraint) : void 0) > -1) {
+        if ((i = (ref1 = object.constraints) != null ? ref1.indexOf(constraint) : void 0) > -1) {
           object.constraints.splice(i, 1);
           matched = false;
-          _ref2 = object.constraints;
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            other = _ref2[_i];
-            if (engine.constraints.indexOf(other) > -1 && (((_ref3 = other.operations[0].parent[0].values) != null ? _ref3[path] : void 0) == null)) {
+          ref2 = object.constraints;
+          for (j = 0, len = ref2.length; j < len; j++) {
+            other = ref2[j];
+            if (engine.constraints.indexOf(other) > -1 && (((ref3 = other.operations[0].parent[0].values) != null ? ref3[path] : void 0) == null)) {
               matched = true;
               break;
             }
@@ -4868,12 +4868,12 @@ Constraint = Command.extend({
     }
   },
   add: function(constraint, engine, operation, continuation) {
-    var i, op, operations, other, _i;
+    var i, j, op, operations, other;
     other = this.fetch(engine, operation);
     operations = constraint.operations || (constraint.operations = (other != null ? other.operations : void 0) || []);
     constraint.variables = operation.variables;
     if (operations.indexOf(operation) === -1) {
-      for (i = _i = operations.length - 1; _i >= 0; i = _i += -1) {
+      for (i = j = operations.length - 1; j >= 0; i = j += -1) {
         op = operations[i];
         if (op.hash === operation.hash && op.parent[0].key === continuation) {
           operations.splice(i, 1);
@@ -4891,18 +4891,18 @@ Constraint = Command.extend({
     }
   },
   reset: function(engine) {
-    var constraint, editing, property, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3, _ref4;
+    var constraint, editing, j, k, l, len, len1, len2, len3, len4, m, n, property, ref, ref1, ref2, ref3, ref4;
     if (engine.constrained) {
-      _ref = engine.constrained;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        constraint = _ref[_i];
+      ref = engine.constrained;
+      for (j = 0, len = ref.length; j < len; j++) {
+        constraint = ref[j];
         engine.Constraint.prototype.declare(engine, constraint);
       }
     }
     if (engine.unconstrained) {
-      _ref1 = engine.unconstrained;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        constraint = _ref1[_j];
+      ref1 = engine.unconstrained;
+      for (k = 0, len1 = ref1.length; k < len1; k++) {
+        constraint = ref1[k];
         engine.Constraint.prototype.undeclare(engine, constraint);
       }
     }
@@ -4917,24 +4917,24 @@ Constraint = Command.extend({
         }
       }
       if (engine.constraints) {
-        _ref2 = engine.constraints;
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          constraint = _ref2[_k];
+        ref2 = engine.constraints;
+        for (l = 0, len2 = ref2.length; l < len2; l++) {
+          constraint = ref2[l];
           engine.Constraint.prototype.inject(engine, constraint);
         }
       }
     } else {
       if (engine.unconstrained) {
-        _ref3 = engine.unconstrained;
-        for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
-          constraint = _ref3[_l];
+        ref3 = engine.unconstrained;
+        for (m = 0, len3 = ref3.length; m < len3; m++) {
+          constraint = ref3[m];
           engine.Constraint.prototype.eject(engine, constraint);
         }
       }
       if (engine.constrained) {
-        _ref4 = engine.constrained;
-        for (_m = 0, _len4 = _ref4.length; _m < _len4; _m++) {
-          constraint = _ref4[_m];
+        ref4 = engine.constrained;
+        for (n = 0, len4 = ref4.length; n < len4; n++) {
+          constraint = ref4[n];
           engine.Constraint.prototype.inject(engine, constraint);
         }
       }
@@ -4943,30 +4943,30 @@ Constraint = Command.extend({
     return engine.unconstrained = void 0;
   },
   set: function(engine, constraint) {
-    var index, _ref;
+    var index, ref;
     if ((engine.constraints || (engine.constraints = [])).indexOf(constraint) === -1) {
       engine.constraints.push(constraint);
       (engine.constrained || (engine.constrained = [])).push(constraint);
     }
-    if ((index = (_ref = engine.unconstrained) != null ? _ref.indexOf(constraint) : void 0) > -1) {
+    if ((index = (ref = engine.unconstrained) != null ? ref.indexOf(constraint) : void 0) > -1) {
       return engine.unconstrained.splice(index, 1);
     }
   },
   unset: function(engine, constraint) {
-    var index, operation, path, _i, _len, _ref, _ref1;
+    var index, j, len, operation, path, ref, ref1;
     if ((index = engine.constraints.indexOf(constraint)) > -1) {
       engine.constraints.splice(index, 1);
     }
-    if ((index = (_ref = engine.constrained) != null ? _ref.indexOf(constraint) : void 0) > -1) {
+    if ((index = (ref = engine.constrained) != null ? ref.indexOf(constraint) : void 0) > -1) {
       engine.constrained.splice(index, 1);
     } else {
       if ((engine.unconstrained || (engine.unconstrained = [])).indexOf(constraint) === -1) {
         engine.unconstrained.push(constraint);
       }
     }
-    _ref1 = constraint.operations;
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      operation = _ref1[_i];
+    ref1 = constraint.operations;
+    for (j = 0, len = ref1.length; j < len; j++) {
+      operation = ref1[j];
       if ((path = operation.parent[0].key) != null) {
         this.unwatch(engine, operation, path);
       }
@@ -5001,10 +5001,10 @@ Constraint = Command.extend({
     }
   },
   find: function(engine, variable) {
-    var other, _i, _len, _ref;
-    _ref = variable.constraints;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      other = _ref[_i];
+    var j, len, other, ref;
+    ref = variable.constraints;
+    for (j = 0, len = ref.length; j < len; j++) {
+      other = ref[j];
       if (other.operations[0].variables[variable.name].domain === engine) {
         if (engine.constraints.indexOf(other) > -1) {
           return true;
@@ -5013,16 +5013,16 @@ Constraint = Command.extend({
     }
   },
   group: function(constraints) {
-    var constraint, group, groupped, groups, other, others, path, vars, _i, _j, _k, _len, _len1;
+    var constraint, group, groupped, groups, j, k, l, len, len1, other, others, path, vars;
     groups = [];
-    for (_i = 0, _len = constraints.length; _i < _len; _i++) {
-      constraint = constraints[_i];
+    for (j = 0, len = constraints.length; j < len; j++) {
+      constraint = constraints[j];
       groupped = void 0;
       vars = constraint.variables;
-      for (_j = groups.length - 1; _j >= 0; _j += -1) {
-        group = groups[_j];
-        for (_k = 0, _len1 = group.length; _k < _len1; _k++) {
-          other = group[_k];
+      for (k = groups.length - 1; k >= 0; k += -1) {
+        group = groups[k];
+        for (l = 0, len1 = group.length; l < len1; l++) {
+          other = group[l];
           others = other.variables;
           for (path in vars) {
             if (others[path]) {
@@ -5048,7 +5048,7 @@ Constraint = Command.extend({
     return groups;
   },
   split: function(engine) {
-    var arg, args, commands, constraint, equal, group, groups, i, index, operation, separated, shift, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref;
+    var arg, args, commands, constraint, equal, group, groups, i, index, j, k, l, len, len1, len2, len3, m, operation, ref, separated, shift;
     groups = this.group(engine.constraints).sort(function(a, b) {
       var al, bl;
       al = a.length;
@@ -5059,14 +5059,14 @@ Constraint = Command.extend({
     commands = [];
     if (separated.length) {
       shift = 0;
-      for (index = _i = 0, _len = separated.length; _i < _len; index = ++_i) {
+      for (index = j = 0, len = separated.length; j < len; index = ++j) {
         group = separated[index];
-        for (index = _j = 0, _len1 = group.length; _j < _len1; index = ++_j) {
+        for (index = k = 0, len1 = group.length; k < len1; index = ++k) {
           constraint = group[index];
           this.unset(engine, constraint);
-          _ref = constraint.operations;
-          for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
-            operation = _ref[_k];
+          ref = constraint.operations;
+          for (l = 0, len2 = ref.length; l < len2; l++) {
+            operation = ref[l];
             commands.push(operation.parent);
           }
         }
@@ -5082,7 +5082,7 @@ Constraint = Command.extend({
       }
       if (commands.length === args.length) {
         equal = true;
-        for (i = _l = 0, _len3 = args.length; _l < _len3; i = ++_l) {
+        for (i = m = 0, len3 = args.length; m < len3; i = ++m) {
           arg = args[i];
           if (commands.indexOf(arg) === -1) {
             equal = false;
@@ -5104,13 +5104,13 @@ module.exports = Constraint;
 
 },{"../Command":4}],12:[function(require,module,exports){
 var Command, Iterator,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __hasProp = {}.hasOwnProperty;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Command = require('../Command');
 
-Iterator = (function(_super) {
-  __extends(Iterator, _super);
+Iterator = (function(superClass) {
+  extend(Iterator, superClass);
 
   function Iterator() {
     return Iterator.__super__.constructor.apply(this, arguments);
@@ -5175,13 +5175,13 @@ module.exports = Iterator;
 
 },{"../Command":4}],13:[function(require,module,exports){
 var Command, Range,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __hasProp = {}.hasOwnProperty;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Command = require('../Command');
 
-Range = (function(_super) {
-  __extends(Range, _super);
+Range = (function(superClass) {
+  extend(Range, superClass);
 
   function Range() {
     return Range.__super__.constructor.apply(this, arguments);
@@ -5242,8 +5242,8 @@ Range = (function(_super) {
 
 })(Command);
 
-Range.Modifier = (function(_super) {
-  __extends(Modifier, _super);
+Range.Modifier = (function(superClass) {
+  extend(Modifier, superClass);
 
   function Modifier() {
     return Modifier.__super__.constructor.apply(this, arguments);
@@ -5359,16 +5359,16 @@ Range.Modifier = (function(_super) {
 
 })(Range);
 
-Range.Progress = (function(_super) {
-  __extends(Progress, _super);
+Range.Progress = (function(superClass) {
+  extend(Progress, superClass);
 
   function Progress() {
     return Progress.__super__.constructor.apply(this, arguments);
   }
 
   Progress.prototype.after = function(result, args, engine, operation, continuation, scope) {
-    var index, ranges, _base, _base1;
-    ranges = (_base = ((_base1 = engine.engine).ranges || (_base1.ranges = {})))[continuation] || (_base[continuation] = []);
+    var base, base1, index, ranges;
+    ranges = (base = ((base1 = engine.engine).ranges || (base1.ranges = {})))[continuation] || (base[continuation] = []);
     if ((index = ranges.indexOf(operation)) === -1) {
       ranges.push(operation, scope, result);
     } else {
@@ -5381,8 +5381,8 @@ Range.Progress = (function(_super) {
 
 })(Range);
 
-Range.Easing = (function(_super) {
-  __extends(Easing, _super);
+Range.Easing = (function(superClass) {
+  extend(Easing, superClass);
 
   function Easing(obj) {
     if (typeof obj === 'string') {
@@ -5438,8 +5438,8 @@ Range.Easing = (function(_super) {
 
 })(Range.Progress);
 
-Range.Mapper = (function(_super) {
-  __extends(Mapper, _super);
+Range.Mapper = (function(superClass) {
+  extend(Mapper, superClass);
 
   function Mapper() {
     return Mapper.__super__.constructor.apply(this, arguments);
@@ -5456,9 +5456,9 @@ Range.Mapper = (function(_super) {
 
   Mapper.define({
     map: function(left, right, engine, operation, continuation, scope, ascender, ascending) {
-      var end, start, _ref, _ref1, _ref2;
+      var end, ref, ref1, ref2, start;
       if (ascender === 2) {
-        if ((start = (_ref = left[2]) != null ? _ref : left[0]) != null) {
+        if ((start = (ref = left[2]) != null ? ref : left[0]) != null) {
           if (start !== false && right < start) {
             right = start;
           } else if ((end = left.push ? left[1] : left) < right) {
@@ -5475,7 +5475,7 @@ Range.Mapper = (function(_super) {
         if (left.push) {
           if ((left[0] != null) && (left[1] != null)) {
             right[2] = left[0] || 0;
-            right[3] = ((_ref1 = (_ref2 = left[2]) != null ? _ref2 : left[1]) != null ? _ref1 : left) || 0;
+            right[3] = ((ref1 = (ref2 = left[2]) != null ? ref2 : left[1]) != null ? ref1 : left) || 0;
           }
         } else {
           right[3] = right[2] = left || 0;
@@ -5495,13 +5495,13 @@ module.exports = Range;
 
 },{"../Command":4}],14:[function(require,module,exports){
 var Command, Variable,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __hasProp = {}.hasOwnProperty;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Command = require('../Command');
 
-Variable = (function(_super) {
-  __extends(Variable, _super);
+Variable = (function(superClass) {
+  extend(Variable, superClass);
 
   Variable.prototype.type = 'Variable';
 
@@ -5518,8 +5518,8 @@ Variable = (function(_super) {
   function Variable() {}
 
   Variable.prototype.before = function(args, engine, operation, continuation, scope, ascender, ascending) {
-    var value, _ref;
-    if ((value = ascending != null ? (_ref = ascending.values) != null ? _ref[args[0]] : void 0 : void 0) != null) {
+    var ref, value;
+    if ((value = ascending != null ? (ref = ascending.values) != null ? ref[args[0]] : void 0 : void 0) != null) {
       return value;
     }
   };
@@ -5535,12 +5535,12 @@ Variable = (function(_super) {
   };
 
   Variable.prototype.undeclare = function(engine, variable, quick) {
-    var _ref;
+    var ref;
     if (quick) {
       (engine.replaced || (engine.replaced = {}))[variable.name] = variable;
     } else {
       (engine.nullified || (engine.nullified = {}))[variable.name] = variable;
-      if ((_ref = engine.declared) != null ? _ref[variable.name] : void 0) {
+      if ((ref = engine.declared) != null ? ref[variable.name] : void 0) {
         delete engine.declared[variable.name];
       }
     }
@@ -5553,8 +5553,8 @@ Variable = (function(_super) {
 
 })(Command);
 
-Variable.Expression = (function(_super) {
-  __extends(Expression, _super);
+Variable.Expression = (function(superClass) {
+  extend(Expression, superClass);
 
   function Expression() {
     return Expression.__super__.constructor.apply(this, arguments);
@@ -5609,8 +5609,8 @@ module.exports = Variable;
 Provides values that don't need to be solved
  */
 var Command, Data, Domain, Variable,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __hasProp = {}.hasOwnProperty;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Domain = require('../Domain');
 
@@ -5618,8 +5618,8 @@ Command = require('../Command');
 
 Variable = require('../commands/Variable');
 
-Data = (function(_super) {
-  __extends(Data, _super);
+Data = (function(superClass) {
+  extend(Data, superClass);
 
   function Data() {
     return Data.__super__.constructor.apply(this, arguments);
@@ -5657,7 +5657,7 @@ Data.prototype.Assignment = Command.extend({
   ]
 }, {
   '=': function(variable, value, engine, operation, continuation) {
-    var name, _base;
+    var base, name;
     if (typeof variable === 'string') {
       name = variable;
     } else if (variable[0] === 'get' && variable.length === 2) {
@@ -5667,7 +5667,7 @@ Data.prototype.Assignment = Command.extend({
       return;
     }
     if (name) {
-      ((_base = engine.updating).assignments || (_base.assignments = [])).push(name, value, this.delimit(continuation), operation);
+      ((base = engine.updating).assignments || (base.assignments = [])).push(name, value, this.delimit(continuation), operation);
     } else {
       throw new Error('[Input] Unexpected expression on left side of `=`: ' + JSON.stringify(variable));
     }
@@ -5716,9 +5716,9 @@ Data.prototype.Variable.Getter = Data.prototype.Variable.extend({
 
 Data.prototype.Variable.Expression = Variable.Expression.extend({
   before: function(args, engine) {
-    var arg, _i, _len;
-    for (_i = 0, _len = args.length; _i < _len; _i++) {
-      arg = args[_i];
+    var arg, i, len;
+    for (i = 0, len = args.length; i < len; i++) {
+      arg = args[i];
       if ((arg == null) || arg !== arg) {
         return NaN;
       }
@@ -5751,9 +5751,9 @@ module.exports = Data;
 
 },{"../Command":4,"../Domain":5,"../commands/Variable":14}],16:[function(require,module,exports){
 var Command, Constraint, Domain, Input, Outputting, Solving, Variable,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __hasProp = {}.hasOwnProperty,
-  __slice = [].slice;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty,
+  slice = [].slice;
 
 Domain = require('../Domain');
 
@@ -5763,8 +5763,8 @@ Variable = require('../commands/Variable');
 
 Constraint = require('../commands/Constraint');
 
-Input = (function(_super) {
-  __extends(Input, _super);
+Input = (function(superClass) {
+  extend(Input, superClass);
 
   function Input() {
     return Input.__super__.constructor.apply(this, arguments);
@@ -5834,10 +5834,10 @@ Input.prototype.Remove = Command.extend({
   extras: 1
 }, {
   remove: function() {
-    var args, engine, path, _i, _j, _len;
-    args = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), engine = arguments[_i++];
-    for (_j = 0, _len = args.length; _j < _len; _j++) {
-      path = args[_j];
+    var args, engine, j, k, len, path;
+    args = 2 <= arguments.length ? slice.call(arguments, 0, j = arguments.length - 1) : (j = 0, []), engine = arguments[j++];
+    for (k = 0, len = args.length; k < len; k++) {
+      path = args[k];
       engine.triggerEvent('remove', path);
     }
     return true;
@@ -5847,8 +5847,8 @@ Input.prototype.Remove = Command.extend({
 Input.prototype.Default = Command.Default.extend({
   extras: 2,
   execute: function() {
-    var args, engine, operation, _i;
-    args = 3 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 2) : (_i = 0, []), engine = arguments[_i++], operation = arguments[_i++];
+    var args, engine, j, operation;
+    args = 3 <= arguments.length ? slice.call(arguments, 0, j = arguments.length - 2) : (j = 0, []), engine = arguments[j++], operation = arguments[j++];
     args.unshift(operation[0]);
     return args;
   }
@@ -5867,8 +5867,8 @@ Solving = Input.prototype.Default.extend({
   },
   extras: 4,
   execute: function() {
-    var args, continuation, domain, engine, meta, operation, scope, wrapper, _base, _i;
-    args = 5 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 4) : (_i = 0, []), engine = arguments[_i++], operation = arguments[_i++], continuation = arguments[_i++], scope = arguments[_i++];
+    var args, base, continuation, domain, engine, j, meta, operation, scope, wrapper;
+    args = 5 <= arguments.length ? slice.call(arguments, 0, j = arguments.length - 4) : (j = 0, []), engine = arguments[j++], operation = arguments[j++], continuation = arguments[j++], scope = arguments[j++];
     meta = {
       key: this.delimit(continuation)
     };
@@ -5883,15 +5883,15 @@ Solving = Input.prototype.Default.extend({
       wrapper.parent = operation.parent;
       wrapper.domain || (wrapper.domain = domain);
     }
-    ((_base = engine.updating).constraints || (_base.constraints = [])).push(wrapper, domain);
+    ((base = engine.updating).constraints || (base.constraints = [])).push(wrapper, domain);
   },
   produce: function(meta, args) {
     return [meta, args];
   },
   domain: function(engine, operation) {
-    var domain, parent, _ref;
+    var domain, parent, ref;
     if (parent = operation.parent) {
-      if (domain = (_ref = parent.command.domains) != null ? _ref[parent.indexOf(operation)] : void 0) {
+      if (domain = (ref = parent.command.domains) != null ? ref[parent.indexOf(operation)] : void 0) {
         return engine[domain];
       }
     }
@@ -5909,9 +5909,9 @@ Outputting = function(engine, operation, command) {
 };
 
 Outputting.patch = function(engine, operation, parent, index, context) {
-  var argument, command, i, match, _i, _len;
+  var argument, command, i, j, len, match;
   operation.domain = engine.output;
-  for (i = _i = 0, _len = operation.length; _i < _len; i = ++_i) {
+  for (i = j = 0, len = operation.length; j < len; i = ++j) {
     argument = operation[i];
     if (argument.push) {
       if (index !== false || argument.command.type === 'Default' || argument.command.type === 'Variable') {
@@ -6012,9 +6012,9 @@ module.exports = Input;
 
 },{"../Command":4,"../Domain":5,"../commands/Condition":10,"../commands/Constraint":11,"../commands/Iterator":12,"../commands/Variable":14}],17:[function(require,module,exports){
 var Command, Constraint, Domain, Linear, Variable, c,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __hasProp = {}.hasOwnProperty,
-  __slice = [].slice;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty,
+  slice = [].slice;
 
 Domain = require('../Domain');
 
@@ -6028,8 +6028,8 @@ c = require('cassowary');
 
 c.Strength.require = c.Strength.required;
 
-Linear = (function(_super) {
-  __extends(Linear, _super);
+Linear = (function(superClass) {
+  extend(Linear, superClass);
 
   function Linear() {
     return Linear.__super__.constructor.apply(this, arguments);
@@ -6068,8 +6068,8 @@ Linear = (function(_super) {
   };
 
   Linear.prototype.unedit = function(variable) {
-    var cei, constraint, _ref;
-    if (constraint = (_ref = this.editing) != null ? _ref['%' + (variable.name || variable)] : void 0) {
+    var cei, constraint, ref;
+    if (constraint = (ref = this.editing) != null ? ref['%' + (variable.name || variable)] : void 0) {
       cei = this.instance._editVarMap.get(constraint.variable);
       this.instance.removeColumn(cei.editMinus);
       this.instance._editVarMap["delete"](constraint.variable);
@@ -6078,8 +6078,8 @@ Linear = (function(_super) {
   };
 
   Linear.prototype.edit = function(variable, strength, weight, continuation) {
-    var constraint, _ref;
-    if (!((_ref = this.editing) != null ? _ref[variable.name] : void 0)) {
+    var constraint, ref;
+    if (!((ref = this.editing) != null ? ref[variable.name] : void 0)) {
       constraint = new c.EditConstraint(variable, this.strength(strength, 'strong'), this.weight(weight));
       constraint.variable = variable;
       this.Constraint.prototype.inject(this, constraint);
@@ -6143,15 +6143,15 @@ Linear.prototype.Constraint = Constraint.extend({
     return this.get(engine, operation, ascending);
   },
   after: function(args, result, engine, operation, continuation, scope, ascender, ascending) {
-    var _base, _base1, _name, _name1;
+    var base, base1, name1, name2;
     if (result.hashCode) {
-      return (_base = ((_base1 = (engine.operations || (engine.operations = {})))[_name1 = operation.hash || (operation.hash = this.toExpression(operation))] || (_base1[_name1] = {})))[_name = this.toHash(ascending)] || (_base[_name] = result);
+      return (base = ((base1 = (engine.operations || (engine.operations = {})))[name2 = operation.hash || (operation.hash = this.toExpression(operation))] || (base1[name2] = {})))[name1 = this.toHash(ascending)] || (base[name1] = result);
     }
     return result;
   },
   get: function(engine, operation, scope) {
-    var _ref, _ref1;
-    return (_ref = engine.operations) != null ? (_ref1 = _ref[operation.hash || (operation.hash = this.toExpression(operation))]) != null ? _ref1[this.toHash(scope)] : void 0 : void 0;
+    var ref, ref1;
+    return (ref = engine.operations) != null ? (ref1 = ref[operation.hash || (operation.hash = this.toExpression(operation))]) != null ? ref1[this.toHash(scope)] : void 0 : void 0;
   },
   "yield": Linear.Mixin["yield"],
   inject: function(engine, constraint) {
@@ -6239,8 +6239,8 @@ Linear.prototype.Remove = Command.extend({
   signature: false
 }, {
   remove: function() {
-    var args, engine, _i;
-    args = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), engine = arguments[_i++];
+    var args, engine, i;
+    args = 2 <= arguments.length ? slice.call(arguments, 0, i = arguments.length - 1) : (i = 0, []), engine = arguments[i++];
     return engine.remove.apply(engine, args);
   }
 });
@@ -6278,15 +6278,15 @@ module.exports = Linear;
 
 },{"../Command":4,"../Domain":5,"../commands/Constraint":11,"../commands/Variable":14,"cassowary":3}],18:[function(require,module,exports){
 var Constraint, Data, Output,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  __hasProp = {}.hasOwnProperty;
+  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+  hasProp = {}.hasOwnProperty;
 
 Data = require('./Data');
 
 Constraint = require('../commands/Constraint');
 
-Output = (function(_super) {
-  __extends(Output, _super);
+Output = (function(superClass) {
+  extend(Output, superClass);
 
   function Output() {
     return Output.__super__.constructor.apply(this, arguments);
@@ -6371,16 +6371,16 @@ Output.prototype.StyleAssignment = Output.prototype.Assignment.extend({
 
 
 },{"../commands/Constraint":11,"../commands/Range":13,"./Data":15}],19:[function(require,module,exports){
-var Console, method, _i, _len, _ref,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+var Console, i, len, method, ref,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Console = (function() {
-  function Console(_at_level) {
-    var _ref, _ref1, _ref2;
-    this.level = _at_level;
-    this.onError = __bind(this.onError, this);
+  function Console(level) {
+    var ref, ref1, ref2;
+    this.level = level;
+    this.onError = bind(this.onError, this);
     if (this.level == null) {
-      this.level = (_ref = typeof self !== "undefined" && self !== null ? self.GSS_LOG : void 0) != null ? _ref : parseFloat((typeof self !== "undefined" && self !== null ? (_ref1 = self.location) != null ? (_ref2 = _ref1.search.match(/log=([\d.]+)/)) != null ? _ref2[1] : void 0 : void 0 : void 0) || 0);
+      this.level = (ref = typeof self !== "undefined" && self !== null ? self.GSS_LOG : void 0) != null ? ref : parseFloat((typeof self !== "undefined" && self !== null ? (ref1 = self.location) != null ? (ref2 = ref1.search.match(/log=([\d.]+)/)) != null ? ref2[1] : void 0 : void 0 : void 0) || 0);
     }
     if (!Console.bind) {
       this.level = 0;
@@ -6397,12 +6397,12 @@ Console = (function() {
   Console.prototype.groups = 0;
 
   Console.prototype.onError = function(e) {
-    var _results;
-    _results = [];
+    var results;
+    results = [];
     while (this.pop(e)) {
-      _results.push(true);
+      results.push(true);
     }
-    return _results;
+    return results;
   };
 
   Console.prototype.push = function(a, b, c, type) {
@@ -6440,15 +6440,15 @@ Console = (function() {
   };
 
   Console.prototype.flush = function() {
-    var index, item, _i, _len, _ref;
+    var i, index, item, len, ref;
     if (this.level > 1) {
       if (typeof console !== "undefined" && console !== null) {
         console.profileEnd();
       }
     }
-    _ref = this.buffer;
-    for (index = _i = 0, _len = _ref.length; _i < _len; index = _i += 5) {
-      item = _ref[index];
+    ref = this.buffer;
+    for (index = i = 0, len = ref.length; i < len; index = i += 5) {
+      item = ref[index];
       this.buffer[index + 4].call(this, this.buffer[index], this.buffer[index + 1], this.buffer[index + 2], this.buffer[index + 3]);
     }
     return this.buffer = [];
@@ -6532,7 +6532,7 @@ Console = (function() {
   Console.prototype.breakpoint = decodeURIComponent(((typeof document !== "undefined" && document !== null ? document.location.search.match(/breakpoint=([^&]+)/, '') : void 0) || ['', ''])[1]);
 
   Console.prototype.row = function(a, b, c, d) {
-    var fmt, index, p1, _ref;
+    var fmt, index, p1, ref;
     if (b == null) {
       b = '';
     }
@@ -6550,7 +6550,7 @@ Console = (function() {
       return;
     }
     p1 = Array(4 - Math.floor((a.length + 1) / 4)).join('\t');
-    if ((index = c.indexOf((_ref = self.GSS) != null ? _ref.Engine.prototype.Command.prototype.DESCEND : void 0)) > -1) {
+    if ((index = c.indexOf((ref = self.GSS) != null ? ref.Engine.prototype.Command.prototype.DESCEND : void 0)) > -1) {
       if (c.indexOf('style[type*="gss"]') > -1) {
         c = c.substring(index + 1);
       }
@@ -6611,9 +6611,9 @@ Console = (function() {
 
 })();
 
-_ref = Console.prototype.methods;
-for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-  method = _ref[_i];
+ref = Console.prototype.methods;
+for (i = 0, len = ref.length; i < len; i++) {
+  method = ref[i];
   Console.prototype[method] = (function(method) {
     return function() {
       if (method === 'group' || method === 'groupCollapsed') {
@@ -6637,51 +6637,51 @@ module.exports = Console;
 
 },{}],20:[function(require,module,exports){
 var Exporter,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Exporter = (function() {
-  function Exporter(_at_engine) {
-    var _ref;
-    this.engine = _at_engine;
-    this.postexport = __bind(this.postexport, this);
-    this.preexport = __bind(this.preexport, this);
-    if (!(this.command = typeof location !== "undefined" && location !== null ? (_ref = location.search.match(/export=([a-z0-9]+)/)) != null ? _ref[1] : void 0 : void 0)) {
+  function Exporter(engine) {
+    var ref;
+    this.engine = engine;
+    this.postexport = bind(this.postexport, this);
+    this.preexport = bind(this.preexport, this);
+    if (!(this.command = typeof location !== "undefined" && location !== null ? (ref = location.search.match(/export=([a-z0-9]+)/)) != null ? ref[1] : void 0 : void 0)) {
       return;
     }
     this.preexport();
   }
 
   Exporter.prototype.preexport = function() {
-    var baseline, element, height, pairs, scope, width, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+    var baseline, element, height, i, j, k, l, len, len1, len2, len3, pairs, ref, ref1, ref2, ref3, ref4, ref5, scope, width;
     if ((scope = this.engine.scope).nodeType === 9) {
       scope = this.engine.scope.body;
     }
     this.engine.identify(scope);
-    _ref = scope.getElementsByTagName('*');
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      element = _ref[_i];
-      if (element.tagName !== 'SCRIPT' && (element.tagName !== 'STYLE' || ((_ref1 = element.getAttribute('type')) != null ? _ref1.indexOf('gss') : void 0) > -1)) {
+    ref = scope.getElementsByTagName('*');
+    for (i = 0, len = ref.length; i < len; i++) {
+      element = ref[i];
+      if (element.tagName !== 'SCRIPT' && (element.tagName !== 'STYLE' || ((ref1 = element.getAttribute('type')) != null ? ref1.indexOf('gss') : void 0) > -1)) {
         this.engine.identify(element);
       }
     }
     if (window.Sizes) {
       this.sizes = [];
-      _ref2 = window.Sizes;
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        pairs = _ref2[_j];
-        _ref3 = pairs[0];
-        for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
-          width = _ref3[_k];
-          _ref4 = pairs[1];
-          for (_l = 0, _len3 = _ref4.length; _l < _len3; _l++) {
-            height = _ref4[_l];
+      ref2 = window.Sizes;
+      for (j = 0, len1 = ref2.length; j < len1; j++) {
+        pairs = ref2[j];
+        ref3 = pairs[0];
+        for (k = 0, len2 = ref3.length; k < len2; k++) {
+          width = ref3[k];
+          ref4 = pairs[1];
+          for (l = 0, len3 = ref4.length; l < len3; l++) {
+            height = ref4[l];
             this.sizes.push(width + 'x' + height);
           }
         }
       }
     }
     if (this.command.indexOf('x') > -1) {
-      _ref5 = this.command.split('x'), width = _ref5[0], height = _ref5[1];
+      ref5 = this.command.split('x'), width = ref5[0], height = ref5[1];
       baseline = 72;
       width = parseInt(width) * baseline;
       height = parseInt(height) * baseline;
@@ -6707,10 +6707,10 @@ Exporter = (function() {
   };
 
   Exporter.prototype.postexport = function() {
-    var property, result, size, value, _i, _len, _ref;
-    _ref = this.sizes;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      size = _ref[_i];
+    var i, len, property, ref, result, size, value;
+    ref = this.sizes;
+    for (i = 0, len = ref.length; i < len; i++) {
+      size = ref[i];
       if (!localStorage[size]) {
         location.search = location.search.replace(/[&?]export=([a-z0-9])+/, '') + '?export=' + size;
         return;
@@ -6727,11 +6727,11 @@ Exporter = (function() {
   };
 
   Exporter.prototype["export"] = function() {
-    var id, index, path, property, value, values, _ref;
+    var id, index, path, property, ref, value, values;
     values = {};
-    _ref = this.engine.values;
-    for (path in _ref) {
-      value = _ref[path];
+    ref = this.engine.values;
+    for (path in ref) {
+      value = ref[path];
       if ((index = path.indexOf('[')) > -1 && path.indexOf('"') === -1) {
         property = this.engine.data.camelize(path.substring(index + 1, path.length - 1));
         id = path.substring(0, index);
@@ -6756,21 +6756,21 @@ module.exports = Exporter;
 
 },{}],21:[function(require,module,exports){
 var Inspector,
-  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  __hasProp = {}.hasOwnProperty;
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+  hasProp = {}.hasOwnProperty;
 
 Inspector = (function() {
-  function Inspector(_at_engine) {
-    this.engine = _at_engine;
-    this.draw = __bind(this.draw, this);
-    this.onMouseMove = __bind(this.onMouseMove, this);
-    this.onClick = __bind(this.onClick, this);
-    this.onKeyUp = __bind(this.onKeyUp, this);
-    this.onKeyDown = __bind(this.onKeyDown, this);
+  function Inspector(engine) {
+    this.engine = engine;
+    this.draw = bind(this.draw, this);
+    this.onMouseMove = bind(this.onMouseMove, this);
+    this.onClick = bind(this.onClick, this);
+    this.onKeyUp = bind(this.onKeyUp, this);
+    this.onKeyDown = bind(this.onKeyDown, this);
   }
 
   Inspector.prototype.toExpressionString = function(operation) {
-    var i, klass, path, prop, _ref, _ref1, _ref2;
+    var i, klass, path, prop, ref, ref1, ref2;
     if (operation != null ? operation.push : void 0) {
       if (operation[0] === 'get') {
         path = operation[1];
@@ -6783,13 +6783,13 @@ Inspector = (function() {
         } else if (i > -1) {
           if (prop === 'x' || prop === 'y') {
             klass = 'position';
-          } else if (!((_ref = this.engine.data.properties[prop]) != null ? _ref.matcher : void 0)) {
+          } else if (!((ref = this.engine.data.properties[prop]) != null ? ref.matcher : void 0)) {
             klass = 'local';
           }
         }
         return '<strong class="' + (klass || 'variable') + '" for="' + path + '" title="' + this.engine.values[path] + '">' + path + '</strong>';
       }
-      return this.toExpressionString(operation[1]) + ' <b title=\'' + ((_ref1 = operation.parent) != null ? (_ref2 = _ref1[0]) != null ? _ref2.key : void 0 : void 0) + '\'>' + operation[0] + '</b> ' + this.toExpressionString(operation[2]);
+      return this.toExpressionString(operation[1]) + ' <b title=\'' + ((ref1 = operation.parent) != null ? (ref2 = ref1[0]) != null ? ref2.key : void 0 : void 0) + '\'>' + operation[0] + '</b> ' + this.toExpressionString(operation[2]);
     } else {
       return operation != null ? operation : '';
     }
@@ -6816,17 +6816,17 @@ Inspector = (function() {
   };
 
   Inspector.prototype.refresh = function() {
-    var bits, id, ids, property, value, values, _i, _len, _ref, _ref1, _results;
+    var bits, id, ids, j, len, property, ref, ref1, results, value, values;
     values = {};
-    _ref = this.engine.values;
-    for (property in _ref) {
-      value = _ref[property];
+    ref = this.engine.values;
+    for (property in ref) {
+      value = ref[property];
       values[property] = value;
     }
     if (this.rulers) {
-      _ref1 = this.rulers;
-      for (property in _ref1) {
-        value = _ref1[property];
+      ref1 = this.rulers;
+      for (property in ref1) {
+        value = ref1[property];
         if (!values.hasOwnProperty(property)) {
           values[property] = null;
         }
@@ -6841,12 +6841,12 @@ Inspector = (function() {
         }
       }
     }
-    _results = [];
-    for (_i = 0, _len = ids.length; _i < _len; _i++) {
-      id = ids[_i];
-      _results.push(this.draw(id, values));
+    results = [];
+    for (j = 0, len = ids.length; j < len; j++) {
+      id = ids[j];
+      results.push(this.draw(id, values));
     }
-    return _results;
+    return results;
   };
 
   Inspector.prototype.onKeyDown = function(e) {
@@ -6862,16 +6862,16 @@ Inspector = (function() {
   };
 
   Inspector.prototype.getDomains = function(ids) {
-    var domain, domains, id, property, value, _i, _len, _ref, _ref1;
+    var domain, domains, id, j, len, property, ref, ref1, value;
     domains = [];
-    _ref = this.engine.domains;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      domain = _ref[_i];
+    ref = this.engine.domains;
+    for (j = 0, len = ref.length; j < len; j++) {
+      domain = ref[j];
       if (domain.displayName !== 'Solved' && domain.constraints.length) {
-        _ref1 = domain.values;
-        for (property in _ref1) {
-          if (!__hasProp.call(_ref1, property)) continue;
-          value = _ref1[property];
+        ref1 = domain.values;
+        for (property in ref1) {
+          if (!hasProp.call(ref1, property)) continue;
+          value = ref1[property];
           id = property.split('[');
           if (id.length > 1) {
             if (ids.indexOf(id[0]) > -1) {
@@ -6887,8 +6887,8 @@ Inspector = (function() {
   };
 
   Inspector.prototype.onClick = function(e) {
-    var distance, domain, domains, ids, inspecting, prop, properties, property, props, target, _ref, _ref1, _ref2;
-    if (((_ref = e.target.tagName) != null ? _ref.toLowerCase() : void 0) === 'domain') {
+    var distance, domain, domains, ids, inspecting, prop, properties, property, props, ref, ref1, ref2, target;
+    if (((ref = e.target.tagName) != null ? ref.toLowerCase() : void 0) === 'domain') {
       if (!this.rulers) {
         this.refresh();
       }
@@ -6926,9 +6926,9 @@ Inspector = (function() {
         if (e.metaKey) {
           this.filter(ids, e.shiftKey);
         }
-      } else if ((property = document.body.getAttribute('reaching')) && ((_ref1 = e.target.tagName) != null ? _ref1.toLowerCase() : void 0) === 'ruler') {
+      } else if ((property = document.body.getAttribute('reaching')) && ((ref1 = e.target.tagName) != null ? ref1.toLowerCase() : void 0) === 'ruler') {
         domain = this.reaching;
-        if (domain && (properties = (_ref2 = domain.distances) != null ? _ref2[property] : void 0)) {
+        if (domain && (properties = (ref2 = domain.distances) != null ? ref2[property] : void 0)) {
           props = [];
           for (prop in properties) {
             distance = properties[prop];
@@ -6947,16 +6947,16 @@ Inspector = (function() {
   };
 
   Inspector.prototype.constraints = function(id, element, props, all) {
-    var d, diff, domain, el, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
+    var d, diff, domain, el, j, k, len, len1, ref, ref1, ref2, ref3;
     if (!this.panel) {
       this.panel = document.createElement('panel');
     } else {
       this.panel.classList.remove('filtered');
     }
     if (!element) {
-      _ref = this.list.childNodes;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        el = _ref[_i];
+      ref = this.list.childNodes;
+      for (j = 0, len = ref.length; j < len; j++) {
+        el = ref[j];
         if (el.getAttribute('for') === String(id)) {
           element = el;
           break;
@@ -6967,17 +6967,17 @@ Inspector = (function() {
       }
     }
     if (this.panel.parentNode !== element) {
-      if ((_ref1 = this.panel.parentNode) != null) {
-        _ref1.classList.remove('active');
+      if ((ref1 = this.panel.parentNode) != null) {
+        ref1.classList.remove('active');
       }
       element.appendChild(this.panel);
     }
     if (id === 'singles') {
       domain = this.singles;
     } else {
-      _ref2 = this.engine.domains;
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        d = _ref2[_j];
+      ref2 = this.engine.domains;
+      for (k = 0, len1 = ref2.length; k < len1; k++) {
+        d = ref2[k];
         if (String(d.uid) === String(id)) {
           domain = d;
           break;
@@ -6985,17 +6985,17 @@ Inspector = (function() {
       }
     }
     if (domain) {
-      this.panel.innerHTML = (_ref3 = domain.constraints) != null ? _ref3.map((function(_this) {
+      this.panel.innerHTML = (ref3 = domain.constraints) != null ? ref3.map((function(_this) {
         return function(constraint) {
           return _this.toExpressionString(constraint.operations[0]);
         };
       })(this)).filter(function(string) {
-        var prop, _k, _len2;
+        var l, len2, prop;
         if (!props) {
           return true;
         }
-        for (_k = 0, _len2 = props.length; _k < _len2; _k++) {
-          prop = props[_k];
+        for (l = 0, len2 = props.length; l < len2; l++) {
+          prop = props[l];
           if (string.indexOf(prop) > -1) {
             if (!all && props.length > 1) {
               props.splice(1);
@@ -7005,10 +7005,10 @@ Inspector = (function() {
         }
         return false;
       }).map(function(string) {
-        var prop, _k, _len2;
+        var l, len2, prop;
         if (props) {
-          for (_k = 0, _len2 = props.length; _k < _len2; _k++) {
-            prop = props[_k];
+          for (l = 0, len2 = props.length; l < len2; l++) {
+            prop = props[l];
             prop = prop.replace(/([\[\]$])/g, '\\$1');
             string = string.replace(new RegExp('\\>(' + prop + '[\\[\\"])', 'g'), ' mark>$1');
           }
@@ -7029,7 +7029,7 @@ Inspector = (function() {
   };
 
   Inspector.prototype.onMouseMove = function(e) {
-    var target, _ref;
+    var ref, target;
     target = e.target;
     if (target._gss) {
       return this.visualize(e.target.getAttribute('property'));
@@ -7042,7 +7042,7 @@ Inspector = (function() {
       }
       target = target.parentNode;
     }
-    if ((_ref = this.panel) != null ? _ref.parentNode : void 0) {
+    if ((ref = this.panel) != null ? ref.parentNode : void 0) {
       this.panel.parentNode.classList.remove('active');
       this.panel.parentNode.removeChild(this.panel);
     }
@@ -7052,14 +7052,14 @@ Inspector = (function() {
   };
 
   Inspector.prototype.visualize = function(property, ids, all) {
-    var distance, domain, id, key, prop, properties, props, reached, ruler, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _results;
+    var distance, domain, id, j, k, key, l, len, len1, len2, prop, properties, props, reached, ref, ref1, results, ruler;
     if (!property && !ids) {
       if (this.reaching) {
         this.reaching = void 0;
         document.body.removeAttribute('reaching');
-        _ref = document.getElementsByTagName('ruler');
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          ruler = _ref[_i];
+        ref = document.getElementsByTagName('ruler');
+        for (j = 0, len = ref.length; j < len; j++) {
+          ruler = ref[j];
           ruler.classList.remove('reached');
         }
       }
@@ -7071,8 +7071,8 @@ Inspector = (function() {
     if (ids) {
       props = [];
       for (property in this.rulers) {
-        for (_j = 0, _len1 = ids.length; _j < _len1; _j++) {
-          id = ids[_j];
+        for (k = 0, len1 = ids.length; k < len1; k++) {
+          id = ids[k];
           if (property.substring(0, id.length) === id) {
             if (property.substring(id.length, id.length + 1) === '[') {
               props.push(property);
@@ -7090,69 +7090,69 @@ Inspector = (function() {
     }
     domain = this.getDomains(ids)[0];
     reached = false;
-    _results = [];
-    for (_k = 0, _len2 = props.length; _k < _len2; _k++) {
-      prop = props[_k];
-      if (domain && (properties = (_ref1 = domain.distances) != null ? _ref1[prop] : void 0)) {
-        _results.push((function() {
-          var _ref2, _results1;
-          _results1 = [];
+    results = [];
+    for (l = 0, len2 = props.length; l < len2; l++) {
+      prop = props[l];
+      if (domain && (properties = (ref1 = domain.distances) != null ? ref1[prop] : void 0)) {
+        results.push((function() {
+          var ref2, results1;
+          results1 = [];
           for (key in properties) {
             distance = properties[key];
             if (!distance) {
               reached = true;
-              if ((_ref2 = this.rulers[key]) != null) {
-                _ref2.classList.add('reached');
+              if ((ref2 = this.rulers[key]) != null) {
+                ref2.classList.add('reached');
               }
               this.reaching = domain;
-              _results1.push(document.body.setAttribute('reaching', prop || id));
+              results1.push(document.body.setAttribute('reaching', prop || id));
             } else {
-              _results1.push(void 0);
+              results1.push(void 0);
             }
           }
-          return _results1;
+          return results1;
         }).call(this));
       } else {
-        _results.push(void 0);
+        results.push(void 0);
       }
     }
-    return _results;
+    return results;
   };
 
   Inspector.prototype.filter = function(ids, all, scroll) {
-    var domain, i, id, index, node, offsetTop, property, ruler, top, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    var domain, i, id, index, j, k, len, len1, node, offsetTop, property, ref, ref1, ref2, ruler, top;
     this.indexes || (this.indexes = (function() {
-      var _i, _len, _ref, _results;
-      _ref = this.list.childNodes;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        node = _ref[_i];
+      var j, len, ref, results;
+      ref = this.list.childNodes;
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        node = ref[j];
         if (node.getAttribute('hidden') == null) {
-          _results.push(node.getAttribute('for'));
+          results.push(node.getAttribute('for'));
         } else {
-          _results.push(void 0);
+          results.push(void 0);
         }
       }
-      return _results;
+      return results;
     }).call(this));
     if (all) {
       ids = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.list.childNodes;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          node = _ref[_i];
-          _results.push(node.getAttribute('for'));
+        var j, len, ref, results;
+        ref = this.list.childNodes;
+        results = [];
+        for (j = 0, len = ref.length; j < len; j++) {
+          node = ref[j];
+          results.push(node.getAttribute('for'));
         }
-        return _results;
+        return results;
       }).call(this);
       if (ids.toString() === this.indexes.toString()) {
         ids = [];
       }
       this.indexes = ids || [];
     } else {
-      for (_i = 0, _len = ids.length; _i < _len; _i++) {
-        id = ids[_i];
+      for (j = 0, len = ids.length; j < len; j++) {
+        id = ids[j];
         if ((i = this.indexes.indexOf(id)) === -1) {
           this.indexes.push(id);
         } else {
@@ -7160,13 +7160,13 @@ Inspector = (function() {
         }
       }
     }
-    _ref = this.list.childNodes;
-    for (index = _j = 0, _len1 = _ref.length; _j < _len1; index = ++_j) {
-      domain = _ref[index];
+    ref = this.list.childNodes;
+    for (index = k = 0, len1 = ref.length; k < len1; index = ++k) {
+      domain = ref[index];
       if (this.engine.domains[index] != null) {
         if (this.indexes.indexOf(String(this.engine.domains[index].uid)) === -1) {
           domain.setAttribute('hidden', 'hidden');
-          if (((_ref1 = this.panel) != null ? _ref1.parentNode : void 0) === domain) {
+          if (((ref1 = this.panel) != null ? ref1.parentNode : void 0) === domain) {
             domain.classList.remove('active');
             domain.removeChild(this.panel);
           }
@@ -7176,9 +7176,9 @@ Inspector = (function() {
       }
     }
     top = null;
-    _ref2 = this.rulers;
-    for (property in _ref2) {
-      ruler = _ref2[property];
+    ref2 = this.rulers;
+    for (property in ref2) {
+      ruler = ref2[property];
       if (this.indexes.indexOf(ruler.getAttribute('domain')) === -1) {
         ruler.setAttribute('hidden', 'hidden');
       } else {
@@ -7201,7 +7201,7 @@ Inspector = (function() {
   };
 
   Inspector.prototype.domains = function(domains) {
-    var domain, index, innerHTML, multiples, singles, total, _i;
+    var domain, index, innerHTML, j, multiples, singles, total;
     this.singles = void 0;
     if (!this.sheet) {
       this.stylesheet();
@@ -7213,7 +7213,7 @@ Inspector = (function() {
     }
     total = 0;
     multiples = [];
-    for (index = _i = domains.length - 1; _i >= 0; index = _i += -1) {
+    for (index = j = domains.length - 1; j >= 0; index = j += -1) {
       domain = domains[index];
       if (domain.constraints.length === 1) {
         singles = this.singles || (this.singles = {
@@ -7235,9 +7235,9 @@ Inspector = (function() {
     Inspector.uid || (Inspector.uid = 0);
     innerHTML = multiples.map((function(_this) {
       return function(d) {
-        var length, _ref;
+        var length, ref;
         d.uid || (d.uid = ++Inspector.uid);
-        length = ((_ref = d.constraints) != null ? _ref.length : void 0) || 0;
+        length = ((ref = d.constraints) != null ? ref.length : void 0) || 0;
         total += length;
         return "<domain for=\"" + d.uid + "\" count=\"" + length + "\" " + (_this.engine.console.level <= 1 && 'hidden') + " class=\"" + (d.displayName.toLowerCase()) + "\">" + length + "</domain>";
       };
@@ -7259,7 +7259,7 @@ Inspector = (function() {
    */
 
   Inspector.prototype.ruler = function(element, path, value, x, y, width, height, inside) {
-    var bits, constraint, domain, id, konst, other, property, ruler, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
+    var bits, constraint, domain, id, j, k, konst, len, len1, other, property, ref, ref1, ref2, ref3, ruler;
     bits = path.split('[');
     id = bits[0];
     property = bits[1].split(']')[0];
@@ -7276,32 +7276,32 @@ Inspector = (function() {
       ruler.setAttribute('title', path);
       ruler.removeAttribute('hidden');
     } else if (value == null) {
-      if ((_ref = ruler.parentNode) != null) {
-        _ref.removeChild(ruler);
+      if ((ref = ruler.parentNode) != null) {
+        ref.removeChild(ruler);
       }
       delete this.rulers[path];
       return;
     }
     domain = void 0;
-    _ref1 = this.engine.domains;
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      other = _ref1[_i];
+    ref1 = this.engine.domains;
+    for (j = 0, len = ref1.length; j < len; j++) {
+      other = ref1[j];
       if (other.values.hasOwnProperty(path) && other.displayName !== 'Solved') {
         domain = other;
         break;
       }
     }
     if (!domain) {
-      if ((_ref2 = ruler.parentNode) != null) {
-        _ref2.removeChild(ruler);
+      if ((ref2 = ruler.parentNode) != null) {
+        ref2.removeChild(ruler);
       }
       return;
     }
     ruler.setAttribute('domain', domain.uid);
     if (!(konst = typeof this.engine.variables[path] === 'string')) {
-      _ref3 = domain.constraints;
-      for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-        constraint = _ref3[_j];
+      ref3 = domain.constraints;
+      for (k = 0, len1 = ref3.length; k < len1; k++) {
+        constraint = ref3[k];
         if (constraint.operations[0].variables[path] && Object.keys(constraint.operations[0].variables).length === 1) {
           konst = true;
           break;
@@ -7341,42 +7341,42 @@ Inspector = (function() {
   };
 
   Inspector.prototype.reach = function(distances, a, b, level) {
-    var bc, c, _results;
+    var bc, c, results;
     if (level == null) {
       level = 0;
     }
     (distances[a] || (distances[a] = {}))[b] = level;
     (distances[b] || (distances[b] = {}))[a] = level;
-    _results = [];
+    results = [];
     for (c in distances[a]) {
       bc = distances[b][c];
       if ((bc == null) || bc > level + 1) {
-        _results.push(this.reach(distances, b, c, level + 1));
+        results.push(this.reach(distances, b, c, level + 1));
       } else {
-        _results.push(void 0);
+        results.push(void 0);
       }
     }
-    return _results;
+    return results;
   };
 
   Inspector.prototype.draw = function(id, data) {
-    var bits, clientLeft, clientTop, element, left, offsetLeft, offsetTop, parenting, prop, scope, top, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
+    var bits, clientLeft, clientTop, element, left, offsetLeft, offsetTop, parenting, prop, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, scope, top;
     if ((bits = id.split('"')).length > 1) {
       scope = bits[0];
     } else {
       scope = id;
     }
-    if (((_ref = (element = this.engine.identity[scope])) != null ? _ref.nodeType : void 0) === 1) {
+    if (((ref = (element = this.engine.identity[scope])) != null ? ref.nodeType : void 0) === 1) {
       if (scope !== id) {
         if (!element.offsetHeight && !element.offsetTop) {
           element = element.parentNode;
           scope = this.engine.identify(element);
           parenting = true;
         }
-        top = (_ref1 = data[scope + '[y]']) != null ? _ref1 : 0;
-        left = (_ref2 = data[scope + '[x]']) != null ? _ref2 : 0;
-        clientTop = (_ref3 = data[id + '[y]']) != null ? _ref3 : 0;
-        clientLeft = (_ref4 = data[id + '[x]']) != null ? _ref4 : 0;
+        top = (ref1 = data[scope + '[y]']) != null ? ref1 : 0;
+        left = (ref2 = data[scope + '[x]']) != null ? ref2 : 0;
+        clientTop = (ref3 = data[id + '[y]']) != null ? ref3 : 0;
+        clientLeft = (ref4 = data[id + '[x]']) != null ? ref4 : 0;
         offsetTop = top + clientTop;
         offsetLeft = left + clientLeft;
       } else {
@@ -7384,17 +7384,17 @@ Inspector = (function() {
         left = element.offsetLeft;
       }
       if (!parenting) {
-        if ((_ref5 = element.offsetWidth !== data[scope + '[width]']) != null ? _ref5 : data[scope + '[intrinsic-width]']) {
+        if ((ref5 = element.offsetWidth !== data[scope + '[width]']) != null ? ref5 : data[scope + '[intrinsic-width]']) {
           clientLeft = left + element.clientLeft;
         }
-        if ((_ref6 = element.offsetHeight !== data[scope + '[height]']) != null ? _ref6 : data[scope + '[intrinsic-height]']) {
+        if ((ref6 = element.offsetHeight !== data[scope + '[height]']) != null ? ref6 : data[scope + '[intrinsic-height]']) {
           clientTop = top + element.clientTop;
         }
       }
     } else {
       element = document.body;
-      left = (_ref7 = data[id + '[x]']) != null ? _ref7 : 0;
-      top = (_ref8 = data[id + '[y]']) != null ? _ref8 : 0;
+      left = (ref7 = data[id + '[x]']) != null ? ref7 : 0;
+      top = (ref8 = data[id + '[y]']) != null ? ref8 : 0;
     }
     if (data.hasOwnProperty(prop = id + '[width]')) {
       this.ruler(element, prop, data[prop], clientLeft != null ? clientLeft : left, clientTop != null ? clientTop : top, data[prop], 0, scope !== id);
@@ -8110,273 +8110,279 @@ module.exports = (function() {
               var command = g.createSelectorCommaCommand(head, tail); 
               return command.slice(1,command.length);
             },
-        peg$c129 = "true",
-        peg$c130 = { type: "literal", value: "true", description: "\"true\"" },
-        peg$c131 = function() {return true;},
-        peg$c132 = "false",
-        peg$c133 = { type: "literal", value: "false", description: "\"false\"" },
-        peg$c134 = function() {return false;},
-        peg$c135 = "null",
-        peg$c136 = { type: "literal", value: "null", description: "\"null\"" },
-        peg$c137 = function() {return null;},
-        peg$c138 = "undefined",
-        peg$c139 = { type: "literal", value: "undefined", description: "\"undefined\"" },
-        peg$c140 = function() {return undefined;},
-        peg$c141 = function(exp, u) { 
+        peg$c129 = function(op, e) {return [op,e]},
+        peg$c130 = "- ",
+        peg$c131 = { type: "literal", value: "- ", description: "\"- \"" },
+        peg$c132 = "%",
+        peg$c133 = { type: "literal", value: "%", description: "\"%\"" },
+        peg$c134 = function(op) {
+              return op.trim();
+            },
+        peg$c135 = "true",
+        peg$c136 = { type: "literal", value: "true", description: "\"true\"" },
+        peg$c137 = function() {return true;},
+        peg$c138 = "false",
+        peg$c139 = { type: "literal", value: "false", description: "\"false\"" },
+        peg$c140 = function() {return false;},
+        peg$c141 = "null",
+        peg$c142 = { type: "literal", value: "null", description: "\"null\"" },
+        peg$c143 = function() {return null;},
+        peg$c144 = "undefined",
+        peg$c145 = { type: "literal", value: "undefined", description: "\"undefined\"" },
+        peg$c146 = function() {return undefined;},
+        peg$c147 = function(exp, u) { 
             return [u, exp];
           },
-        peg$c142 = function(expression) { 
+        peg$c148 = function(expression) { 
             return expression; 
           },
-        peg$c143 = function(v, u) {return [u,v]},
-        peg$c144 = { type: "other", description: "variable" },
-        peg$c145 = "[",
-        peg$c146 = { type: "literal", value: "[", description: "\"[\"" },
-        peg$c147 = "]",
-        peg$c148 = { type: "literal", value: "]", description: "\"]\"" },
-        peg$c149 = function(negative, selector, varChars) {
+        peg$c149 = function(v, u) {return [u,v]},
+        peg$c150 = { type: "other", description: "variable" },
+        peg$c151 = "[",
+        peg$c152 = { type: "literal", value: "[", description: "\"[\"" },
+        peg$c153 = "]",
+        peg$c154 = { type: "literal", value: "]", description: "\"]\"" },
+        peg$c155 = function(negative, selector, varChars) {
               return g.variable(negative, selector, varChars);
             },
-        peg$c150 = function(selector, varChars) {
+        peg$c156 = function(selector, varChars) {
               return g.variable(false, selector, varChars);
             },
-        peg$c151 = /^["']/,
-        peg$c152 = { type: "class", value: "[\"']", description: "[\"']" },
-        peg$c153 = /^[^"']/,
-        peg$c154 = { type: "class", value: "[^\"']", description: "[^\"']" },
-        peg$c155 = function(string) {return string.join('');},
-        peg$c156 = /^[a-zA-Z0-9#.\-_$]/,
-        peg$c157 = { type: "class", value: "[a-zA-Z0-9#.\\-_$]", description: "[a-zA-Z0-9#.\\-_$]" },
-        peg$c158 = /^[a-zA-Z]/,
-        peg$c159 = { type: "class", value: "[a-zA-Z]", description: "[a-zA-Z]" },
-        peg$c160 = /^[a-zA-Z0-9\-_]/,
-        peg$c161 = { type: "class", value: "[a-zA-Z0-9\\-_]", description: "[a-zA-Z0-9\\-_]" },
-        peg$c162 = function(first, rest) { return first + rest.join('');},
-        peg$c163 = /^[\-]/,
-        peg$c164 = { type: "class", value: "[\\-]", description: "[\\-]" },
-        peg$c165 = function(dashes, first, rest) { return dashes.join('') + first + rest.join('');},
-        peg$c166 = function(val, u) { return [u, val]; },
-        peg$c167 = function(val) { return val; },
-        peg$c168 = "%",
-        peg$c169 = { type: "literal", value: "%", description: "\"%\"" },
-        peg$c170 = function(u) {return u.join('');},
-        peg$c171 = /^[oO]/,
-        peg$c172 = { type: "class", value: "[oO]", description: "[oO]" },
-        peg$c173 = /^[rR]/,
-        peg$c174 = { type: "class", value: "[rR]", description: "[rR]" },
-        peg$c175 = /^[ ]/,
-        peg$c176 = { type: "class", value: "[ ]", description: "[ ]" },
-        peg$c177 = /^[aA]/,
-        peg$c178 = { type: "class", value: "[aA]", description: "[aA]" },
-        peg$c179 = /^[nN]/,
-        peg$c180 = { type: "class", value: "[nN]", description: "[nN]" },
-        peg$c181 = /^[dD]/,
-        peg$c182 = { type: "class", value: "[dD]", description: "[dD]" },
-        peg$c183 = /^[0-9]/,
-        peg$c184 = { type: "class", value: "[0-9]", description: "[0-9]" },
-        peg$c185 = function(digits) { return g.integer(digits); },
-        peg$c186 = /^[\-+]/,
-        peg$c187 = { type: "class", value: "[\\-+]", description: "[\\-+]" },
-        peg$c188 = function(sign, integer) { return g.signedInteger(sign, integer); },
-        peg$c189 = ".",
-        peg$c190 = { type: "literal", value: ".", description: "\".\"" },
-        peg$c191 = function(left, right) { return parseFloat(left.join('') + "." + right.join('')); },
-        peg$c192 = function(sign, real) { return g.signedReal(sign, real); },
-        peg$c193 = { type: "any", description: "any character" },
-        peg$c194 = { type: "other", description: "whitespace" },
-        peg$c195 = /^[\t\x0B\f \xA0\uFEFF]/,
-        peg$c196 = { type: "class", value: "[\\t\\x0B\\f \\xA0\\uFEFF]", description: "[\\t\\x0B\\f \\xA0\\uFEFF]" },
-        peg$c197 = /^[\n\r\u2028\u2029]/,
-        peg$c198 = { type: "class", value: "[\\n\\r\\u2028\\u2029]", description: "[\\n\\r\\u2028\\u2029]" },
-        peg$c199 = { type: "other", description: "end of line" },
-        peg$c200 = "\n",
-        peg$c201 = { type: "literal", value: "\n", description: "\"\\n\"" },
-        peg$c202 = "\r\n",
-        peg$c203 = { type: "literal", value: "\r\n", description: "\"\\r\\n\"" },
-        peg$c204 = "\r",
-        peg$c205 = { type: "literal", value: "\r", description: "\"\\r\"" },
-        peg$c206 = "\u2028",
-        peg$c207 = { type: "literal", value: "\u2028", description: "\"\\u2028\"" },
-        peg$c208 = "\u2029",
-        peg$c209 = { type: "literal", value: "\u2029", description: "\"\\u2029\"" },
-        peg$c210 = { type: "other", description: "comment" },
-        peg$c211 = "/*",
-        peg$c212 = { type: "literal", value: "/*", description: "\"/*\"" },
-        peg$c213 = "*/",
-        peg$c214 = { type: "literal", value: "*/", description: "\"*/\"" },
-        peg$c215 = "//",
-        peg$c216 = { type: "literal", value: "//", description: "\"//\"" },
-        peg$c217 = function(ctx, sel) {
+        peg$c157 = /^["']/,
+        peg$c158 = { type: "class", value: "[\"']", description: "[\"']" },
+        peg$c159 = /^[^"']/,
+        peg$c160 = { type: "class", value: "[^\"']", description: "[^\"']" },
+        peg$c161 = function(string) {return string.join('');},
+        peg$c162 = /^[a-zA-Z0-9#.\-_$]/,
+        peg$c163 = { type: "class", value: "[a-zA-Z0-9#.\\-_$]", description: "[a-zA-Z0-9#.\\-_$]" },
+        peg$c164 = /^[a-zA-Z]/,
+        peg$c165 = { type: "class", value: "[a-zA-Z]", description: "[a-zA-Z]" },
+        peg$c166 = /^[a-zA-Z0-9\-_]/,
+        peg$c167 = { type: "class", value: "[a-zA-Z0-9\\-_]", description: "[a-zA-Z0-9\\-_]" },
+        peg$c168 = function(first, rest) { return first + rest.join('');},
+        peg$c169 = /^[\-]/,
+        peg$c170 = { type: "class", value: "[\\-]", description: "[\\-]" },
+        peg$c171 = function(dashes, first, rest) { return dashes.join('') + first + rest.join('');},
+        peg$c172 = function(val, u) { return [u, val]; },
+        peg$c173 = function(val) { return val; },
+        peg$c174 = function(u) {return u.join('');},
+        peg$c175 = /^[oO]/,
+        peg$c176 = { type: "class", value: "[oO]", description: "[oO]" },
+        peg$c177 = /^[rR]/,
+        peg$c178 = { type: "class", value: "[rR]", description: "[rR]" },
+        peg$c179 = /^[ ]/,
+        peg$c180 = { type: "class", value: "[ ]", description: "[ ]" },
+        peg$c181 = /^[aA]/,
+        peg$c182 = { type: "class", value: "[aA]", description: "[aA]" },
+        peg$c183 = /^[nN]/,
+        peg$c184 = { type: "class", value: "[nN]", description: "[nN]" },
+        peg$c185 = /^[dD]/,
+        peg$c186 = { type: "class", value: "[dD]", description: "[dD]" },
+        peg$c187 = /^[0-9]/,
+        peg$c188 = { type: "class", value: "[0-9]", description: "[0-9]" },
+        peg$c189 = function(digits) { return g.integer(digits); },
+        peg$c190 = /^[\-+]/,
+        peg$c191 = { type: "class", value: "[\\-+]", description: "[\\-+]" },
+        peg$c192 = function(sign, integer) { return g.signedInteger(sign, integer); },
+        peg$c193 = ".",
+        peg$c194 = { type: "literal", value: ".", description: "\".\"" },
+        peg$c195 = function(left, right) { return parseFloat(left.join('') + "." + right.join('')); },
+        peg$c196 = function(sign, real) { return g.signedReal(sign, real); },
+        peg$c197 = { type: "any", description: "any character" },
+        peg$c198 = { type: "other", description: "whitespace" },
+        peg$c199 = /^[\t\x0B\f \xA0\uFEFF]/,
+        peg$c200 = { type: "class", value: "[\\t\\x0B\\f \\xA0\\uFEFF]", description: "[\\t\\x0B\\f \\xA0\\uFEFF]" },
+        peg$c201 = /^[\n\r\u2028\u2029]/,
+        peg$c202 = { type: "class", value: "[\\n\\r\\u2028\\u2029]", description: "[\\n\\r\\u2028\\u2029]" },
+        peg$c203 = { type: "other", description: "end of line" },
+        peg$c204 = "\n",
+        peg$c205 = { type: "literal", value: "\n", description: "\"\\n\"" },
+        peg$c206 = "\r\n",
+        peg$c207 = { type: "literal", value: "\r\n", description: "\"\\r\\n\"" },
+        peg$c208 = "\r",
+        peg$c209 = { type: "literal", value: "\r", description: "\"\\r\"" },
+        peg$c210 = "\u2028",
+        peg$c211 = { type: "literal", value: "\u2028", description: "\"\\u2028\"" },
+        peg$c212 = "\u2029",
+        peg$c213 = { type: "literal", value: "\u2029", description: "\"\\u2029\"" },
+        peg$c214 = { type: "other", description: "comment" },
+        peg$c215 = "/*",
+        peg$c216 = { type: "literal", value: "/*", description: "\"/*\"" },
+        peg$c217 = "*/",
+        peg$c218 = { type: "literal", value: "*/", description: "\"*/\"" },
+        peg$c219 = "//",
+        peg$c220 = { type: "literal", value: "//", description: "\"//\"" },
+        peg$c221 = function(ctx, sel) {
             if (!(ctx[0] instanceof Array)) {ctx = [ctx];}
             if (sel[0] instanceof Array){ctx.push([sel]);} else {ctx.push([sel]);}     
             return ctx;
           },
-        peg$c218 = function(left) {return left;},
-        peg$c219 = function(sel) {return sel;},
-        peg$c220 = function(head, tail) { return g.createSelectorCommaCommand(head, tail); },
-        peg$c221 = function(filters) { if (filters.length === 1 ) {return filters[0];} return filters;},
-        peg$c222 = { type: "other", description: "NoParanSelector" },
-        peg$c223 = { type: "other", description: "SimpleSelector" },
-        peg$c224 = function(c) {return [c]},
-        peg$c225 = { type: "other", description: "Combinator" },
-        peg$c226 = /^[><+~!]/,
-        peg$c227 = { type: "class", value: "[><+~!]", description: "[><+~!]" },
-        peg$c228 = function(c) {return c.join('');},
-        peg$c229 = /^[^{,)]/,
-        peg$c230 = { type: "class", value: "[^{,)]", description: "[^{,)]" },
-        peg$c231 = function() {return " "},
-        peg$c232 = function(splats, postfix) {
+        peg$c222 = function(left) {return left;},
+        peg$c223 = function(sel) {return sel;},
+        peg$c224 = function(head, tail) { return g.createSelectorCommaCommand(head, tail); },
+        peg$c225 = function(filters) { if (filters.length === 1 ) {return filters[0];} return filters;},
+        peg$c226 = { type: "other", description: "NoParanSelector" },
+        peg$c227 = { type: "other", description: "SimpleSelector" },
+        peg$c228 = function(c) {return [c]},
+        peg$c229 = { type: "other", description: "Combinator" },
+        peg$c230 = /^[><+~!]/,
+        peg$c231 = { type: "class", value: "[><+~!]", description: "[><+~!]" },
+        peg$c232 = function(c) {return c.join('');},
+        peg$c233 = /^[^{,)]/,
+        peg$c234 = { type: "class", value: "[^{,)]", description: "[^{,)]" },
+        peg$c235 = function() {return " "},
+        peg$c236 = function(splats, postfix) {
               return {splats:splats,postfix:postfix.join("")};
             },
-        peg$c233 = { type: "other", description: "Splat" },
-        peg$c234 = function(prefix, o) {
+        peg$c237 = { type: "other", description: "Splat" },
+        peg$c238 = function(prefix, o) {
                o.prefix = prefix.join("");
                return o;
              },
-        peg$c235 = { type: "other", description: "Range" },
-        peg$c236 = "...",
-        peg$c237 = { type: "literal", value: "...", description: "\"...\"" },
-        peg$c238 = function(from, to) {
+        peg$c239 = { type: "other", description: "Range" },
+        peg$c240 = "...",
+        peg$c241 = { type: "literal", value: "...", description: "\"...\"" },
+        peg$c242 = function(from, to) {
               from = Number(from.join(''));
               to   = Number(to.join(''));
               return {from:from,to:to}
             },
-        peg$c239 = function(char) {return char},
-        peg$c240 = /^["]/,
-        peg$c241 = { type: "class", value: "[\"]", description: "[\"]" },
-        peg$c242 = function(name) {return g.splatifyIfNeeded('virtual',name);},
-        peg$c243 = /^[^"]/,
-        peg$c244 = { type: "class", value: "[^\"]", description: "[^\"]" },
-        peg$c245 = function(name) {return name.join("");},
-        peg$c246 = function(name) {return ["tag",name];},
-        peg$c247 = function() {return ["tag", "*"];},
-        peg$c248 = "#",
-        peg$c249 = { type: "literal", value: "#", description: "\"#\"" },
-        peg$c250 = function(name) {return g.splatifyIfNeeded('#',name);},
-        peg$c251 = function(name) {return g.splatifyIfNeeded('.',name);},
-        peg$c252 = function(name) {return [name];},
-        peg$c253 = "$",
-        peg$c254 = { type: "literal", value: "$", description: "\"$\"" },
-        peg$c255 = function() {return ["$"];},
-        peg$c256 = "&",
-        peg$c257 = { type: "literal", value: "&", description: "\"&\"" },
-        peg$c258 = /^[^&]/,
-        peg$c259 = { type: "class", value: "[^&]", description: "[^&]" },
-        peg$c260 = function() {return ["&"];},
-        peg$c261 = "^",
-        peg$c262 = { type: "literal", value: "^", description: "\"^\"" },
-        peg$c263 = function(ups) {
+        peg$c243 = function(char) {return char},
+        peg$c244 = /^["]/,
+        peg$c245 = { type: "class", value: "[\"]", description: "[\"]" },
+        peg$c246 = function(name) {return g.splatifyIfNeeded('virtual',name);},
+        peg$c247 = /^[^"]/,
+        peg$c248 = { type: "class", value: "[^\"]", description: "[^\"]" },
+        peg$c249 = function(name) {return name.join("");},
+        peg$c250 = function(name) {return ["tag",name];},
+        peg$c251 = function() {return ["tag", "*"];},
+        peg$c252 = "#",
+        peg$c253 = { type: "literal", value: "#", description: "\"#\"" },
+        peg$c254 = function(name) {return g.splatifyIfNeeded('#',name);},
+        peg$c255 = function(name) {return g.splatifyIfNeeded('.',name);},
+        peg$c256 = function(name) {return [name];},
+        peg$c257 = "$",
+        peg$c258 = { type: "literal", value: "$", description: "\"$\"" },
+        peg$c259 = function() {return ["$"];},
+        peg$c260 = "&",
+        peg$c261 = { type: "literal", value: "&", description: "\"&\"" },
+        peg$c262 = /^[^&]/,
+        peg$c263 = { type: "class", value: "[^&]", description: "[^&]" },
+        peg$c264 = function() {return ["&"];},
+        peg$c265 = "^",
+        peg$c266 = { type: "literal", value: "^", description: "\"^\"" },
+        peg$c267 = function(ups) {
             var upCount = ups.length;
             if (upCount > 1) {
               return ['^', upCount];
             }
             return ['^'];
           },
-        peg$c264 = "::document",
-        peg$c265 = { type: "literal", value: "::document", description: "\"::document\"" },
-        peg$c266 = "::host",
-        peg$c267 = { type: "literal", value: "::host", description: "\"::host\"" },
-        peg$c268 = "::scope",
-        peg$c269 = { type: "literal", value: "::scope", description: "\"::scope\"" },
-        peg$c270 = "::parent",
-        peg$c271 = { type: "literal", value: "::parent", description: "\"::parent\"" },
-        peg$c272 = "::window",
-        peg$c273 = { type: "literal", value: "::window", description: "\"::window\"" },
-        peg$c274 = "::viewport",
-        peg$c275 = { type: "literal", value: "::viewport", description: "\"::viewport\"" },
-        peg$c276 = function() { return "::window"; },
-        peg$c277 = "::this",
-        peg$c278 = { type: "literal", value: "::this", description: "\"::this\"" },
-        peg$c279 = "::",
-        peg$c280 = { type: "literal", value: "::", description: "\"::\"" },
-        peg$c281 = function() { return "&"; },
-        peg$c282 = function(colons, name, option) {
+        peg$c268 = "::document",
+        peg$c269 = { type: "literal", value: "::document", description: "\"::document\"" },
+        peg$c270 = "::host",
+        peg$c271 = { type: "literal", value: "::host", description: "\"::host\"" },
+        peg$c272 = "::scope",
+        peg$c273 = { type: "literal", value: "::scope", description: "\"::scope\"" },
+        peg$c274 = "::parent",
+        peg$c275 = { type: "literal", value: "::parent", description: "\"::parent\"" },
+        peg$c276 = "::window",
+        peg$c277 = { type: "literal", value: "::window", description: "\"::window\"" },
+        peg$c278 = "::viewport",
+        peg$c279 = { type: "literal", value: "::viewport", description: "\"::viewport\"" },
+        peg$c280 = function() { return "::window"; },
+        peg$c281 = "::this",
+        peg$c282 = { type: "literal", value: "::this", description: "\"::this\"" },
+        peg$c283 = "::",
+        peg$c284 = { type: "literal", value: "::", description: "\"::\"" },
+        peg$c285 = function() { return "&"; },
+        peg$c286 = function(colons, name, option) {
             if (option) {return [colons + name, option];}
             return [colons + name];
           },
-        peg$c283 = function(option) {return option; },
-        peg$c284 = function(n) {return Number(n.join(""));},
-        peg$c285 = /^[^)]/,
-        peg$c286 = { type: "class", value: "[^)]", description: "[^)]" },
-        peg$c287 = function(string) {return string.join(""); },
-        peg$c288 = /^[^~|=!\^$&*\]]/,
-        peg$c289 = { type: "class", value: "[^~|=!\\^$&*\\]]", description: "[^~|=!\\^$&*\\]]" },
-        peg$c290 = /^[~|=!\^$&*]/,
-        peg$c291 = { type: "class", value: "[~|=!\\^$&*]", description: "[~|=!\\^$&*]" },
-        peg$c292 = /^[^\]]/,
-        peg$c293 = { type: "class", value: "[^\\]]", description: "[^\\]]" },
-        peg$c294 = function(left, op, right) {return ["["+op.join("")+"]",left.join("").trim(),right.join("").trim()]; },
-        peg$c295 = function(attr) {return ["[]",attr.join("")]; },
-        peg$c296 = /^[^0-9\-]/,
-        peg$c297 = { type: "class", value: "[^0-9\\-]", description: "[^0-9\\-]" },
-        peg$c298 = function(name) {return name.join("")},
-        peg$c299 = { type: "other", description: "Strength and Weight" },
-        peg$c300 = "!",
-        peg$c301 = { type: "literal", value: "!", description: "\"!\"" },
-        peg$c302 = function(strength, weight) {
+        peg$c287 = function(option) {return option; },
+        peg$c288 = function(n) {return Number(n.join(""));},
+        peg$c289 = /^[^)]/,
+        peg$c290 = { type: "class", value: "[^)]", description: "[^)]" },
+        peg$c291 = function(string) {return string.join(""); },
+        peg$c292 = /^[^~|=!\^$&*\]]/,
+        peg$c293 = { type: "class", value: "[^~|=!\\^$&*\\]]", description: "[^~|=!\\^$&*\\]]" },
+        peg$c294 = /^[~|=!\^$&*]/,
+        peg$c295 = { type: "class", value: "[~|=!\\^$&*]", description: "[~|=!\\^$&*]" },
+        peg$c296 = /^[^\]]/,
+        peg$c297 = { type: "class", value: "[^\\]]", description: "[^\\]]" },
+        peg$c298 = function(left, op, right) {return ["["+op.join("")+"]",left.join("").trim(),right.join("").trim()]; },
+        peg$c299 = function(attr) {return ["[]",attr.join("")]; },
+        peg$c300 = /^[^0-9\-]/,
+        peg$c301 = { type: "class", value: "[^0-9\\-]", description: "[^0-9\\-]" },
+        peg$c302 = function(name) {return name.join("")},
+        peg$c303 = { type: "other", description: "Strength and Weight" },
+        peg$c304 = "!",
+        peg$c305 = { type: "literal", value: "!", description: "\"!\"" },
+        peg$c306 = function(strength, weight) {
             return g.strengthAndWeight().valid(strength, weight);
           },
-        peg$c303 = function() {
+        peg$c307 = function() {
             return g.strengthAndWeight().invalid();
           },
-        peg$c304 = function(weight) { return Number(weight.join('')); },
-        peg$c305 = "required",
-        peg$c306 = { type: "literal", value: "required", description: "\"required\"" },
-        peg$c307 = "REQUIRED",
-        peg$c308 = { type: "literal", value: "REQUIRED", description: "\"REQUIRED\"" },
-        peg$c309 = "Required",
-        peg$c310 = { type: "literal", value: "Required", description: "\"Required\"" },
-        peg$c311 = function() { return "require"; },
-        peg$c312 = "require",
-        peg$c313 = { type: "literal", value: "require", description: "\"require\"" },
-        peg$c314 = "REQUIRE",
-        peg$c315 = { type: "literal", value: "REQUIRE", description: "\"REQUIRE\"" },
-        peg$c316 = "Require",
-        peg$c317 = { type: "literal", value: "Require", description: "\"Require\"" },
-        peg$c318 = "strong",
-        peg$c319 = { type: "literal", value: "strong", description: "\"strong\"" },
-        peg$c320 = "STRONG",
-        peg$c321 = { type: "literal", value: "STRONG", description: "\"STRONG\"" },
-        peg$c322 = "Strong",
-        peg$c323 = { type: "literal", value: "Strong", description: "\"Strong\"" },
-        peg$c324 = function() { return "strong"; },
-        peg$c325 = "medium",
-        peg$c326 = { type: "literal", value: "medium", description: "\"medium\"" },
-        peg$c327 = "MEDIUM",
-        peg$c328 = { type: "literal", value: "MEDIUM", description: "\"MEDIUM\"" },
-        peg$c329 = "Medium",
-        peg$c330 = { type: "literal", value: "Medium", description: "\"Medium\"" },
-        peg$c331 = function() { return "medium"; },
-        peg$c332 = "weak",
-        peg$c333 = { type: "literal", value: "weak", description: "\"weak\"" },
-        peg$c334 = "WEAK",
-        peg$c335 = { type: "literal", value: "WEAK", description: "\"WEAK\"" },
-        peg$c336 = "Weak",
-        peg$c337 = { type: "literal", value: "Weak", description: "\"Weak\"" },
-        peg$c338 = function() { return "weak"; },
-        peg$c339 = /^[a-zA-Z\-_]/,
-        peg$c340 = { type: "class", value: "[a-zA-Z\\-_]", description: "[a-zA-Z\\-_]" },
-        peg$c341 = function(strength) { return strength.join('').toLowerCase(); },
-        peg$c342 = "-gss-virtual",
-        peg$c343 = { type: "literal", value: "-gss-virtual", description: "\"-gss-virtual\"" },
-        peg$c344 = "virtual",
-        peg$c345 = { type: "literal", value: "virtual", description: "\"virtual\"" },
-        peg$c346 = function(names) {
+        peg$c308 = function(weight) { return Number(weight.join('')); },
+        peg$c309 = "required",
+        peg$c310 = { type: "literal", value: "required", description: "\"required\"" },
+        peg$c311 = "REQUIRED",
+        peg$c312 = { type: "literal", value: "REQUIRED", description: "\"REQUIRED\"" },
+        peg$c313 = "Required",
+        peg$c314 = { type: "literal", value: "Required", description: "\"Required\"" },
+        peg$c315 = function() { return "require"; },
+        peg$c316 = "require",
+        peg$c317 = { type: "literal", value: "require", description: "\"require\"" },
+        peg$c318 = "REQUIRE",
+        peg$c319 = { type: "literal", value: "REQUIRE", description: "\"REQUIRE\"" },
+        peg$c320 = "Require",
+        peg$c321 = { type: "literal", value: "Require", description: "\"Require\"" },
+        peg$c322 = "strong",
+        peg$c323 = { type: "literal", value: "strong", description: "\"strong\"" },
+        peg$c324 = "STRONG",
+        peg$c325 = { type: "literal", value: "STRONG", description: "\"STRONG\"" },
+        peg$c326 = "Strong",
+        peg$c327 = { type: "literal", value: "Strong", description: "\"Strong\"" },
+        peg$c328 = function() { return "strong"; },
+        peg$c329 = "medium",
+        peg$c330 = { type: "literal", value: "medium", description: "\"medium\"" },
+        peg$c331 = "MEDIUM",
+        peg$c332 = { type: "literal", value: "MEDIUM", description: "\"MEDIUM\"" },
+        peg$c333 = "Medium",
+        peg$c334 = { type: "literal", value: "Medium", description: "\"Medium\"" },
+        peg$c335 = function() { return "medium"; },
+        peg$c336 = "weak",
+        peg$c337 = { type: "literal", value: "weak", description: "\"weak\"" },
+        peg$c338 = "WEAK",
+        peg$c339 = { type: "literal", value: "WEAK", description: "\"WEAK\"" },
+        peg$c340 = "Weak",
+        peg$c341 = { type: "literal", value: "Weak", description: "\"Weak\"" },
+        peg$c342 = function() { return "weak"; },
+        peg$c343 = /^[a-zA-Z\-_]/,
+        peg$c344 = { type: "class", value: "[a-zA-Z\\-_]", description: "[a-zA-Z\\-_]" },
+        peg$c345 = function(strength) { return strength.join('').toLowerCase(); },
+        peg$c346 = "-gss-virtual",
+        peg$c347 = { type: "literal", value: "-gss-virtual", description: "\"-gss-virtual\"" },
+        peg$c348 = "virtual",
+        peg$c349 = { type: "literal", value: "virtual", description: "\"virtual\"" },
+        peg$c350 = function(names) {
             return g.virtualElement(names);
           },
-        peg$c347 = "\"",
-        peg$c348 = { type: "literal", value: "\"", description: "\"\\\"\"" },
-        peg$c349 = function(name) {
+        peg$c351 = "\"",
+        peg$c352 = { type: "literal", value: "\"", description: "\"\\\"\"" },
+        peg$c353 = function(name) {
             return name.join('');
           },
-        peg$c350 = function(variables) {
+        peg$c354 = function(variables) {
               return g.stay(variables);
             },
-        peg$c351 = function(variable) { return g.stayVariable(variable); },
-        peg$c352 = "@-gss-stay",
-        peg$c353 = { type: "literal", value: "@-gss-stay", description: "\"@-gss-stay\"" },
-        peg$c354 = "@stay",
-        peg$c355 = { type: "literal", value: "@stay", description: "\"@stay\"" },
+        peg$c355 = function(variable) { return g.stayVariable(variable); },
+        peg$c356 = "@-gss-stay",
+        peg$c357 = { type: "literal", value: "@-gss-stay", description: "\"@-gss-stay\"" },
+        peg$c358 = "@stay",
+        peg$c359 = { type: "literal", value: "@stay", description: "\"@stay\"" },
 
         peg$currPos          = 0,
         peg$reportedPos      = 0,
@@ -11015,7 +11021,7 @@ module.exports = (function() {
     function peg$parseFuncParam() {
       var s0;
 
-      s0 = peg$parseFunctions();
+      s0 = peg$parseUnaryOperation();
       if (s0 === peg$FAILED) {
         s0 = peg$parseAndOrExpression();
         if (s0 === peg$FAILED) {
@@ -11122,86 +11128,236 @@ module.exports = (function() {
       return s0;
     }
 
+    function peg$parseUnaryOperation() {
+      var s0, s1, s2, s3;
+
+      s0 = peg$currPos;
+      s1 = peg$parseUnaryOperator();
+      if (s1 !== peg$FAILED) {
+        s2 = peg$parse__();
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parseAndOrExpression();
+          if (s3 !== peg$FAILED) {
+            peg$reportedPos = s0;
+            s1 = peg$c129(s1, s3);
+            s0 = s1;
+          } else {
+            peg$currPos = s0;
+            s0 = peg$c0;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$c0;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$c0;
+      }
+
+      return s0;
+    }
+
+    function peg$parseUnaryOperator() {
+      var s0, s1;
+
+      s0 = peg$currPos;
+      if (input.substr(peg$currPos, 2) === peg$c130) {
+        s1 = peg$c130;
+        peg$currPos += 2;
+      } else {
+        s1 = peg$FAILED;
+        if (peg$silentFails === 0) { peg$fail(peg$c131); }
+      }
+      if (s1 === peg$FAILED) {
+        if (input.charCodeAt(peg$currPos) === 42) {
+          s1 = peg$c105;
+          peg$currPos++;
+        } else {
+          s1 = peg$FAILED;
+          if (peg$silentFails === 0) { peg$fail(peg$c106); }
+        }
+        if (s1 === peg$FAILED) {
+          if (input.charCodeAt(peg$currPos) === 43) {
+            s1 = peg$c99;
+            peg$currPos++;
+          } else {
+            s1 = peg$FAILED;
+            if (peg$silentFails === 0) { peg$fail(peg$c100); }
+          }
+          if (s1 === peg$FAILED) {
+            if (input.charCodeAt(peg$currPos) === 47) {
+              s1 = peg$c108;
+              peg$currPos++;
+            } else {
+              s1 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c109); }
+            }
+            if (s1 === peg$FAILED) {
+              if (input.substr(peg$currPos, 2) === peg$c79) {
+                s1 = peg$c79;
+                peg$currPos += 2;
+              } else {
+                s1 = peg$FAILED;
+                if (peg$silentFails === 0) { peg$fail(peg$c80); }
+              }
+              if (s1 === peg$FAILED) {
+                if (input.substr(peg$currPos, 2) === peg$c88) {
+                  s1 = peg$c88;
+                  peg$currPos += 2;
+                } else {
+                  s1 = peg$FAILED;
+                  if (peg$silentFails === 0) { peg$fail(peg$c89); }
+                }
+                if (s1 === peg$FAILED) {
+                  if (input.substr(peg$currPos, 2) === peg$c90) {
+                    s1 = peg$c90;
+                    peg$currPos += 2;
+                  } else {
+                    s1 = peg$FAILED;
+                    if (peg$silentFails === 0) { peg$fail(peg$c91); }
+                  }
+                  if (s1 === peg$FAILED) {
+                    if (input.substr(peg$currPos, 2) === peg$c83) {
+                      s1 = peg$c83;
+                      peg$currPos += 2;
+                    } else {
+                      s1 = peg$FAILED;
+                      if (peg$silentFails === 0) { peg$fail(peg$c84); }
+                    }
+                    if (s1 === peg$FAILED) {
+                      if (input.substr(peg$currPos, 2) === peg$c85) {
+                        s1 = peg$c85;
+                        peg$currPos += 2;
+                      } else {
+                        s1 = peg$FAILED;
+                        if (peg$silentFails === 0) { peg$fail(peg$c86); }
+                      }
+                      if (s1 === peg$FAILED) {
+                        if (input.charCodeAt(peg$currPos) === 61) {
+                          s1 = peg$c72;
+                          peg$currPos++;
+                        } else {
+                          s1 = peg$FAILED;
+                          if (peg$silentFails === 0) { peg$fail(peg$c73); }
+                        }
+                        if (s1 === peg$FAILED) {
+                          if (input.charCodeAt(peg$currPos) === 62) {
+                            s1 = peg$c96;
+                            peg$currPos++;
+                          } else {
+                            s1 = peg$FAILED;
+                            if (peg$silentFails === 0) { peg$fail(peg$c97); }
+                          }
+                          if (s1 === peg$FAILED) {
+                            if (input.charCodeAt(peg$currPos) === 60) {
+                              s1 = peg$c93;
+                              peg$currPos++;
+                            } else {
+                              s1 = peg$FAILED;
+                              if (peg$silentFails === 0) { peg$fail(peg$c94); }
+                            }
+                            if (s1 === peg$FAILED) {
+                              if (input.charCodeAt(peg$currPos) === 37) {
+                                s1 = peg$c132;
+                                peg$currPos++;
+                              } else {
+                                s1 = peg$FAILED;
+                                if (peg$silentFails === 0) { peg$fail(peg$c133); }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      if (s1 !== peg$FAILED) {
+        peg$reportedPos = s0;
+        s1 = peg$c134(s1);
+      }
+      s0 = s1;
+
+      return s0;
+    }
+
     function peg$parsePrimaryExpression() {
       var s0, s1, s2, s3;
 
-      s0 = peg$parseUnitVar();
+      s0 = peg$parseFunctions();
       if (s0 === peg$FAILED) {
-        s0 = peg$parseVar();
+        s0 = peg$parseUnitVar();
         if (s0 === peg$FAILED) {
-          s0 = peg$parseLiteral();
+          s0 = peg$parseVar();
           if (s0 === peg$FAILED) {
-            s0 = peg$parseString();
+            s0 = peg$parseLiteral();
             if (s0 === peg$FAILED) {
-              s0 = peg$currPos;
-              if (input.substr(peg$currPos, 4) === peg$c129) {
-                s1 = peg$c129;
-                peg$currPos += 4;
-              } else {
-                s1 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c130); }
-              }
-              if (s1 !== peg$FAILED) {
-                peg$reportedPos = s0;
-                s1 = peg$c131();
-              }
-              s0 = s1;
+              s0 = peg$parseString();
               if (s0 === peg$FAILED) {
                 s0 = peg$currPos;
-                if (input.substr(peg$currPos, 5) === peg$c132) {
-                  s1 = peg$c132;
-                  peg$currPos += 5;
+                if (input.substr(peg$currPos, 4) === peg$c135) {
+                  s1 = peg$c135;
+                  peg$currPos += 4;
                 } else {
                   s1 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c133); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c136); }
                 }
                 if (s1 !== peg$FAILED) {
                   peg$reportedPos = s0;
-                  s1 = peg$c134();
+                  s1 = peg$c137();
                 }
                 s0 = s1;
                 if (s0 === peg$FAILED) {
                   s0 = peg$currPos;
-                  if (input.substr(peg$currPos, 4) === peg$c135) {
-                    s1 = peg$c135;
-                    peg$currPos += 4;
+                  if (input.substr(peg$currPos, 5) === peg$c138) {
+                    s1 = peg$c138;
+                    peg$currPos += 5;
                   } else {
                     s1 = peg$FAILED;
-                    if (peg$silentFails === 0) { peg$fail(peg$c136); }
+                    if (peg$silentFails === 0) { peg$fail(peg$c139); }
                   }
                   if (s1 !== peg$FAILED) {
                     peg$reportedPos = s0;
-                    s1 = peg$c137();
+                    s1 = peg$c140();
                   }
                   s0 = s1;
                   if (s0 === peg$FAILED) {
                     s0 = peg$currPos;
-                    if (input.substr(peg$currPos, 9) === peg$c138) {
-                      s1 = peg$c138;
-                      peg$currPos += 9;
+                    if (input.substr(peg$currPos, 4) === peg$c141) {
+                      s1 = peg$c141;
+                      peg$currPos += 4;
                     } else {
                       s1 = peg$FAILED;
-                      if (peg$silentFails === 0) { peg$fail(peg$c139); }
+                      if (peg$silentFails === 0) { peg$fail(peg$c142); }
                     }
                     if (s1 !== peg$FAILED) {
                       peg$reportedPos = s0;
-                      s1 = peg$c140();
+                      s1 = peg$c143();
                     }
                     s0 = s1;
                     if (s0 === peg$FAILED) {
                       s0 = peg$currPos;
-                      s1 = peg$parseParanExpression();
+                      if (input.substr(peg$currPos, 9) === peg$c144) {
+                        s1 = peg$c144;
+                        peg$currPos += 9;
+                      } else {
+                        s1 = peg$FAILED;
+                        if (peg$silentFails === 0) { peg$fail(peg$c145); }
+                      }
                       if (s1 !== peg$FAILED) {
-                        s2 = [];
-                        if (input.charCodeAt(peg$currPos) === 32) {
-                          s3 = peg$c111;
-                          peg$currPos++;
-                        } else {
-                          s3 = peg$FAILED;
-                          if (peg$silentFails === 0) { peg$fail(peg$c112); }
-                        }
-                        while (s3 !== peg$FAILED) {
-                          s2.push(s3);
+                        peg$reportedPos = s0;
+                        s1 = peg$c146();
+                      }
+                      s0 = s1;
+                      if (s0 === peg$FAILED) {
+                        s0 = peg$currPos;
+                        s1 = peg$parseParanExpression();
+                        if (s1 !== peg$FAILED) {
+                          s2 = [];
                           if (input.charCodeAt(peg$currPos) === 32) {
                             s3 = peg$c111;
                             peg$currPos++;
@@ -11209,13 +11365,26 @@ module.exports = (function() {
                             s3 = peg$FAILED;
                             if (peg$silentFails === 0) { peg$fail(peg$c112); }
                           }
-                        }
-                        if (s2 !== peg$FAILED) {
-                          s3 = peg$parseUnit();
-                          if (s3 !== peg$FAILED) {
-                            peg$reportedPos = s0;
-                            s1 = peg$c141(s1, s3);
-                            s0 = s1;
+                          while (s3 !== peg$FAILED) {
+                            s2.push(s3);
+                            if (input.charCodeAt(peg$currPos) === 32) {
+                              s3 = peg$c111;
+                              peg$currPos++;
+                            } else {
+                              s3 = peg$FAILED;
+                              if (peg$silentFails === 0) { peg$fail(peg$c112); }
+                            }
+                          }
+                          if (s2 !== peg$FAILED) {
+                            s3 = peg$parseUnit();
+                            if (s3 !== peg$FAILED) {
+                              peg$reportedPos = s0;
+                              s1 = peg$c147(s1, s3);
+                              s0 = s1;
+                            } else {
+                              peg$currPos = s0;
+                              s0 = peg$c0;
+                            }
                           } else {
                             peg$currPos = s0;
                             s0 = peg$c0;
@@ -11224,12 +11393,9 @@ module.exports = (function() {
                           peg$currPos = s0;
                           s0 = peg$c0;
                         }
-                      } else {
-                        peg$currPos = s0;
-                        s0 = peg$c0;
-                      }
-                      if (s0 === peg$FAILED) {
-                        s0 = peg$parseParanExpression();
+                        if (s0 === peg$FAILED) {
+                          s0 = peg$parseParanExpression();
+                        }
                       }
                     }
                   }
@@ -11270,7 +11436,7 @@ module.exports = (function() {
               }
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c142(s3);
+                s1 = peg$c148(s3);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -11328,7 +11494,7 @@ module.exports = (function() {
           s3 = peg$parseUnit();
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c143(s1, s3);
+            s1 = peg$c149(s1, s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -11368,11 +11534,11 @@ module.exports = (function() {
         }
         if (s2 !== peg$FAILED) {
           if (input.charCodeAt(peg$currPos) === 91) {
-            s3 = peg$c145;
+            s3 = peg$c151;
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c146); }
+            if (peg$silentFails === 0) { peg$fail(peg$c152); }
           }
           if (s3 !== peg$FAILED) {
             s4 = [];
@@ -11387,15 +11553,15 @@ module.exports = (function() {
             }
             if (s4 !== peg$FAILED) {
               if (input.charCodeAt(peg$currPos) === 93) {
-                s5 = peg$c147;
+                s5 = peg$c153;
                 peg$currPos++;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c148); }
+                if (peg$silentFails === 0) { peg$fail(peg$c154); }
               }
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c149(s1, s2, s4);
+                s1 = peg$c155(s1, s2, s4);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -11427,7 +11593,7 @@ module.exports = (function() {
           s2 = peg$parseUnBracketedVarChars();
           if (s2 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c150(s1, s2);
+            s1 = peg$c156(s1, s2);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -11441,7 +11607,7 @@ module.exports = (function() {
       peg$silentFails--;
       if (s0 === peg$FAILED) {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c144); }
+        if (peg$silentFails === 0) { peg$fail(peg$c150); }
       }
 
       return s0;
@@ -11451,43 +11617,43 @@ module.exports = (function() {
       var s0, s1, s2, s3;
 
       s0 = peg$currPos;
-      if (peg$c151.test(input.charAt(peg$currPos))) {
+      if (peg$c157.test(input.charAt(peg$currPos))) {
         s1 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c152); }
+        if (peg$silentFails === 0) { peg$fail(peg$c158); }
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
-        if (peg$c153.test(input.charAt(peg$currPos))) {
+        if (peg$c159.test(input.charAt(peg$currPos))) {
           s3 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s3 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c154); }
+          if (peg$silentFails === 0) { peg$fail(peg$c160); }
         }
         while (s3 !== peg$FAILED) {
           s2.push(s3);
-          if (peg$c153.test(input.charAt(peg$currPos))) {
+          if (peg$c159.test(input.charAt(peg$currPos))) {
             s3 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c154); }
+            if (peg$silentFails === 0) { peg$fail(peg$c160); }
           }
         }
         if (s2 !== peg$FAILED) {
-          if (peg$c151.test(input.charAt(peg$currPos))) {
+          if (peg$c157.test(input.charAt(peg$currPos))) {
             s3 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c152); }
+            if (peg$silentFails === 0) { peg$fail(peg$c158); }
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c155(s2);
+            s1 = peg$c161(s2);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -11508,12 +11674,12 @@ module.exports = (function() {
     function peg$parseBracketedVarChars() {
       var s0;
 
-      if (peg$c156.test(input.charAt(peg$currPos))) {
+      if (peg$c162.test(input.charAt(peg$currPos))) {
         s0 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c157); }
+        if (peg$silentFails === 0) { peg$fail(peg$c163); }
       }
 
       return s0;
@@ -11523,35 +11689,35 @@ module.exports = (function() {
       var s0, s1, s2, s3, s4;
 
       s0 = peg$currPos;
-      if (peg$c158.test(input.charAt(peg$currPos))) {
+      if (peg$c164.test(input.charAt(peg$currPos))) {
         s1 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c159); }
+        if (peg$silentFails === 0) { peg$fail(peg$c165); }
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
-        if (peg$c160.test(input.charAt(peg$currPos))) {
+        if (peg$c166.test(input.charAt(peg$currPos))) {
           s3 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s3 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c161); }
+          if (peg$silentFails === 0) { peg$fail(peg$c167); }
         }
         while (s3 !== peg$FAILED) {
           s2.push(s3);
-          if (peg$c160.test(input.charAt(peg$currPos))) {
+          if (peg$c166.test(input.charAt(peg$currPos))) {
             s3 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c161); }
+            if (peg$silentFails === 0) { peg$fail(peg$c167); }
           }
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c162(s1, s2);
+          s1 = peg$c168(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -11564,53 +11730,53 @@ module.exports = (function() {
       if (s0 === peg$FAILED) {
         s0 = peg$currPos;
         s1 = [];
-        if (peg$c163.test(input.charAt(peg$currPos))) {
+        if (peg$c169.test(input.charAt(peg$currPos))) {
           s2 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s2 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c164); }
+          if (peg$silentFails === 0) { peg$fail(peg$c170); }
         }
         if (s2 !== peg$FAILED) {
           while (s2 !== peg$FAILED) {
             s1.push(s2);
-            if (peg$c163.test(input.charAt(peg$currPos))) {
+            if (peg$c169.test(input.charAt(peg$currPos))) {
               s2 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s2 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c164); }
+              if (peg$silentFails === 0) { peg$fail(peg$c170); }
             }
           }
         } else {
           s1 = peg$c0;
         }
         if (s1 !== peg$FAILED) {
-          if (peg$c158.test(input.charAt(peg$currPos))) {
+          if (peg$c164.test(input.charAt(peg$currPos))) {
             s2 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c159); }
+            if (peg$silentFails === 0) { peg$fail(peg$c165); }
           }
           if (s2 !== peg$FAILED) {
             s3 = [];
-            if (peg$c160.test(input.charAt(peg$currPos))) {
+            if (peg$c166.test(input.charAt(peg$currPos))) {
               s4 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s4 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c161); }
+              if (peg$silentFails === 0) { peg$fail(peg$c167); }
             }
             if (s4 !== peg$FAILED) {
               while (s4 !== peg$FAILED) {
                 s3.push(s4);
-                if (peg$c160.test(input.charAt(peg$currPos))) {
+                if (peg$c166.test(input.charAt(peg$currPos))) {
                   s4 = input.charAt(peg$currPos);
                   peg$currPos++;
                 } else {
                   s4 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c161); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c167); }
                 }
               }
             } else {
@@ -11618,7 +11784,7 @@ module.exports = (function() {
             }
             if (s3 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c165(s1, s2, s3);
+              s1 = peg$c171(s1, s2, s3);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -11663,7 +11829,7 @@ module.exports = (function() {
         s2 = peg$parseUnit();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c166(s1, s2);
+          s1 = peg$c172(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -11678,7 +11844,7 @@ module.exports = (function() {
         s1 = peg$parseNumeric();
         if (s1 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c167(s1);
+          s1 = peg$c173(s1);
         }
         s0 = s1;
       }
@@ -11690,11 +11856,11 @@ module.exports = (function() {
       var s0, s1, s2, s3;
 
       if (input.charCodeAt(peg$currPos) === 37) {
-        s0 = peg$c168;
+        s0 = peg$c132;
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c169); }
+        if (peg$silentFails === 0) { peg$fail(peg$c133); }
       }
       if (s0 === peg$FAILED) {
         s0 = peg$currPos;
@@ -11724,7 +11890,7 @@ module.exports = (function() {
           }
           if (s2 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c170(s2);
+            s1 = peg$c174(s2);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -11774,28 +11940,28 @@ module.exports = (function() {
         s3 = peg$currPos;
         peg$silentFails++;
         s4 = peg$currPos;
-        if (peg$c171.test(input.charAt(peg$currPos))) {
+        if (peg$c175.test(input.charAt(peg$currPos))) {
           s5 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s5 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c172); }
+          if (peg$silentFails === 0) { peg$fail(peg$c176); }
         }
         if (s5 !== peg$FAILED) {
-          if (peg$c173.test(input.charAt(peg$currPos))) {
+          if (peg$c177.test(input.charAt(peg$currPos))) {
             s6 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s6 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c174); }
+            if (peg$silentFails === 0) { peg$fail(peg$c178); }
           }
           if (s6 !== peg$FAILED) {
-            if (peg$c175.test(input.charAt(peg$currPos))) {
+            if (peg$c179.test(input.charAt(peg$currPos))) {
               s7 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s7 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c176); }
+              if (peg$silentFails === 0) { peg$fail(peg$c180); }
             }
             if (s7 !== peg$FAILED) {
               s5 = [s5, s6, s7];
@@ -11832,36 +11998,36 @@ module.exports = (function() {
           s4 = peg$currPos;
           peg$silentFails++;
           s5 = peg$currPos;
-          if (peg$c177.test(input.charAt(peg$currPos))) {
+          if (peg$c181.test(input.charAt(peg$currPos))) {
             s6 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s6 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c178); }
+            if (peg$silentFails === 0) { peg$fail(peg$c182); }
           }
           if (s6 !== peg$FAILED) {
-            if (peg$c179.test(input.charAt(peg$currPos))) {
+            if (peg$c183.test(input.charAt(peg$currPos))) {
               s7 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s7 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c180); }
+              if (peg$silentFails === 0) { peg$fail(peg$c184); }
             }
             if (s7 !== peg$FAILED) {
-              if (peg$c181.test(input.charAt(peg$currPos))) {
+              if (peg$c185.test(input.charAt(peg$currPos))) {
                 s8 = input.charAt(peg$currPos);
                 peg$currPos++;
               } else {
                 s8 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c182); }
+                if (peg$silentFails === 0) { peg$fail(peg$c186); }
               }
               if (s8 !== peg$FAILED) {
-                if (peg$c175.test(input.charAt(peg$currPos))) {
+                if (peg$c179.test(input.charAt(peg$currPos))) {
                   s9 = input.charAt(peg$currPos);
                   peg$currPos++;
                 } else {
                   s9 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c176); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c180); }
                 }
                 if (s9 !== peg$FAILED) {
                   s6 = [s6, s7, s8, s9];
@@ -11937,22 +12103,22 @@ module.exports = (function() {
 
       s0 = peg$currPos;
       s1 = [];
-      if (peg$c183.test(input.charAt(peg$currPos))) {
+      if (peg$c187.test(input.charAt(peg$currPos))) {
         s2 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s2 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c184); }
+        if (peg$silentFails === 0) { peg$fail(peg$c188); }
       }
       if (s2 !== peg$FAILED) {
         while (s2 !== peg$FAILED) {
           s1.push(s2);
-          if (peg$c183.test(input.charAt(peg$currPos))) {
+          if (peg$c187.test(input.charAt(peg$currPos))) {
             s2 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c184); }
+            if (peg$silentFails === 0) { peg$fail(peg$c188); }
           }
         }
       } else {
@@ -11960,7 +12126,7 @@ module.exports = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c185(s1);
+        s1 = peg$c189(s1);
       }
       s0 = s1;
 
@@ -11971,12 +12137,12 @@ module.exports = (function() {
       var s0, s1, s2;
 
       s0 = peg$currPos;
-      if (peg$c186.test(input.charAt(peg$currPos))) {
+      if (peg$c190.test(input.charAt(peg$currPos))) {
         s1 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c187); }
+        if (peg$silentFails === 0) { peg$fail(peg$c191); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseInteger();
@@ -11985,7 +12151,7 @@ module.exports = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c188(s1, s2);
+          s1 = peg$c192(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -12004,49 +12170,49 @@ module.exports = (function() {
 
       s0 = peg$currPos;
       s1 = [];
-      if (peg$c183.test(input.charAt(peg$currPos))) {
+      if (peg$c187.test(input.charAt(peg$currPos))) {
         s2 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s2 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c184); }
+        if (peg$silentFails === 0) { peg$fail(peg$c188); }
       }
       while (s2 !== peg$FAILED) {
         s1.push(s2);
-        if (peg$c183.test(input.charAt(peg$currPos))) {
+        if (peg$c187.test(input.charAt(peg$currPos))) {
           s2 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s2 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c184); }
+          if (peg$silentFails === 0) { peg$fail(peg$c188); }
         }
       }
       if (s1 !== peg$FAILED) {
         if (input.charCodeAt(peg$currPos) === 46) {
-          s2 = peg$c189;
+          s2 = peg$c193;
           peg$currPos++;
         } else {
           s2 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c190); }
+          if (peg$silentFails === 0) { peg$fail(peg$c194); }
         }
         if (s2 !== peg$FAILED) {
           s3 = [];
-          if (peg$c183.test(input.charAt(peg$currPos))) {
+          if (peg$c187.test(input.charAt(peg$currPos))) {
             s4 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s4 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c184); }
+            if (peg$silentFails === 0) { peg$fail(peg$c188); }
           }
           if (s4 !== peg$FAILED) {
             while (s4 !== peg$FAILED) {
               s3.push(s4);
-              if (peg$c183.test(input.charAt(peg$currPos))) {
+              if (peg$c187.test(input.charAt(peg$currPos))) {
                 s4 = input.charAt(peg$currPos);
                 peg$currPos++;
               } else {
                 s4 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c184); }
+                if (peg$silentFails === 0) { peg$fail(peg$c188); }
               }
             }
           } else {
@@ -12054,7 +12220,7 @@ module.exports = (function() {
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c191(s1, s3);
+            s1 = peg$c195(s1, s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -12076,18 +12242,18 @@ module.exports = (function() {
       var s0, s1, s2;
 
       s0 = peg$currPos;
-      if (peg$c186.test(input.charAt(peg$currPos))) {
+      if (peg$c190.test(input.charAt(peg$currPos))) {
         s1 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c187); }
+        if (peg$silentFails === 0) { peg$fail(peg$c191); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseReal();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c192(s1, s2);
+          s1 = peg$c196(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -12109,7 +12275,7 @@ module.exports = (function() {
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c193); }
+        if (peg$silentFails === 0) { peg$fail(peg$c197); }
       }
 
       return s0;
@@ -12119,17 +12285,17 @@ module.exports = (function() {
       var s0, s1;
 
       peg$silentFails++;
-      if (peg$c195.test(input.charAt(peg$currPos))) {
+      if (peg$c199.test(input.charAt(peg$currPos))) {
         s0 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c196); }
+        if (peg$silentFails === 0) { peg$fail(peg$c200); }
       }
       peg$silentFails--;
       if (s0 === peg$FAILED) {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c194); }
+        if (peg$silentFails === 0) { peg$fail(peg$c198); }
       }
 
       return s0;
@@ -12138,12 +12304,12 @@ module.exports = (function() {
     function peg$parseLineTerminator() {
       var s0;
 
-      if (peg$c197.test(input.charAt(peg$currPos))) {
+      if (peg$c201.test(input.charAt(peg$currPos))) {
         s0 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c198); }
+        if (peg$silentFails === 0) { peg$fail(peg$c202); }
       }
 
       return s0;
@@ -12154,43 +12320,43 @@ module.exports = (function() {
 
       peg$silentFails++;
       if (input.charCodeAt(peg$currPos) === 10) {
-        s0 = peg$c200;
+        s0 = peg$c204;
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c201); }
+        if (peg$silentFails === 0) { peg$fail(peg$c205); }
       }
       if (s0 === peg$FAILED) {
-        if (input.substr(peg$currPos, 2) === peg$c202) {
-          s0 = peg$c202;
+        if (input.substr(peg$currPos, 2) === peg$c206) {
+          s0 = peg$c206;
           peg$currPos += 2;
         } else {
           s0 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c203); }
+          if (peg$silentFails === 0) { peg$fail(peg$c207); }
         }
         if (s0 === peg$FAILED) {
           if (input.charCodeAt(peg$currPos) === 13) {
-            s0 = peg$c204;
+            s0 = peg$c208;
             peg$currPos++;
           } else {
             s0 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c205); }
+            if (peg$silentFails === 0) { peg$fail(peg$c209); }
           }
           if (s0 === peg$FAILED) {
             if (input.charCodeAt(peg$currPos) === 8232) {
-              s0 = peg$c206;
+              s0 = peg$c210;
               peg$currPos++;
             } else {
               s0 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c207); }
+              if (peg$silentFails === 0) { peg$fail(peg$c211); }
             }
             if (s0 === peg$FAILED) {
               if (input.charCodeAt(peg$currPos) === 8233) {
-                s0 = peg$c208;
+                s0 = peg$c212;
                 peg$currPos++;
               } else {
                 s0 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c209); }
+                if (peg$silentFails === 0) { peg$fail(peg$c213); }
               }
             }
           }
@@ -12199,7 +12365,7 @@ module.exports = (function() {
       peg$silentFails--;
       if (s0 === peg$FAILED) {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c199); }
+        if (peg$silentFails === 0) { peg$fail(peg$c203); }
       }
 
       return s0;
@@ -12277,7 +12443,7 @@ module.exports = (function() {
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c193); }
+        if (peg$silentFails === 0) { peg$fail(peg$c197); }
       }
       peg$silentFails--;
       if (s1 === peg$FAILED) {
@@ -12301,7 +12467,7 @@ module.exports = (function() {
       peg$silentFails--;
       if (s0 === peg$FAILED) {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c210); }
+        if (peg$silentFails === 0) { peg$fail(peg$c214); }
       }
 
       return s0;
@@ -12311,24 +12477,24 @@ module.exports = (function() {
       var s0, s1, s2, s3, s4, s5;
 
       s0 = peg$currPos;
-      if (input.substr(peg$currPos, 2) === peg$c211) {
-        s1 = peg$c211;
+      if (input.substr(peg$currPos, 2) === peg$c215) {
+        s1 = peg$c215;
         peg$currPos += 2;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c212); }
+        if (peg$silentFails === 0) { peg$fail(peg$c216); }
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
         s3 = peg$currPos;
         s4 = peg$currPos;
         peg$silentFails++;
-        if (input.substr(peg$currPos, 2) === peg$c213) {
-          s5 = peg$c213;
+        if (input.substr(peg$currPos, 2) === peg$c217) {
+          s5 = peg$c217;
           peg$currPos += 2;
         } else {
           s5 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c214); }
+          if (peg$silentFails === 0) { peg$fail(peg$c218); }
         }
         peg$silentFails--;
         if (s5 === peg$FAILED) {
@@ -12355,12 +12521,12 @@ module.exports = (function() {
           s3 = peg$currPos;
           s4 = peg$currPos;
           peg$silentFails++;
-          if (input.substr(peg$currPos, 2) === peg$c213) {
-            s5 = peg$c213;
+          if (input.substr(peg$currPos, 2) === peg$c217) {
+            s5 = peg$c217;
             peg$currPos += 2;
           } else {
             s5 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c214); }
+            if (peg$silentFails === 0) { peg$fail(peg$c218); }
           }
           peg$silentFails--;
           if (s5 === peg$FAILED) {
@@ -12384,12 +12550,12 @@ module.exports = (function() {
           }
         }
         if (s2 !== peg$FAILED) {
-          if (input.substr(peg$currPos, 2) === peg$c213) {
-            s3 = peg$c213;
+          if (input.substr(peg$currPos, 2) === peg$c217) {
+            s3 = peg$c217;
             peg$currPos += 2;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c214); }
+            if (peg$silentFails === 0) { peg$fail(peg$c218); }
           }
           if (s3 !== peg$FAILED) {
             s1 = [s1, s2, s3];
@@ -12414,24 +12580,24 @@ module.exports = (function() {
       var s0, s1, s2, s3, s4, s5;
 
       s0 = peg$currPos;
-      if (input.substr(peg$currPos, 2) === peg$c211) {
-        s1 = peg$c211;
+      if (input.substr(peg$currPos, 2) === peg$c215) {
+        s1 = peg$c215;
         peg$currPos += 2;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c212); }
+        if (peg$silentFails === 0) { peg$fail(peg$c216); }
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
         s3 = peg$currPos;
         s4 = peg$currPos;
         peg$silentFails++;
-        if (input.substr(peg$currPos, 2) === peg$c213) {
-          s5 = peg$c213;
+        if (input.substr(peg$currPos, 2) === peg$c217) {
+          s5 = peg$c217;
           peg$currPos += 2;
         } else {
           s5 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c214); }
+          if (peg$silentFails === 0) { peg$fail(peg$c218); }
         }
         if (s5 === peg$FAILED) {
           s5 = peg$parseLineTerminator();
@@ -12461,12 +12627,12 @@ module.exports = (function() {
           s3 = peg$currPos;
           s4 = peg$currPos;
           peg$silentFails++;
-          if (input.substr(peg$currPos, 2) === peg$c213) {
-            s5 = peg$c213;
+          if (input.substr(peg$currPos, 2) === peg$c217) {
+            s5 = peg$c217;
             peg$currPos += 2;
           } else {
             s5 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c214); }
+            if (peg$silentFails === 0) { peg$fail(peg$c218); }
           }
           if (s5 === peg$FAILED) {
             s5 = peg$parseLineTerminator();
@@ -12493,12 +12659,12 @@ module.exports = (function() {
           }
         }
         if (s2 !== peg$FAILED) {
-          if (input.substr(peg$currPos, 2) === peg$c213) {
-            s3 = peg$c213;
+          if (input.substr(peg$currPos, 2) === peg$c217) {
+            s3 = peg$c217;
             peg$currPos += 2;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c214); }
+            if (peg$silentFails === 0) { peg$fail(peg$c218); }
           }
           if (s3 !== peg$FAILED) {
             s1 = [s1, s2, s3];
@@ -12523,12 +12689,12 @@ module.exports = (function() {
       var s0, s1, s2, s3, s4, s5;
 
       s0 = peg$currPos;
-      if (input.substr(peg$currPos, 2) === peg$c215) {
-        s1 = peg$c215;
+      if (input.substr(peg$currPos, 2) === peg$c219) {
+        s1 = peg$c219;
         peg$currPos += 2;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c216); }
+        if (peg$silentFails === 0) { peg$fail(peg$c220); }
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
@@ -12666,7 +12832,7 @@ module.exports = (function() {
         s2 = peg$parseSafeCSSSelector();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c217(s1, s2);
+          s1 = peg$c221(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -12685,7 +12851,7 @@ module.exports = (function() {
             s2 = peg$parse_();
             if (s2 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c218(s1);
+              s1 = peg$c222(s1);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -12728,7 +12894,7 @@ module.exports = (function() {
               }
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c219(s3);
+                s1 = peg$c223(s3);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -12836,7 +13002,7 @@ module.exports = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c220(s1, s2);
+          s1 = peg$c224(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -12869,7 +13035,7 @@ module.exports = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c221(s1);
+        s1 = peg$c225(s1);
       }
       s0 = s1;
 
@@ -12892,7 +13058,7 @@ module.exports = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c221(s1);
+        s1 = peg$c225(s1);
       }
       s0 = s1;
 
@@ -12915,7 +13081,7 @@ module.exports = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c221(s1);
+        s1 = peg$c225(s1);
       }
       s0 = s1;
 
@@ -12948,7 +13114,7 @@ module.exports = (function() {
       peg$silentFails--;
       if (s0 === peg$FAILED) {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c222); }
+        if (peg$silentFails === 0) { peg$fail(peg$c226); }
       }
 
       return s0;
@@ -12965,7 +13131,7 @@ module.exports = (function() {
       peg$silentFails--;
       if (s0 === peg$FAILED) {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c223); }
+        if (peg$silentFails === 0) { peg$fail(peg$c227); }
       }
 
       return s0;
@@ -12991,7 +13157,7 @@ module.exports = (function() {
         s1 = peg$parseCombinator();
         if (s1 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c224(s1);
+          s1 = peg$c228(s1);
         }
         s0 = s1;
       }
@@ -13007,22 +13173,22 @@ module.exports = (function() {
       s1 = peg$parse_();
       if (s1 !== peg$FAILED) {
         s2 = [];
-        if (peg$c226.test(input.charAt(peg$currPos))) {
+        if (peg$c230.test(input.charAt(peg$currPos))) {
           s3 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s3 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c227); }
+          if (peg$silentFails === 0) { peg$fail(peg$c231); }
         }
         if (s3 !== peg$FAILED) {
           while (s3 !== peg$FAILED) {
             s2.push(s3);
-            if (peg$c226.test(input.charAt(peg$currPos))) {
+            if (peg$c230.test(input.charAt(peg$currPos))) {
               s3 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s3 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c227); }
+              if (peg$silentFails === 0) { peg$fail(peg$c231); }
             }
           }
         } else {
@@ -13032,7 +13198,7 @@ module.exports = (function() {
           s3 = peg$parse_();
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c228(s2);
+            s1 = peg$c232(s2);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -13073,12 +13239,12 @@ module.exports = (function() {
         if (s1 !== peg$FAILED) {
           s2 = peg$currPos;
           peg$silentFails++;
-          if (peg$c229.test(input.charAt(peg$currPos))) {
+          if (peg$c233.test(input.charAt(peg$currPos))) {
             s3 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c230); }
+            if (peg$silentFails === 0) { peg$fail(peg$c234); }
           }
           peg$silentFails--;
           if (s3 !== peg$FAILED) {
@@ -13089,7 +13255,7 @@ module.exports = (function() {
           }
           if (s2 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c231();
+            s1 = peg$c235();
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -13103,7 +13269,7 @@ module.exports = (function() {
       peg$silentFails--;
       if (s0 === peg$FAILED) {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c225); }
+        if (peg$silentFails === 0) { peg$fail(peg$c229); }
       }
 
       return s0;
@@ -13132,7 +13298,7 @@ module.exports = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c232(s1, s2);
+          s1 = peg$c236(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -13165,7 +13331,7 @@ module.exports = (function() {
         s2 = peg$parseRange();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c234(s1, s2);
+          s1 = peg$c238(s1, s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -13178,7 +13344,7 @@ module.exports = (function() {
       peg$silentFails--;
       if (s0 === peg$FAILED) {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c233); }
+        if (peg$silentFails === 0) { peg$fail(peg$c237); }
       }
 
       return s0;
@@ -13190,53 +13356,53 @@ module.exports = (function() {
       peg$silentFails++;
       s0 = peg$currPos;
       s1 = [];
-      if (peg$c183.test(input.charAt(peg$currPos))) {
+      if (peg$c187.test(input.charAt(peg$currPos))) {
         s2 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s2 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c184); }
+        if (peg$silentFails === 0) { peg$fail(peg$c188); }
       }
       if (s2 !== peg$FAILED) {
         while (s2 !== peg$FAILED) {
           s1.push(s2);
-          if (peg$c183.test(input.charAt(peg$currPos))) {
+          if (peg$c187.test(input.charAt(peg$currPos))) {
             s2 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c184); }
+            if (peg$silentFails === 0) { peg$fail(peg$c188); }
           }
         }
       } else {
         s1 = peg$c0;
       }
       if (s1 !== peg$FAILED) {
-        if (input.substr(peg$currPos, 3) === peg$c236) {
-          s2 = peg$c236;
+        if (input.substr(peg$currPos, 3) === peg$c240) {
+          s2 = peg$c240;
           peg$currPos += 3;
         } else {
           s2 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c237); }
+          if (peg$silentFails === 0) { peg$fail(peg$c241); }
         }
         if (s2 !== peg$FAILED) {
           s3 = [];
-          if (peg$c183.test(input.charAt(peg$currPos))) {
+          if (peg$c187.test(input.charAt(peg$currPos))) {
             s4 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s4 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c184); }
+            if (peg$silentFails === 0) { peg$fail(peg$c188); }
           }
           if (s4 !== peg$FAILED) {
             while (s4 !== peg$FAILED) {
               s3.push(s4);
-              if (peg$c183.test(input.charAt(peg$currPos))) {
+              if (peg$c187.test(input.charAt(peg$currPos))) {
                 s4 = input.charAt(peg$currPos);
                 peg$currPos++;
               } else {
                 s4 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c184); }
+                if (peg$silentFails === 0) { peg$fail(peg$c188); }
               }
             }
           } else {
@@ -13244,7 +13410,7 @@ module.exports = (function() {
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c238(s1, s3);
+            s1 = peg$c242(s1, s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -13261,7 +13427,7 @@ module.exports = (function() {
       peg$silentFails--;
       if (s0 === peg$FAILED) {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c235); }
+        if (peg$silentFails === 0) { peg$fail(peg$c239); }
       }
 
       return s0;
@@ -13285,7 +13451,7 @@ module.exports = (function() {
         s2 = peg$parseSelectorNameChars();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c239(s2);
+          s1 = peg$c243(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -13303,12 +13469,12 @@ module.exports = (function() {
       var s0, s1, s2, s3;
 
       s0 = peg$currPos;
-      if (peg$c240.test(input.charAt(peg$currPos))) {
+      if (peg$c244.test(input.charAt(peg$currPos))) {
         s1 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c241); }
+        if (peg$silentFails === 0) { peg$fail(peg$c245); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseSplattedName();
@@ -13316,16 +13482,16 @@ module.exports = (function() {
           s2 = peg$parseVirtualSelName();
         }
         if (s2 !== peg$FAILED) {
-          if (peg$c240.test(input.charAt(peg$currPos))) {
+          if (peg$c244.test(input.charAt(peg$currPos))) {
             s3 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c241); }
+            if (peg$silentFails === 0) { peg$fail(peg$c245); }
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c242(s2);
+            s1 = peg$c246(s2);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -13348,22 +13514,22 @@ module.exports = (function() {
 
       s0 = peg$currPos;
       s1 = [];
-      if (peg$c243.test(input.charAt(peg$currPos))) {
+      if (peg$c247.test(input.charAt(peg$currPos))) {
         s2 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s2 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c244); }
+        if (peg$silentFails === 0) { peg$fail(peg$c248); }
       }
       if (s2 !== peg$FAILED) {
         while (s2 !== peg$FAILED) {
           s1.push(s2);
-          if (peg$c243.test(input.charAt(peg$currPos))) {
+          if (peg$c247.test(input.charAt(peg$currPos))) {
             s2 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c244); }
+            if (peg$silentFails === 0) { peg$fail(peg$c248); }
           }
         }
       } else {
@@ -13371,7 +13537,7 @@ module.exports = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c245(s1);
+        s1 = peg$c249(s1);
       }
       s0 = s1;
 
@@ -13385,7 +13551,7 @@ module.exports = (function() {
       s1 = peg$parseSelectorName();
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c246(s1);
+        s1 = peg$c250(s1);
       }
       s0 = s1;
       if (s0 === peg$FAILED) {
@@ -13399,7 +13565,7 @@ module.exports = (function() {
         }
         if (s1 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c247();
+          s1 = peg$c251();
         }
         s0 = s1;
       }
@@ -13412,11 +13578,11 @@ module.exports = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 35) {
-        s1 = peg$c248;
+        s1 = peg$c252;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c249); }
+        if (peg$silentFails === 0) { peg$fail(peg$c253); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseSplattedName();
@@ -13425,7 +13591,7 @@ module.exports = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c250(s2);
+          s1 = peg$c254(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -13444,11 +13610,11 @@ module.exports = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 46) {
-        s1 = peg$c189;
+        s1 = peg$c193;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c190); }
+        if (peg$silentFails === 0) { peg$fail(peg$c194); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseSplattedName();
@@ -13457,7 +13623,7 @@ module.exports = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c251(s2);
+          s1 = peg$c255(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -13478,7 +13644,7 @@ module.exports = (function() {
       s1 = peg$parseReservedPseudos();
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c252(s1);
+        s1 = peg$c256(s1);
       }
       s0 = s1;
 
@@ -13490,35 +13656,35 @@ module.exports = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 36) {
-        s1 = peg$c253;
+        s1 = peg$c257;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c254); }
+        if (peg$silentFails === 0) { peg$fail(peg$c258); }
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c255();
+        s1 = peg$c259();
       }
       s0 = s1;
       if (s0 === peg$FAILED) {
         s0 = peg$currPos;
         if (input.charCodeAt(peg$currPos) === 38) {
-          s1 = peg$c256;
+          s1 = peg$c260;
           peg$currPos++;
         } else {
           s1 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c257); }
+          if (peg$silentFails === 0) { peg$fail(peg$c261); }
         }
         if (s1 !== peg$FAILED) {
           s2 = peg$currPos;
           peg$silentFails++;
-          if (peg$c258.test(input.charAt(peg$currPos))) {
+          if (peg$c262.test(input.charAt(peg$currPos))) {
             s3 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c259); }
+            if (peg$silentFails === 0) { peg$fail(peg$c263); }
           }
           peg$silentFails--;
           if (s3 !== peg$FAILED) {
@@ -13529,7 +13695,7 @@ module.exports = (function() {
           }
           if (s2 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c260();
+            s1 = peg$c264();
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -13543,21 +13709,21 @@ module.exports = (function() {
           s0 = peg$currPos;
           s1 = [];
           if (input.charCodeAt(peg$currPos) === 94) {
-            s2 = peg$c261;
+            s2 = peg$c265;
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c262); }
+            if (peg$silentFails === 0) { peg$fail(peg$c266); }
           }
           if (s2 !== peg$FAILED) {
             while (s2 !== peg$FAILED) {
               s1.push(s2);
               if (input.charCodeAt(peg$currPos) === 94) {
-                s2 = peg$c261;
+                s2 = peg$c265;
                 peg$currPos++;
               } else {
                 s2 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c262); }
+                if (peg$silentFails === 0) { peg$fail(peg$c266); }
               }
             }
           } else {
@@ -13565,7 +13731,7 @@ module.exports = (function() {
           }
           if (s1 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c263(s1);
+            s1 = peg$c267(s1);
           }
           s0 = s1;
         }
@@ -13577,84 +13743,84 @@ module.exports = (function() {
     function peg$parseReservedPseudos() {
       var s0, s1;
 
-      if (input.substr(peg$currPos, 10) === peg$c264) {
-        s0 = peg$c264;
+      if (input.substr(peg$currPos, 10) === peg$c268) {
+        s0 = peg$c268;
         peg$currPos += 10;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c265); }
+        if (peg$silentFails === 0) { peg$fail(peg$c269); }
       }
       if (s0 === peg$FAILED) {
-        if (input.substr(peg$currPos, 6) === peg$c266) {
-          s0 = peg$c266;
+        if (input.substr(peg$currPos, 6) === peg$c270) {
+          s0 = peg$c270;
           peg$currPos += 6;
         } else {
           s0 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c267); }
+          if (peg$silentFails === 0) { peg$fail(peg$c271); }
         }
         if (s0 === peg$FAILED) {
-          if (input.substr(peg$currPos, 7) === peg$c268) {
-            s0 = peg$c268;
+          if (input.substr(peg$currPos, 7) === peg$c272) {
+            s0 = peg$c272;
             peg$currPos += 7;
           } else {
             s0 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c269); }
+            if (peg$silentFails === 0) { peg$fail(peg$c273); }
           }
           if (s0 === peg$FAILED) {
-            if (input.substr(peg$currPos, 8) === peg$c270) {
-              s0 = peg$c270;
+            if (input.substr(peg$currPos, 8) === peg$c274) {
+              s0 = peg$c274;
               peg$currPos += 8;
             } else {
               s0 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c271); }
+              if (peg$silentFails === 0) { peg$fail(peg$c275); }
             }
           }
         }
       }
       if (s0 === peg$FAILED) {
         s0 = peg$currPos;
-        if (input.substr(peg$currPos, 8) === peg$c272) {
-          s1 = peg$c272;
+        if (input.substr(peg$currPos, 8) === peg$c276) {
+          s1 = peg$c276;
           peg$currPos += 8;
         } else {
           s1 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c273); }
+          if (peg$silentFails === 0) { peg$fail(peg$c277); }
         }
         if (s1 === peg$FAILED) {
-          if (input.substr(peg$currPos, 10) === peg$c274) {
-            s1 = peg$c274;
+          if (input.substr(peg$currPos, 10) === peg$c278) {
+            s1 = peg$c278;
             peg$currPos += 10;
           } else {
             s1 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c275); }
+            if (peg$silentFails === 0) { peg$fail(peg$c279); }
           }
         }
         if (s1 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c276();
+          s1 = peg$c280();
         }
         s0 = s1;
         if (s0 === peg$FAILED) {
           s0 = peg$currPos;
-          if (input.substr(peg$currPos, 6) === peg$c277) {
-            s1 = peg$c277;
+          if (input.substr(peg$currPos, 6) === peg$c281) {
+            s1 = peg$c281;
             peg$currPos += 6;
           } else {
             s1 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c278); }
+            if (peg$silentFails === 0) { peg$fail(peg$c282); }
           }
           if (s1 === peg$FAILED) {
-            if (input.substr(peg$currPos, 2) === peg$c279) {
-              s1 = peg$c279;
+            if (input.substr(peg$currPos, 2) === peg$c283) {
+              s1 = peg$c283;
               peg$currPos += 2;
             } else {
               s1 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c280); }
+              if (peg$silentFails === 0) { peg$fail(peg$c284); }
             }
           }
           if (s1 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c281();
+            s1 = peg$c285();
           }
           s0 = s1;
         }
@@ -13667,12 +13833,12 @@ module.exports = (function() {
       var s0, s1, s2, s3;
 
       s0 = peg$currPos;
-      if (input.substr(peg$currPos, 2) === peg$c279) {
-        s1 = peg$c279;
+      if (input.substr(peg$currPos, 2) === peg$c283) {
+        s1 = peg$c283;
         peg$currPos += 2;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c280); }
+        if (peg$silentFails === 0) { peg$fail(peg$c284); }
       }
       if (s1 === peg$FAILED) {
         if (input.charCodeAt(peg$currPos) === 58) {
@@ -13692,7 +13858,7 @@ module.exports = (function() {
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c282(s1, s2, s3);
+            s1 = peg$c286(s1, s2, s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -13737,7 +13903,7 @@ module.exports = (function() {
               }
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c283(s3);
+                s1 = peg$c287(s3);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -13780,7 +13946,7 @@ module.exports = (function() {
             }
             if (s3 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c137();
+              s1 = peg$c143();
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -13804,22 +13970,22 @@ module.exports = (function() {
 
       s0 = peg$currPos;
       s1 = [];
-      if (peg$c183.test(input.charAt(peg$currPos))) {
+      if (peg$c187.test(input.charAt(peg$currPos))) {
         s2 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s2 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c184); }
+        if (peg$silentFails === 0) { peg$fail(peg$c188); }
       }
       if (s2 !== peg$FAILED) {
         while (s2 !== peg$FAILED) {
           s1.push(s2);
-          if (peg$c183.test(input.charAt(peg$currPos))) {
+          if (peg$c187.test(input.charAt(peg$currPos))) {
             s2 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c184); }
+            if (peg$silentFails === 0) { peg$fail(peg$c188); }
           }
         }
       } else {
@@ -13827,7 +13993,7 @@ module.exports = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c284(s1);
+        s1 = peg$c288(s1);
       }
       s0 = s1;
       if (s0 === peg$FAILED) {
@@ -13835,22 +14001,22 @@ module.exports = (function() {
         if (s0 === peg$FAILED) {
           s0 = peg$currPos;
           s1 = [];
-          if (peg$c285.test(input.charAt(peg$currPos))) {
+          if (peg$c289.test(input.charAt(peg$currPos))) {
             s2 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c286); }
+            if (peg$silentFails === 0) { peg$fail(peg$c290); }
           }
           if (s2 !== peg$FAILED) {
             while (s2 !== peg$FAILED) {
               s1.push(s2);
-              if (peg$c285.test(input.charAt(peg$currPos))) {
+              if (peg$c289.test(input.charAt(peg$currPos))) {
                 s2 = input.charAt(peg$currPos);
                 peg$currPos++;
               } else {
                 s2 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c286); }
+                if (peg$silentFails === 0) { peg$fail(peg$c290); }
               }
             }
           } else {
@@ -13858,7 +14024,7 @@ module.exports = (function() {
           }
           if (s1 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c287(s1);
+            s1 = peg$c291(s1);
           }
           s0 = s1;
         }
@@ -13872,30 +14038,30 @@ module.exports = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 91) {
-        s1 = peg$c145;
+        s1 = peg$c151;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c146); }
+        if (peg$silentFails === 0) { peg$fail(peg$c152); }
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
-        if (peg$c288.test(input.charAt(peg$currPos))) {
+        if (peg$c292.test(input.charAt(peg$currPos))) {
           s3 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s3 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c289); }
+          if (peg$silentFails === 0) { peg$fail(peg$c293); }
         }
         if (s3 !== peg$FAILED) {
           while (s3 !== peg$FAILED) {
             s2.push(s3);
-            if (peg$c288.test(input.charAt(peg$currPos))) {
+            if (peg$c292.test(input.charAt(peg$currPos))) {
               s3 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s3 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c289); }
+              if (peg$silentFails === 0) { peg$fail(peg$c293); }
             }
           }
         } else {
@@ -13903,22 +14069,22 @@ module.exports = (function() {
         }
         if (s2 !== peg$FAILED) {
           s3 = [];
-          if (peg$c290.test(input.charAt(peg$currPos))) {
+          if (peg$c294.test(input.charAt(peg$currPos))) {
             s4 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s4 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c291); }
+            if (peg$silentFails === 0) { peg$fail(peg$c295); }
           }
           if (s4 !== peg$FAILED) {
             while (s4 !== peg$FAILED) {
               s3.push(s4);
-              if (peg$c290.test(input.charAt(peg$currPos))) {
+              if (peg$c294.test(input.charAt(peg$currPos))) {
                 s4 = input.charAt(peg$currPos);
                 peg$currPos++;
               } else {
                 s4 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c291); }
+                if (peg$silentFails === 0) { peg$fail(peg$c295); }
               }
             }
           } else {
@@ -13926,22 +14092,22 @@ module.exports = (function() {
           }
           if (s3 !== peg$FAILED) {
             s4 = [];
-            if (peg$c292.test(input.charAt(peg$currPos))) {
+            if (peg$c296.test(input.charAt(peg$currPos))) {
               s5 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s5 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c293); }
+              if (peg$silentFails === 0) { peg$fail(peg$c297); }
             }
             if (s5 !== peg$FAILED) {
               while (s5 !== peg$FAILED) {
                 s4.push(s5);
-                if (peg$c292.test(input.charAt(peg$currPos))) {
+                if (peg$c296.test(input.charAt(peg$currPos))) {
                   s5 = input.charAt(peg$currPos);
                   peg$currPos++;
                 } else {
                   s5 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c293); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c297); }
                 }
               }
             } else {
@@ -13949,15 +14115,15 @@ module.exports = (function() {
             }
             if (s4 !== peg$FAILED) {
               if (input.charCodeAt(peg$currPos) === 93) {
-                s5 = peg$c147;
+                s5 = peg$c153;
                 peg$currPos++;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c148); }
+                if (peg$silentFails === 0) { peg$fail(peg$c154); }
               }
               if (s5 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c294(s2, s3, s4);
+                s1 = peg$c298(s2, s3, s4);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -13982,30 +14148,30 @@ module.exports = (function() {
       if (s0 === peg$FAILED) {
         s0 = peg$currPos;
         if (input.charCodeAt(peg$currPos) === 91) {
-          s1 = peg$c145;
+          s1 = peg$c151;
           peg$currPos++;
         } else {
           s1 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c146); }
+          if (peg$silentFails === 0) { peg$fail(peg$c152); }
         }
         if (s1 !== peg$FAILED) {
           s2 = [];
-          if (peg$c292.test(input.charAt(peg$currPos))) {
+          if (peg$c296.test(input.charAt(peg$currPos))) {
             s3 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c293); }
+            if (peg$silentFails === 0) { peg$fail(peg$c297); }
           }
           if (s3 !== peg$FAILED) {
             while (s3 !== peg$FAILED) {
               s2.push(s3);
-              if (peg$c292.test(input.charAt(peg$currPos))) {
+              if (peg$c296.test(input.charAt(peg$currPos))) {
                 s3 = input.charAt(peg$currPos);
                 peg$currPos++;
               } else {
                 s3 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c293); }
+                if (peg$silentFails === 0) { peg$fail(peg$c297); }
               }
             }
           } else {
@@ -14013,15 +14179,15 @@ module.exports = (function() {
           }
           if (s2 !== peg$FAILED) {
             if (input.charCodeAt(peg$currPos) === 93) {
-              s3 = peg$c147;
+              s3 = peg$c153;
               peg$currPos++;
             } else {
               s3 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c148); }
+              if (peg$silentFails === 0) { peg$fail(peg$c154); }
             }
             if (s3 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c295(s2);
+              s1 = peg$c299(s2);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -14046,12 +14212,12 @@ module.exports = (function() {
       s0 = peg$currPos;
       s1 = peg$currPos;
       peg$silentFails++;
-      if (peg$c296.test(input.charAt(peg$currPos))) {
+      if (peg$c300.test(input.charAt(peg$currPos))) {
         s2 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s2 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c297); }
+        if (peg$silentFails === 0) { peg$fail(peg$c301); }
       }
       peg$silentFails--;
       if (s2 !== peg$FAILED) {
@@ -14073,7 +14239,7 @@ module.exports = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c298(s2);
+          s1 = peg$c302(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -14090,12 +14256,12 @@ module.exports = (function() {
     function peg$parseSelectorNameChars() {
       var s0;
 
-      if (peg$c160.test(input.charAt(peg$currPos))) {
+      if (peg$c166.test(input.charAt(peg$currPos))) {
         s0 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c161); }
+        if (peg$silentFails === 0) { peg$fail(peg$c167); }
       }
 
       return s0;
@@ -14107,11 +14273,11 @@ module.exports = (function() {
       peg$silentFails++;
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 33) {
-        s1 = peg$c300;
+        s1 = peg$c304;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c301); }
+        if (peg$silentFails === 0) { peg$fail(peg$c305); }
       }
       if (s1 !== peg$FAILED) {
         s2 = peg$parseStrength();
@@ -14122,7 +14288,7 @@ module.exports = (function() {
           }
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c302(s2, s3);
+            s1 = peg$c306(s2, s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -14139,11 +14305,11 @@ module.exports = (function() {
       if (s0 === peg$FAILED) {
         s0 = peg$currPos;
         if (input.charCodeAt(peg$currPos) === 33) {
-          s1 = peg$c300;
+          s1 = peg$c304;
           peg$currPos++;
         } else {
           s1 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c301); }
+          if (peg$silentFails === 0) { peg$fail(peg$c305); }
         }
         if (s1 !== peg$FAILED) {
           if (input.length > peg$currPos) {
@@ -14151,14 +14317,14 @@ module.exports = (function() {
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c193); }
+            if (peg$silentFails === 0) { peg$fail(peg$c197); }
           }
           if (s2 === peg$FAILED) {
             s2 = peg$c20;
           }
           if (s2 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c303();
+            s1 = peg$c307();
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -14172,7 +14338,7 @@ module.exports = (function() {
       peg$silentFails--;
       if (s0 === peg$FAILED) {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c299); }
+        if (peg$silentFails === 0) { peg$fail(peg$c303); }
       }
 
       return s0;
@@ -14183,22 +14349,22 @@ module.exports = (function() {
 
       s0 = peg$currPos;
       s1 = [];
-      if (peg$c183.test(input.charAt(peg$currPos))) {
+      if (peg$c187.test(input.charAt(peg$currPos))) {
         s2 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s2 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c184); }
+        if (peg$silentFails === 0) { peg$fail(peg$c188); }
       }
       if (s2 !== peg$FAILED) {
         while (s2 !== peg$FAILED) {
           s1.push(s2);
-          if (peg$c183.test(input.charAt(peg$currPos))) {
+          if (peg$c187.test(input.charAt(peg$currPos))) {
             s2 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c184); }
+            if (peg$silentFails === 0) { peg$fail(peg$c188); }
           }
         }
       } else {
@@ -14206,7 +14372,7 @@ module.exports = (function() {
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c304(s1);
+        s1 = peg$c308(s1);
       }
       s0 = s1;
 
@@ -14217,183 +14383,183 @@ module.exports = (function() {
       var s0, s1, s2;
 
       s0 = peg$currPos;
-      if (input.substr(peg$currPos, 8) === peg$c305) {
-        s1 = peg$c305;
+      if (input.substr(peg$currPos, 8) === peg$c309) {
+        s1 = peg$c309;
         peg$currPos += 8;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c306); }
+        if (peg$silentFails === 0) { peg$fail(peg$c310); }
       }
       if (s1 === peg$FAILED) {
-        if (input.substr(peg$currPos, 8) === peg$c307) {
-          s1 = peg$c307;
+        if (input.substr(peg$currPos, 8) === peg$c311) {
+          s1 = peg$c311;
           peg$currPos += 8;
         } else {
           s1 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c308); }
+          if (peg$silentFails === 0) { peg$fail(peg$c312); }
         }
         if (s1 === peg$FAILED) {
-          if (input.substr(peg$currPos, 8) === peg$c309) {
-            s1 = peg$c309;
+          if (input.substr(peg$currPos, 8) === peg$c313) {
+            s1 = peg$c313;
             peg$currPos += 8;
           } else {
             s1 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c310); }
+            if (peg$silentFails === 0) { peg$fail(peg$c314); }
           }
         }
       }
       if (s1 !== peg$FAILED) {
         peg$reportedPos = s0;
-        s1 = peg$c311();
+        s1 = peg$c315();
       }
       s0 = s1;
       if (s0 === peg$FAILED) {
         s0 = peg$currPos;
-        if (input.substr(peg$currPos, 7) === peg$c312) {
-          s1 = peg$c312;
+        if (input.substr(peg$currPos, 7) === peg$c316) {
+          s1 = peg$c316;
           peg$currPos += 7;
         } else {
           s1 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c313); }
+          if (peg$silentFails === 0) { peg$fail(peg$c317); }
         }
         if (s1 === peg$FAILED) {
-          if (input.substr(peg$currPos, 7) === peg$c314) {
-            s1 = peg$c314;
-            peg$currPos += 7;
-          } else {
-            s1 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c315); }
-          }
-          if (s1 === peg$FAILED) {
-            if (input.substr(peg$currPos, 7) === peg$c316) {
-              s1 = peg$c316;
-              peg$currPos += 7;
-            } else {
-              s1 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c317); }
-            }
-          }
-        }
-        if (s1 !== peg$FAILED) {
-          peg$reportedPos = s0;
-          s1 = peg$c311();
-        }
-        s0 = s1;
-        if (s0 === peg$FAILED) {
-          s0 = peg$currPos;
-          if (input.substr(peg$currPos, 6) === peg$c318) {
+          if (input.substr(peg$currPos, 7) === peg$c318) {
             s1 = peg$c318;
-            peg$currPos += 6;
+            peg$currPos += 7;
           } else {
             s1 = peg$FAILED;
             if (peg$silentFails === 0) { peg$fail(peg$c319); }
           }
           if (s1 === peg$FAILED) {
-            if (input.substr(peg$currPos, 6) === peg$c320) {
+            if (input.substr(peg$currPos, 7) === peg$c320) {
               s1 = peg$c320;
-              peg$currPos += 6;
+              peg$currPos += 7;
             } else {
               s1 = peg$FAILED;
               if (peg$silentFails === 0) { peg$fail(peg$c321); }
             }
+          }
+        }
+        if (s1 !== peg$FAILED) {
+          peg$reportedPos = s0;
+          s1 = peg$c315();
+        }
+        s0 = s1;
+        if (s0 === peg$FAILED) {
+          s0 = peg$currPos;
+          if (input.substr(peg$currPos, 6) === peg$c322) {
+            s1 = peg$c322;
+            peg$currPos += 6;
+          } else {
+            s1 = peg$FAILED;
+            if (peg$silentFails === 0) { peg$fail(peg$c323); }
+          }
+          if (s1 === peg$FAILED) {
+            if (input.substr(peg$currPos, 6) === peg$c324) {
+              s1 = peg$c324;
+              peg$currPos += 6;
+            } else {
+              s1 = peg$FAILED;
+              if (peg$silentFails === 0) { peg$fail(peg$c325); }
+            }
             if (s1 === peg$FAILED) {
-              if (input.substr(peg$currPos, 6) === peg$c322) {
-                s1 = peg$c322;
+              if (input.substr(peg$currPos, 6) === peg$c326) {
+                s1 = peg$c326;
                 peg$currPos += 6;
               } else {
                 s1 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c323); }
+                if (peg$silentFails === 0) { peg$fail(peg$c327); }
               }
             }
           }
           if (s1 !== peg$FAILED) {
             peg$reportedPos = s0;
-            s1 = peg$c324();
+            s1 = peg$c328();
           }
           s0 = s1;
           if (s0 === peg$FAILED) {
             s0 = peg$currPos;
-            if (input.substr(peg$currPos, 6) === peg$c325) {
-              s1 = peg$c325;
+            if (input.substr(peg$currPos, 6) === peg$c329) {
+              s1 = peg$c329;
               peg$currPos += 6;
             } else {
               s1 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c326); }
+              if (peg$silentFails === 0) { peg$fail(peg$c330); }
             }
             if (s1 === peg$FAILED) {
-              if (input.substr(peg$currPos, 6) === peg$c327) {
-                s1 = peg$c327;
+              if (input.substr(peg$currPos, 6) === peg$c331) {
+                s1 = peg$c331;
                 peg$currPos += 6;
               } else {
                 s1 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c328); }
+                if (peg$silentFails === 0) { peg$fail(peg$c332); }
               }
               if (s1 === peg$FAILED) {
-                if (input.substr(peg$currPos, 6) === peg$c329) {
-                  s1 = peg$c329;
+                if (input.substr(peg$currPos, 6) === peg$c333) {
+                  s1 = peg$c333;
                   peg$currPos += 6;
                 } else {
                   s1 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c330); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c334); }
                 }
               }
             }
             if (s1 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c331();
+              s1 = peg$c335();
             }
             s0 = s1;
             if (s0 === peg$FAILED) {
               s0 = peg$currPos;
-              if (input.substr(peg$currPos, 4) === peg$c332) {
-                s1 = peg$c332;
+              if (input.substr(peg$currPos, 4) === peg$c336) {
+                s1 = peg$c336;
                 peg$currPos += 4;
               } else {
                 s1 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c333); }
+                if (peg$silentFails === 0) { peg$fail(peg$c337); }
               }
               if (s1 === peg$FAILED) {
-                if (input.substr(peg$currPos, 4) === peg$c334) {
-                  s1 = peg$c334;
+                if (input.substr(peg$currPos, 4) === peg$c338) {
+                  s1 = peg$c338;
                   peg$currPos += 4;
                 } else {
                   s1 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c335); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c339); }
                 }
                 if (s1 === peg$FAILED) {
-                  if (input.substr(peg$currPos, 4) === peg$c336) {
-                    s1 = peg$c336;
+                  if (input.substr(peg$currPos, 4) === peg$c340) {
+                    s1 = peg$c340;
                     peg$currPos += 4;
                   } else {
                     s1 = peg$FAILED;
-                    if (peg$silentFails === 0) { peg$fail(peg$c337); }
+                    if (peg$silentFails === 0) { peg$fail(peg$c341); }
                   }
                 }
               }
               if (s1 !== peg$FAILED) {
                 peg$reportedPos = s0;
-                s1 = peg$c338();
+                s1 = peg$c342();
               }
               s0 = s1;
               if (s0 === peg$FAILED) {
                 s0 = peg$currPos;
                 s1 = [];
-                if (peg$c339.test(input.charAt(peg$currPos))) {
+                if (peg$c343.test(input.charAt(peg$currPos))) {
                   s2 = input.charAt(peg$currPos);
                   peg$currPos++;
                 } else {
                   s2 = peg$FAILED;
-                  if (peg$silentFails === 0) { peg$fail(peg$c340); }
+                  if (peg$silentFails === 0) { peg$fail(peg$c344); }
                 }
                 if (s2 !== peg$FAILED) {
                   while (s2 !== peg$FAILED) {
                     s1.push(s2);
-                    if (peg$c339.test(input.charAt(peg$currPos))) {
+                    if (peg$c343.test(input.charAt(peg$currPos))) {
                       s2 = input.charAt(peg$currPos);
                       peg$currPos++;
                     } else {
                       s2 = peg$FAILED;
-                      if (peg$silentFails === 0) { peg$fail(peg$c340); }
+                      if (peg$silentFails === 0) { peg$fail(peg$c344); }
                     }
                   }
                 } else {
@@ -14401,7 +14567,7 @@ module.exports = (function() {
                 }
                 if (s1 !== peg$FAILED) {
                   peg$reportedPos = s0;
-                  s1 = peg$c341(s1);
+                  s1 = peg$c345(s1);
                 }
                 s0 = s1;
               }
@@ -14425,20 +14591,20 @@ module.exports = (function() {
         if (peg$silentFails === 0) { peg$fail(peg$c42); }
       }
       if (s1 !== peg$FAILED) {
-        if (input.substr(peg$currPos, 12) === peg$c342) {
-          s2 = peg$c342;
+        if (input.substr(peg$currPos, 12) === peg$c346) {
+          s2 = peg$c346;
           peg$currPos += 12;
         } else {
           s2 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c343); }
+          if (peg$silentFails === 0) { peg$fail(peg$c347); }
         }
         if (s2 === peg$FAILED) {
-          if (input.substr(peg$currPos, 7) === peg$c344) {
-            s2 = peg$c344;
+          if (input.substr(peg$currPos, 7) === peg$c348) {
+            s2 = peg$c348;
             peg$currPos += 7;
           } else {
             s2 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c345); }
+            if (peg$silentFails === 0) { peg$fail(peg$c349); }
           }
         }
         if (s2 !== peg$FAILED) {
@@ -14456,7 +14622,7 @@ module.exports = (function() {
             }
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c346(s4);
+              s1 = peg$c350(s4);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -14483,30 +14649,30 @@ module.exports = (function() {
 
       s0 = peg$currPos;
       if (input.charCodeAt(peg$currPos) === 34) {
-        s1 = peg$c347;
+        s1 = peg$c351;
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c348); }
+        if (peg$silentFails === 0) { peg$fail(peg$c352); }
       }
       if (s1 !== peg$FAILED) {
         s2 = [];
-        if (peg$c243.test(input.charAt(peg$currPos))) {
+        if (peg$c247.test(input.charAt(peg$currPos))) {
           s3 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s3 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c244); }
+          if (peg$silentFails === 0) { peg$fail(peg$c248); }
         }
         if (s3 !== peg$FAILED) {
           while (s3 !== peg$FAILED) {
             s2.push(s3);
-            if (peg$c243.test(input.charAt(peg$currPos))) {
+            if (peg$c247.test(input.charAt(peg$currPos))) {
               s3 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s3 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c244); }
+              if (peg$silentFails === 0) { peg$fail(peg$c248); }
             }
           }
         } else {
@@ -14514,17 +14680,17 @@ module.exports = (function() {
         }
         if (s2 !== peg$FAILED) {
           if (input.charCodeAt(peg$currPos) === 34) {
-            s3 = peg$c347;
+            s3 = peg$c351;
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c348); }
+            if (peg$silentFails === 0) { peg$fail(peg$c352); }
           }
           if (s3 !== peg$FAILED) {
             s4 = peg$parse__();
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c349(s2);
+              s1 = peg$c353(s2);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -14564,7 +14730,7 @@ module.exports = (function() {
         }
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
-          s1 = peg$c350(s2);
+          s1 = peg$c354(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -14600,7 +14766,7 @@ module.exports = (function() {
             }
             if (s4 !== peg$FAILED) {
               peg$reportedPos = s0;
-              s1 = peg$c351(s2);
+              s1 = peg$c355(s2);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -14625,20 +14791,20 @@ module.exports = (function() {
     function peg$parseStayStart() {
       var s0;
 
-      if (input.substr(peg$currPos, 10) === peg$c352) {
-        s0 = peg$c352;
+      if (input.substr(peg$currPos, 10) === peg$c356) {
+        s0 = peg$c356;
         peg$currPos += 10;
       } else {
         s0 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c353); }
+        if (peg$silentFails === 0) { peg$fail(peg$c357); }
       }
       if (s0 === peg$FAILED) {
-        if (input.substr(peg$currPos, 5) === peg$c354) {
-          s0 = peg$c354;
+        if (input.substr(peg$currPos, 5) === peg$c358) {
+          s0 = peg$c358;
           peg$currPos += 5;
         } else {
           s0 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c355); }
+          if (peg$silentFails === 0) { peg$fail(peg$c359); }
         }
       }
 
@@ -14888,7 +15054,7 @@ _buffer2dExpansion = function(node, commands, buffer) {
 
 _unpackRuleset2dConstraints = function(node, commands, buffer) {
   var constraint, i, _i, _len, _ref, _results;
-  _ref = commands.slice(0, +node.length + 1 || 9e9);
+  _ref = commands.slice(0, +commands.length + 1 || 9e9);
   _results = [];
   for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
     constraint = _ref[i];
@@ -23272,6 +23438,44 @@ Document = (function(superClass) {
       return this.Matrix.rst(this.get(id, 'rotate-x') || 0, this.get(id, 'rotate-y') || 0, this.get(id, 'rotate-z') || 0, (ref = this.get(id, 'scale-x')) != null ? ref : 1, (ref1 = this.get(id, 'scale-y')) != null ? ref1 : 1, (ref2 = this.get(id, 'scale-z')) != null ? ref2 : 1, this.get(id, 'translate-x') || 0, this.get(id, 'translate-y') || 0, this.get(id, 'translate-z') || 0);
     };
 
+    Document.prototype.Output.prototype.StyleAssignment = Document.prototype.Output.prototype.Assignment.extend({
+      signature: [
+        [
+          {
+            object: ['Query', 'Selector']
+          }
+        ], {
+          property: ['String'],
+          value: ['Any']
+        }
+      ],
+      log: function() {},
+      unlog: function() {},
+      advices: [
+        function(engine, operation, command) {
+          var parent, rule;
+          parent = operation;
+          rule = void 0;
+          while (parent.parent) {
+            if (!rule && parent[0] === 'rule') {
+              rule = parent;
+            }
+            parent = parent.parent;
+          }
+          operation.index || (operation.index = parent.assignments = (parent.assignments || 0) + 1);
+          if (rule) {
+            (rule.properties || (rule.properties = [])).push(operation.index);
+          }
+        }
+      ]
+    }, {
+      'set': function(object, property, value, engine, operation, continuation, scope) {
+        if (typeof engine.setStyle === "function") {
+          engine.setStyle(object || scope, property, value, continuation, operation);
+        }
+      }
+    });
+
     return Output;
 
   })(Engine.prototype.Output);
@@ -23623,7 +23827,7 @@ Document = (function(superClass) {
   };
 
   Document.prototype.setStyle = function(element, property, value, continuation, operation, bypass) {
-    var camel, parent, path, prop, ref;
+    var camel, parent, path, prop, ref, ruled;
     if (value == null) {
       value = '';
     }
@@ -23637,7 +23841,11 @@ Document = (function(superClass) {
     if (parent = operation) {
       while (parent.parent) {
         parent = parent.parent;
-        if (parent.command.type === 'Condition' && !parent.command.global) {
+        if (parent.command.type === 'Iterator') {
+          ruled = true;
+          debugger;
+        }
+        if (!ruled && parent.command.type === 'Condition' && !parent.command.global) {
           break;
         }
       }
@@ -25583,9 +25791,9 @@ Stylesheet = (function(superClass) {
   };
 
   Stylesheet.prototype.descend = function(engine, operation, continuation, scope, ascender, ascending) {
-    var argument, command, index, k, len;
+    var argument, command, index, j, len;
     this.users = (this.users || 0) + 1;
-    for (index = k = 0, len = operation.length; k < len; index = ++k) {
+    for (index = j = 0, len = operation.length; j < len; index = ++j) {
       argument = operation[index];
       if (argument != null ? argument.push : void 0) {
         if (argument.parent == null) {
@@ -25603,7 +25811,7 @@ Stylesheet = (function(superClass) {
   Stylesheet.CanonicalizeSelectorRegExp = new RegExp("[$][a-z0-9]+[" + Command.prototype.DESCEND + "]\\s*", "gi");
 
   Stylesheet.prototype.update = function(engine, operation, property, value, stylesheet, rule) {
-    var body, generated, i, index, j, k, l, len, needle, next, ops, other, previous, prop, ref, ref1, ref2, rules, selectors, sheet, text, watchers;
+    var body, generated, index, j, len, needle, ops, other, previous, prop, ref, rules, selectors, sheet, watchers;
     watchers = this.getWatchers(engine, stylesheet);
     if (!(sheet = stylesheet.sheet)) {
       if ((ref = stylesheet.parentNode) != null) {
@@ -25621,7 +25829,7 @@ Stylesheet = (function(superClass) {
     }
     needle = this.getOperation(operation, watchers, rule);
     previous = [];
-    for (index = k = 0, len = watchers.length; k < len; index = ++k) {
+    for (index = j = 0, len = watchers.length; j < len; index = ++j) {
       ops = watchers[index];
       if (ops) {
         other = this.getRule(watchers[ops[0]][0]);
@@ -25638,45 +25846,50 @@ Stylesheet = (function(superClass) {
     index = previous.length;
     generated = rules[index];
     if (generated && (needle !== operation.index || value === '' || (other === rule && index !== needle))) {
-      text = generated.cssText;
-      if ((i = text.indexOf(' ' + property + ':')) === -1) {
-        if ((i = text.indexOf('{' + property + ':')) === -1) {
-          i = text.indexOf(';' + property + ':');
-        } else {
-          i++;
-        }
-      } else {
-        i++;
+      generated.style[property] = value;
+      if (generated.style.length === 0) {
+        sheet.deleteRule(index);
       }
-      if (i > -1) {
-        if (!(j = text.indexOf(';', i) + 1)) {
-          j = text.length - 1;
-        }
-      } else {
-        i = j = text.length - 1;
-      }
-      if ((prop = value) !== '') {
-        prop = property + ':' + value;
-      }
-      text = text.substring(0, i) + prop + text.substring(j);
-      sheet.deleteRule(index);
-      index = sheet.insertRule(text, index);
-      next = void 0;
-      if (needle === operation.index) {
-        needle++;
-      }
-      for (index = l = ref1 = needle, ref2 = watchers.length; ref1 <= ref2 ? l < ref2 : l > ref2; index = ref1 <= ref2 ? ++l : --l) {
-        if (ops = watchers[index]) {
-          next = this.getRule(watchers[ops[0]][0]);
-          if (next !== rule) {
-            sheet.deleteRule(previous.length);
-          }
-          break;
-        }
-      }
-      if (!next) {
-        sheet.deleteRule(previous.length);
-      }
+
+      /*
+      generated.style.cssText +=  ';' + property + ':' + value
+      
+       * Replace old property
+      if (i = text.indexOf(' ' + property + ':')) == -1
+        if (i = text.indexOf('{' + property + ':')) == -1
+          i = text.indexOf(';' + property + ':')
+        else i++
+      else i++
+      
+      if i > -1
+        unless (j = text.indexOf(';', i) + 1)
+          j = text.length - 1
+      
+       * Add property
+      else
+        i = j = text.length - 1
+      
+      if (prop = value) != ''
+        prop = property + ':' + value
+      
+      text = text.substring(0, i) + prop + text.substring(j)
+      
+      sheet.deleteRule(index)
+      index = sheet.insertRule(text, index)
+      
+      next = undefined
+      if needle == operation.index
+        needle++
+      for index in [needle ... watchers.length]
+        if ops = watchers[index]
+          next = @getRule(watchers[ops[0]][0])
+          if next != rule
+            sheet.deleteRule(previous.length)
+          break
+      if !next
+        sheet.deleteRule(previous.length)
+           * Insert rule
+       */
     } else {
       body = property + ':' + value;
       selectors = this.getSelector(stylesheet, operation);
@@ -25745,11 +25958,11 @@ Stylesheet = (function(superClass) {
   };
 
   Stylesheet.prototype.getOperation = function(operation, watchers, rule) {
-    var k, len, needle, other, ref, ref1;
+    var j, len, needle, other, ref, ref1;
     needle = operation.index;
     ref = rule.properties;
-    for (k = 0, len = ref.length; k < len; k++) {
-      other = ref[k];
+    for (j = 0, len = ref.length; j < len; j++) {
+      other = ref[j];
       if ((ref1 = watchers[other]) != null ? ref1.length : void 0) {
         needle = other;
         break;
@@ -25773,15 +25986,15 @@ Stylesheet = (function(superClass) {
   };
 
   Stylesheet.remove = function(engine, continuation) {
-    var k, l, len, operation, operations, ref, stylesheet, watchers;
+    var j, k, len, operation, operations, ref, stylesheet, watchers;
     if (engine.stylesheets) {
       ref = engine.stylesheets;
-      for (k = 0, len = ref.length; k < len; k++) {
-        stylesheet = ref[k];
+      for (j = 0, len = ref.length; j < len; j++) {
+        stylesheet = ref[j];
         if (watchers = this.prototype.getWatchers(engine, stylesheet)) {
           if (operations = watchers[continuation]) {
-            for (l = operations.length - 1; l >= 0; l += -1) {
-              operation = operations[l];
+            for (k = operations.length - 1; k >= 0; k += -1) {
+              operation = operations[k];
               this.prototype.unwatch(engine, operation, continuation, stylesheet, watchers);
             }
           }
@@ -25821,14 +26034,14 @@ Stylesheet = (function(superClass) {
   };
 
   Stylesheet["export"] = function() {
-    var id, k, len, ref, ref1, rule, sheet, style, text;
+    var id, j, len, ref, ref1, rule, sheet, style, text;
     sheet = [];
     ref = engine.stylesheets;
     for (id in ref) {
       style = ref[id];
       ref1 = style.sheet.cssRules || style.sheet.rules;
-      for (k = 0, len = ref1.length; k < len; k++) {
-        rule = ref1[k];
+      for (j = 0, len = ref1.length; j < len; j++) {
+        rule = ref1[j];
         text = rule.cssText.replace(/\[matches~="(.*?)"\]/g, function(m, selector) {
           return selector.replace(/@[^↓]+/g, '').replace(/↓&/g, '').replace(/↓/g, ' ');
         });
@@ -25843,13 +26056,13 @@ Stylesheet = (function(superClass) {
   };
 
   Stylesheet.prototype.getSelectors = function(stylesheet, operation) {
-    var custom, index, k, len, parent, result, results, wrapped;
+    var custom, index, j, len, parent, result, results, wrapped;
     parent = operation;
     results = wrapped = custom = void 0;
     while (parent) {
       if (parent.command.type === 'Condition' && !parent.global) {
         if (results) {
-          for (index = k = 0, len = results.length; k < len; index = ++k) {
+          for (index = j = 0, len = results.length; j < len; index = ++j) {
             result = results[index];
             results[index] = ' ' + this.getCustomSelector(parent.command.key, result);
           }
@@ -25867,27 +26080,27 @@ Stylesheet = (function(superClass) {
   Stylesheet.empty = [''];
 
   Stylesheet.prototype.combineSelectors = function(results, operation) {
-    var index, k, l, len, len1, n, ref, ref1, result, selector, update;
+    var index, j, k, l, len, len1, ref, ref1, result, selector, update;
     if (results == null) {
       results = Stylesheet.empty;
     }
     update = [];
-    for (index = k = 0, len = results.length; k < len; index = ++k) {
+    for (index = j = 0, len = results.length; j < len; index = ++j) {
       result = results[index];
       if (operation.selectors) {
         if (result.substring(0, 12) === ' [matches~="') {
           update.push(' ' + this.getCustomSelector(result.selector, result));
         } else {
           ref = operation.selectors;
-          for (l = 0, len1 = ref.length; l < len1; l++) {
-            selector = ref[l];
+          for (k = 0, len1 = ref.length; k < len1; k++) {
+            selector = ref[k];
             update.push(selector + result);
           }
         }
       } else if (result.substring(0, 12) === ' [matches~="') {
         update.push(' ' + this.getCustomSelector(operation.command.path, result));
       } else if (operation[0] === ',') {
-        for (index = n = 1, ref1 = operation.length; n < ref1; index = n += 1) {
+        for (index = l = 1, ref1 = operation.length; l < ref1; index = l += 1) {
           update.push(this.getRuleSelector(operation[index], operation.command) + result);
         }
       } else {
@@ -25965,15 +26178,15 @@ Stylesheet = (function(superClass) {
   };
 
   Stylesheet.rematch = function(engine) {
-    var bits, element, id, index, k, l, len, len1, matches, tokens, unmatches, value, values;
+    var bits, element, id, index, j, k, len, len1, matches, tokens, unmatches, value, values;
     if (matches = engine.updating.matches) {
       for (id in matches) {
         values = matches[id];
         element = engine.identity.get(id);
         if (tokens = element.getAttribute('matches')) {
           bits = tokens.split(' ');
-          for (k = 0, len = values.length; k < len; k++) {
-            value = values[k];
+          for (j = 0, len = values.length; j < len; j++) {
+            value = values[j];
             if (bits.indexOf(value) === -1) {
               bits.push(value);
             }
@@ -25991,8 +26204,8 @@ Stylesheet = (function(superClass) {
         element = engine.identity.get(id);
         if (tokens = element.getAttribute('matches')) {
           bits = tokens.split(' ');
-          for (l = 0, len1 = values.length; l < len1; l++) {
-            value = values[l];
+          for (k = 0, len1 = values.length; k < len1; k++) {
+            value = values[k];
             if ((index = bits.indexOf(value)) === -1) {
               bits.splice(index, 1);
             }

@@ -70,8 +70,12 @@ class Stylesheet extends Command.List
     index = previous.length
     generated = rules[index]
     if generated && (needle != operation.index || value == '' || (other == rule && index != needle))
-      text = generated.cssText
-
+      generated.style[property] = value
+      if generated.style.length == 0
+        sheet.deleteRule(index)
+      ###
+      generated.style.cssText +=  ';' + property + ':' + value
+      
       # Replace old property
       if (i = text.indexOf(' ' + property + ':')) == -1
         if (i = text.indexOf('{' + property + ':')) == -1
@@ -107,6 +111,7 @@ class Stylesheet extends Command.List
       if !next
         sheet.deleteRule(previous.length)
     # Insert rule
+      ###
     
     else
       body = property + ':' + value

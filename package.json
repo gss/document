@@ -42,6 +42,8 @@
     "./vendor"
   ],
   "dependencies": {
+    "gss-parser": "git://github.com/gss/parser.git#61c4b2849e78d76b0e67b20a5abc08ce52b6c9cb",
+    "vfl-compiler": "~1.1.3",
     "gss-engine": "/Users/invizko/Sites/engine"
   }
 }
