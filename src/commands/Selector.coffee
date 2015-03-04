@@ -474,9 +474,8 @@ Selector.Reference = Selector.Element.extend
     return result
 
   # Bypasses cache and pairing
-  retrieve: (args...)->
-    args.unshift args[1][1]
-    return @execute args ...
+  retrieve: (engine, operation, continuation, scope, ascender, ascending)->
+    return @execute operation[1], engine, operation, continuation, scope, ascender, ascending
 
   reference: true
 

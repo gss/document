@@ -1336,6 +1336,9 @@ Domain = (function() {
     var i, old, op, path, stack, updated, _base, _i, _len, _ref;
     path = this.getPath(object, property);
     old = this.values[path];
+    if (value != null) {
+      value = value.valueOf();
+    }
     if (continuation) {
       _ref = stack = (_base = (this.stacks || (this.stacks = {})))[path] || (_base[path] = []);
       for (i = _i = 0, _len = _ref.length; _i < _len; i = _i += 3) {
@@ -1786,12 +1789,12 @@ Engine = (function() {
     return this;
   }
 
-  Engine.prototype.solve = function() {
+  Engine.prototype.solve = function(a, b, c, d, e, f, g) {
     var args, result, strategy, transacting;
     if (!this.transacting) {
       this.transacting = transacting = true;
     }
-    args = this.transact.apply(this, arguments);
+    args = this.transact(a, b, c, d, e, f, g);
     if (typeof args[0] === 'function') {
       if (result = args.shift().apply(this, args)) {
         this.updating.apply(result);
@@ -1835,6 +1838,7 @@ Engine = (function() {
       this.console.start(reason || (this.updated && 'Update' || 'Initialize'), arg || args);
       this.updating = new this.update;
       this.updating.start();
+      this.triggerEvent('transact', this.updating);
     }
     if (!this.running) {
       this.compile();
@@ -2025,9 +2029,6 @@ Engine = (function() {
 
   Engine.prototype.fireEvent = function(name, data, object) {
     this.triggerEvent(name, data, object);
-    if (this.scope) {
-      this.dispatchEvent(this.scope, name, data, object);
-    }
   };
 
   Engine.prototype.$events = {
@@ -4368,6 +4369,23 @@ Update.prototype = {
       solution = this.solution;
     }
     if (result !== this.solution) {
+
+      /*
+      for property in Object.keys(result)
+        if property == '$name[intrinsic-width]'
+          debugger
+        value = result[property]
+        now = (solution ||= @solution ||= {})[property]
+        if value != now
+          if Math.abs(value - now) >= 2 || last[property] != value
+            if value == now
+              debugger
+            last[property] = now
+            changes[property] = solution[property] = value
+          else
+            last[property] = value
+            solution[property] = now
+       */
       solution || (solution = this.solution || (this.solution = {}));
       for (property in result) {
         value = result[property];
@@ -5257,25 +5275,18 @@ Range.Modifier = (function(_super) {
   ];
 
   Modifier.prototype.before = function(args, domain, operation, continuation, scope, ascender, ascending) {
-    var inversed;
-    inversed = operation[0].indexOf('>') > -1;
     if (typeof args[0] !== 'number' || typeof args[1] === 'number') {
-      debugger;
-      if (inversed) {
+      if (operation[0].indexOf('>') > -1) {
         if (typeof args[1] === 'number') {
           return this.scale(args[0], args[1], null);
         } else {
           return this.scale(args[1], null, args[0]);
         }
       } else {
-        if (typeof args[1] === 'number') {
-          return this.scale(args[0], null, args[1]);
-        } else {
-          return this.scale(args[0], null, args[1]);
-        }
+        return this.scale(args[0], null, args[1]);
       }
     } else {
-      if (inversed) {
+      if (operation[0].indexOf('>') > -1) {
         return this.scale(args[1], null, args[0]);
       } else {
         return this.scale(args[1], args[0], null);
@@ -5477,9 +5488,14 @@ Range.Mapper = (function(_super) {
         return right;
       } else {
         engine.updating.ranges = true;
-        if ((left[0] != null) && (left[1] != null)) {
-          right[2] = left[0] || 0;
-          right[3] = ((_ref1 = (_ref2 = left[2]) != null ? _ref2 : left[1]) != null ? _ref1 : left) || 0;
+        if (left.push) {
+          if ((left[0] != null) && (left[1] != null)) {
+            right[2] = left[0] || 0;
+            right[3] = ((_ref1 = (_ref2 = left[2]) != null ? _ref2 : left[1]) != null ? _ref1 : left) || 0;
+          }
+        } else {
+          right[3] = right[2] = left || 0;
+          return this.valueOf.call(right);
         }
       }
     }
@@ -5562,8 +5578,8 @@ Variable.Expression = (function(_super) {
 
   Expression.prototype.signature = [
     {
-      left: ['Variable', 'Number'],
-      right: ['Variable', 'Number']
+      left: ['Variable', 'Number', 'Range'],
+      right: ['Variable', 'Number', 'Range']
     }
   ];
 
@@ -7494,10 +7510,8 @@ Document = (function(superClass) {
     Output.prototype.Percentage = Document.Measurement.Percentage;
 
     Output.prototype.pretransform = function(id) {
-      var element, ref, ref1, ref2;
-      if (element = this.identity[id]) {
-        return this.Matrix.rst(this.get(id, 'rotate-x') || 0, this.get(id, 'rotate-y') || 0, this.get(id, 'rotate-z') || 0, (ref = this.get(id, 'scale-x')) != null ? ref : 1, (ref1 = this.get(id, 'scale-y')) != null ? ref1 : 1, (ref2 = this.get(id, 'scale-z')) != null ? ref2 : 1, this.get(id, 'translate-x') || 0, this.get(id, 'translate-y') || 0, this.get(id, 'translate-z') || 0);
-      }
+      var ref, ref1, ref2;
+      return this.Matrix.rst(this.get(id, 'rotate-x') || 0, this.get(id, 'rotate-y') || 0, this.get(id, 'rotate-z') || 0, (ref = this.get(id, 'scale-x')) != null ? ref : 1, (ref1 = this.get(id, 'scale-y')) != null ? ref1 : 1, (ref2 = this.get(id, 'scale-z')) != null ? ref2 : 1, this.get(id, 'translate-x') || 0, this.get(id, 'translate-y') || 0, this.get(id, 'translate-z') || 0);
     };
 
     return Output;
@@ -8011,7 +8025,7 @@ Document = (function(superClass) {
   };
 
   Document.prototype.group = function(data) {
-    var base, base1, base2, base3, base4, base5, element, id, key, last, name, path, pretransform, pretransforms, prop, property, result, transform, transforms, value;
+    var base, base1, base2, base3, base4, id, key, last, name, path, pretransform, pretransforms, prop, property, result, transform, transforms, value;
     pretransforms = this.updating.pretransform;
     transforms = result = void 0;
     for (path in data) {
@@ -8025,14 +8039,6 @@ Document = (function(superClass) {
       if (id.charAt(0) === ':') {
         continue;
       }
-      if (!(element = this.engine.identity[id])) {
-        if (id.indexOf('"') > -1) {
-          continue;
-        }
-        if (!(element = document.getElementById(id.substring(1)))) {
-          continue;
-        }
-      }
       if (this.values[id + '[intrinsic-' + property + ']'] != null) {
         continue;
       }
@@ -8045,6 +8051,7 @@ Document = (function(superClass) {
           if (prop.task === 'pretransform') {
             pretransforms = this.updating.pretransform;
           }
+          continue;
         }
         if (property === 'transform') {
           (pretransforms || (pretransforms = {}))[id] = this.output.pretransform(id);
@@ -8054,7 +8061,11 @@ Document = (function(superClass) {
       } else {
         continue;
       }
-      ((base2 = ((base3 = (result || (result = {})))[key] || (base3[key] = {})))[id] || (base2[id] = {}))[property] = value;
+      if (id.indexOf('"') === -1) {
+        if (this.identity[id] || document.getElementById(id.substring(1))) {
+          ((base2 = ((base3 = (result || (result = {})))[key] || (base3[key] = {})))[id] || (base2[id] = {}))[property] = value;
+        }
+      }
     }
     if (pretransforms) {
       for (id in pretransforms) {
@@ -8063,7 +8074,7 @@ Document = (function(superClass) {
           pretransform = this.output.pretransform(id);
         }
         transform = (transforms != null ? transforms[id] : void 0) || this.values[id + '[transform]'];
-        ((base4 = ((base5 = (result || (result = {}))).styles || (base5.styles = {})))[id] || (base4[id] = {})).transform = pretransform && transform ? this.output.Matrix.prototype._mat4.multiply(pretransform, transform, pretransform) : pretransform || transform || null;
+        ((base4 = (result || (result = {}))).transforms || (base4.transforms = {}))[id] = pretransform && transform ? this.output.Matrix.prototype._mat4.multiply(pretransform, transform, pretransform) : pretransform || transform || null;
       }
       this.updating.pretransform = void 0;
     }
@@ -8078,31 +8089,52 @@ Document = (function(superClass) {
    */
 
   Document.prototype.assign = function(data) {
-    var changes, element, id, prop, ref, ref1, styles, value;
+    var camel, changes, element, id, positions, prop, properties, styles, transforms, value;
     if (!(changes = this.group(data))) {
       return;
     }
-    this.console.start('Apply', data);
-    ref = changes.styles;
-    for (id in ref) {
-      styles = ref[id];
-      element = this.identity[id] || document.getElementById(id.substring(1));
-      if (element.nodeType === 1) {
-        for (prop in styles) {
-          value = styles[prop];
-          this.setStyle(element, prop, value);
+    this.console.start('Apply', changes);
+    styles = changes.styles;
+    positions = changes.positions;
+    if (transforms = changes.transforms) {
+      prop = this.output.properties.transform;
+      camel = prop.camelized || 'transform';
+      for (id in transforms) {
+        value = transforms[id];
+        element = this.identity[id];
+        if ((element != null ? element.nodeType : void 0) === 1) {
+          element.style[camel] = value != null ? this.output.Matrix.prototype.format(value) : '';
+        } else {
+          if (value != null) {
+            this.output.set(id, 'final-transform', value);
+          }
+        }
+      }
+      if (!styles && !positions) {
+        this.console.end(changes);
+        return;
+      }
+    }
+    if (styles) {
+      for (id in styles) {
+        properties = styles[id];
+        element = this.identity[id] || document.getElementById(id.substring(1));
+        if (element.nodeType === 1) {
+          for (prop in properties) {
+            value = properties[prop];
+            this.setStyle(element, prop, value);
+          }
         }
       }
     }
-    if (changes.positions) {
+    if (positions) {
       this.each(this.scope, 'placehold', null, null, changes.positions);
-      ref1 = changes.positions;
-      for (id in ref1) {
-        styles = ref1[id];
+      for (id in positions) {
+        styles = positions[id];
         element = this.identity[id] || document.getElementById(id.substring(1));
-        for (prop in styles) {
-          value = styles[prop];
-          if (element.nodeType === 1) {
+        if (element.nodeType === 1) {
+          for (prop in styles) {
+            value = styles[prop];
             this.setStyle(element, prop, value);
           }
         }
@@ -8379,7 +8411,7 @@ Shorthand = (function() {
   };
 
   Shorthand.prototype.toExpressionString = function(key, operation, expression, styles) {
-    var index, l, len, m, name, ref, ref1, ref2, string, type, types;
+    var index, l, len, m, name, ref, ref1, ref2, string, type, types, value;
     if (styles == null) {
       styles = this.styles;
     }
@@ -8387,7 +8419,12 @@ Shorthand = (function() {
       case 'object':
         name = operation[0];
         if (typeof name === 'number') {
-          return styles.engine.Matrix.prototype.format(operation);
+          value = operation.valueOf();
+          if (value !== operation) {
+            return value;
+          } else {
+            return styles.engine.Matrix.prototype.format(operation);
+          }
         } else if ((ref = styles.engine.signatures[name] || styles.engine.input.signatures[name]) != null ? (ref1 = ref.Number) != null ? ref1.resolved : void 0 : void 0) {
           return this.toExpressionString(key, operation[1], true) + name;
         } else {
@@ -8518,8 +8555,7 @@ Combinators fetch new elements, while qualifiers filter them.
 var Query, Selector, div, dummy, property, ref, value,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
-  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-  slice = [].slice;
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 Query = require('gss-engine/src/Query');
 
@@ -9131,11 +9167,8 @@ Selector.Reference = Selector.Element.extend({
   after: function() {
     return result;
   },
-  retrieve: function() {
-    var args;
-    args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-    args.unshift(args[1][1]);
-    return this.execute.apply(this, args);
+  retrieve: function(engine, operation, continuation, scope, ascender, ascending) {
+    return this.execute(operation[1], engine, operation, continuation, scope, ascender, ascending);
   },
   reference: true
 });
@@ -11282,7 +11315,7 @@ Matrix = (function(superClass) {
   }
 
   Matrix.prototype.format = function(matrix) {
-    return 'matrix3d(' + matrix[0].toFixed(20) + ',' + matrix[1].toFixed(20) + ',' + matrix[2].toFixed(20) + ',' + matrix[3].toFixed(20) + ',' + matrix[4].toFixed(20) + ',' + matrix[5].toFixed(20) + ',' + matrix[6].toFixed(20) + ',' + matrix[7].toFixed(20) + ',' + matrix[8].toFixed(20) + ',' + matrix[9].toFixed(20) + ',' + matrix[10].toFixed(20) + ',' + matrix[11].toFixed(20) + ',' + matrix[12].toFixed(20) + ',' + matrix[13].toFixed(20) + ',' + matrix[14].toFixed(20) + ',' + matrix[15].toFixed(20) + ')';
+    return 'matrix3d(' + matrix[0] + ',' + matrix[1] + ',' + matrix[2] + ',' + matrix[3] + ',' + matrix[4] + ',' + matrix[5] + ',' + matrix[6] + ',' + matrix[7] + ',' + matrix[8] + ',' + matrix[9] + ',' + matrix[10] + ',' + matrix[11] + ',' + matrix[12] + ',' + matrix[13] + ',' + matrix[14] + ',' + matrix[15] + ')';
   };
 
   return Matrix;

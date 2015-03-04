@@ -38,19 +38,19 @@ class Document extends Engine
     
 
     pretransform: (id) ->
-      if element = @identity[id]
+      #if element = @identity[id]
 
-        return @Matrix.rst(
-          @get(id, 'rotate-x')    || 0
-          @get(id, 'rotate-y')    || 0
-          @get(id, 'rotate-z')    || 0
-          @get(id, 'scale-x')     ? 1
-          @get(id, 'scale-y')     ? 1
-          @get(id, 'scale-z')     ? 1
-          @get(id, 'translate-x') || 0
-          @get(id, 'translate-y') || 0
-          @get(id, 'translate-z') || 0
-        )
+      return @Matrix.rst(
+        @get(id, 'rotate-x')    || 0
+        @get(id, 'rotate-y')    || 0
+        @get(id, 'rotate-z')    || 0
+        @get(id, 'scale-x')     ? 1
+        @get(id, 'scale-y')     ? 1
+        @get(id, 'scale-z')     ? 1
+        @get(id, 'translate-x') || 0
+        @get(id, 'translate-y') || 0
+        @get(id, 'translate-z') || 0
+      )
 
   
   class Document::Data extends Engine::Data
@@ -199,7 +199,7 @@ class Document extends Engine
         for element in removed
           @identity.unset(element)
         update.removed = undefined
-        
+
       if @ranges
         requestAnimationFrame =>
           @solve 'Transition', ->
@@ -447,9 +447,8 @@ class Document extends Engine
 
       # Find unregistered elements by id
       continue if id.charAt(0) == ':'
-      unless element = @engine.identity[id]
-        continue if id.indexOf('"') > -1
-        continue unless element = document.getElementById(id.substring(1))
+      #unless element = @engine.identity[id]
+      #  continue unless element = document.getElementById(id.substring(1))
       
       if @values[id + '[intrinsic-' + property + ']']?
         continue
@@ -462,6 +461,7 @@ class Document extends Engine
           (@updating[prop.task] ||= {})[id] ||= true
           if prop.task == 'pretransform'
             pretransforms = @updating.pretransform
+          continue
 
         if property == 'transform'
           (pretransforms ||= {})[id] = @output.pretransform(id)
@@ -470,7 +470,9 @@ class Document extends Engine
       else
         continue
 
-      (((result ||= {})[key] ||= {})[id] ||= {})[property] = value
+      if id.indexOf('"') == -1
+        if @identity[id] || document.getElementById(id.substring(1))
+          (((result ||= {})[key] ||= {})[id] ||= {})[property] = value
 
     # Combine matricies
     if pretransforms
@@ -481,7 +483,7 @@ class Document extends Engine
         transform = transforms?[id] || @values[id + '[transform]']
 
 
-        (((result ||= {}).styles ||= {})[id] ||= {}).transform = 
+        ((result ||= {}).transforms ||= {})[id] = 
           if pretransform && transform
             @output.Matrix.prototype._mat4.multiply(pretransform, transform, pretransform)
           else
@@ -504,23 +506,42 @@ class Document extends Engine
     unless changes = @group(data)
       return
 
-    @console.start('Apply', data)
+    @console.start('Apply', changes)
+    styles = changes.styles
+    positions = changes.positions    
 
-    for id, styles of changes.styles
-      element = @identity[id] || document.getElementById(id.substring(1))
-      if element.nodeType == 1
-        for prop, value of styles
-          @setStyle(element, prop, value)
+    if transforms = changes.transforms
+      prop = @output.properties.transform
+      camel = prop.camelized || 'transform'
+      for id, value of transforms
+        element = @identity[id]# || document.getElementById(id.substring(1))
+        if element?.nodeType == 1
+          element.style[camel] = if value? then @output.Matrix::format(value) else ''
+        else
+          if value?
+            @output.set(id, 'final-transform', value)
+
+      if !styles && !positions
+        @console.end(changes)
+        return
 
 
-    if changes.positions
+    if styles
+      for id, properties of styles
+        element = @identity[id] || document.getElementById(id.substring(1))
+        if element.nodeType == 1
+          for prop, value of properties
+            @setStyle(element, prop, value)
+
+
+    if positions
       # Adjust positioning styles to respect element offsets 
       @each(@scope, 'placehold', null, null, changes.positions)
 
-      for id, styles of changes.positions
+      for id, styles of positions
         element = @identity[id] || document.getElementById(id.substring(1))
-        for prop, value of styles
-          if element.nodeType == 1
+        if element.nodeType == 1
+          for prop, value of styles
             @setStyle(element, prop, value)
 
     @console.end(changes)
