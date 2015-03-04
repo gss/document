@@ -46,8 +46,13 @@ class Stylesheet extends Command.List
     unless sheet = stylesheet.sheet
       stylesheet.parentNode?.removeChild(stylesheet)
       return 
-    if prop = engine.output.properties[property]?.property
-      property = prop
+    if prop = engine.output.properties[property]
+      if prop.property
+        property = prop.property
+
+      if typeof value != 'string'
+        value = prop.format(value)
+
     needle = @getOperation(operation, watchers, rule)
     previous = []
     for ops, index in watchers
@@ -165,7 +170,7 @@ class Stylesheet extends Command.List
   set: (engine, operation, continuation, element, property, value) ->
     if rule = @getRule(operation)
       if stylesheet = @getStylesheet(engine, continuation)
-        if @watch engine, operation, continuation, stylesheet
+        if @watch engine, operation, continuation, stylesheet, value
           if @update engine, operation, property, value, stylesheet, rule
             engine.updating.restyled = true
 
@@ -180,12 +185,13 @@ class Stylesheet extends Command.List
               @prototype.unwatch(engine, operation, continuation, stylesheet, watchers)
     return
 
-  watch: (engine, operation, continuation, stylesheet) ->
+  watch: (engine, operation, continuation, stylesheet, value) ->
     watchers = @getWatchers(engine, stylesheet)
 
     meta = (watchers[operation.index] ||= [])
-    if meta.indexOf(continuation) > -1
-      return
+    if (i = meta.indexOf(continuation)) > -1
+      return i == 0
+
     (watchers[continuation] ||= []).push(operation)
     return meta.push(continuation) == 1
 
@@ -203,7 +209,7 @@ class Stylesheet extends Command.List
     unless observers.length
       delete watchers[continuation]
 
-    unless meta.length
+    if meta.length == 0
       delete watchers[index]
       @update engine, operation, operation[1], '', stylesheet, @getRule(operation)
   

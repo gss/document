@@ -1873,7 +1873,8 @@ Engine = (function() {
   };
 
   Engine.prototype.write = function(update) {
-    return this.propagate(update.changes);
+    this.output.merge(update.changes);
+    return update.changes = void 0;
   };
 
   Engine.prototype.commit = function(solution, update) {
@@ -4374,53 +4375,25 @@ Update.prototype = {
     this.index--;
     return solution || this;
   },
-  apply: function(result, solution) {
-    var i, last, property, redefined, value, _base, _ref;
-    if (solution == null) {
-      solution = this.solution;
-    }
-    if (result !== this.solution) {
-
-      /*
-      for property in Object.keys(result)
-        if property == '$name[intrinsic-width]'
-          debugger
-        value = result[property]
-        now = (solution ||= @solution ||= {})[property]
-        if value != now
-          if Math.abs(value - now) >= 2 || last[property] != value
-            if value == now
-              debugger
-            last[property] = now
-            changes[property] = solution[property] = value
-          else
-            last[property] = value
-            solution[property] = now
-       */
-      solution || (solution = this.solution || (this.solution = {}));
-      for (property in result) {
-        value = result[property];
-        if ((redefined = (_ref = this.redefined) != null ? _ref[property] : void 0)) {
-          i = redefined.indexOf(value);
-          if (i > -1) {
-            last = redefined[redefined.length - 1];
-            if (Math.abs(last - value) < 2) {
-              solution[property] = redefined[redefined.length - 1];
-              (this.changes || (this.changes = {}))[property] = solution[property];
-            }
-            continue;
-          }
+  apply: function(result) {
+    var last, now, property, solution, value;
+    solution = this.solution || (this.solution = {});
+    last = this.last || (this.last = {});
+    for (property in result) {
+      value = result[property];
+      now = solution[property];
+      if (last[property] === value) {
+        if (Math.abs(now - value) < 2) {
+          (this.changes || (this.changes = {}))[property] = solution[property] = now;
         }
-        if (solution === this.solution) {
-          redefined = (_base = (this.redefined || (this.redefined = {})))[property] || (_base[property] = []);
-          if (redefined[redefined.length - 1] !== value && (value != null)) {
-            redefined.push(value);
-          }
+        continue;
+      }
+      if (now !== value) {
+        if (solution === this.solution && (value != null)) {
+          last[property] = now;
         }
-        if (solution[property] !== value) {
-          (this.changes || (this.changes = {}))[property] = value;
-          solution[property] = value;
-        }
+        (this.changes || (this.changes = {}))[property] = value;
+        solution[property] = value;
       }
     }
     return solution;
@@ -5729,15 +5702,15 @@ Data.prototype.Variable.Getter = Data.prototype.Variable.extend({
   ]
 }, {
   'get': function(object, property, engine, operation, continuation, scope) {
-    var prefix;
+    var domain, prefix;
     if (engine.queries) {
       prefix = engine.Query.prototype.getScope(engine, object, continuation);
     }
     if (!prefix && engine.data.check(engine.scope, property)) {
       prefix = engine.scope;
-      engine = engine.data;
+      domain = engine.data;
     }
-    return engine.watch(prefix, property, operation, continuation, scope);
+    return (domain || engine).watch(prefix, property, operation, continuation, scope);
   }
 });
 
@@ -5931,12 +5904,12 @@ Outputting = function(engine, operation, command) {
     index = parent.indexOf(operation);
     return Outputting.patch(engine.output, operation, parent, index, parent[index - 1]);
   } else if (operation.command.type === 'Default' && !engine.solver.signatures[operation[0]] && (!engine.data.signatures[operation[0]] || operation[0] === '=') && engine.output.signatures[operation[0]]) {
-    return Outputting.patch(engine.output, operation, parent, false);
+    return Outputting.patch(engine.output, operation, parent, false, null);
   }
 };
 
 Outputting.patch = function(engine, operation, parent, index, context) {
-  var argument, i, match, _i, _len;
+  var argument, command, i, match, _i, _len;
   operation.domain = engine.output;
   for (i = _i = 0, _len = operation.length; _i < _len; i = ++_i) {
     argument = operation[i];
@@ -5953,7 +5926,10 @@ Outputting.patch = function(engine, operation, parent, index, context) {
   } else {
     match = engine.Command.match(engine.output, operation, parent, parent != null ? parent.indexOf(operation) : void 0, context);
   }
-  Command.assign(engine, operation, match, context);
+  command = Command.assign(engine, operation, match, context);
+  if (context === null) {
+    Command.descend(command, engine, operation);
+  }
   return match;
 };
 
@@ -6028,44 +6004,6 @@ Input.prototype.Assignment = Command.extend({
       value: ['Variable', 'Number', 'Matrix', 'Command', 'Range', 'Default']
     }
   ]
-});
-
-Input.prototype.Assignment.Style = Input.prototype.Assignment.extend({
-  signature: [
-    [
-      {
-        object: ['Query', 'Selector']
-      }
-    ], {
-      property: ['String'],
-      value: ['Any']
-    }
-  ],
-  log: function() {},
-  unlog: function() {},
-  advices: [
-    function(engine, operation, command) {
-      var parent, rule;
-      parent = operation;
-      rule = void 0;
-      while (parent.parent) {
-        if (!rule && parent[0] === 'rule') {
-          rule = parent;
-        }
-        parent = parent.parent;
-      }
-      operation.index || (operation.index = parent.assignments = (parent.assignments || 0) + 1);
-      if (rule) {
-        (rule.properties || (rule.properties = [])).push(operation.index);
-      }
-    }
-  ]
-}, {
-  'set': function(object, property, value, engine, operation, continuation, scope) {
-    if (typeof engine.setStyle === "function") {
-      engine.setStyle(object || scope, property, value, continuation, operation);
-    }
-  }
 });
 
 module.exports = Input;
@@ -6391,6 +6329,44 @@ Output.prototype.Constraint = Constraint.extend({
 });
 
 module.exports = Output;
+
+Output.prototype.StyleAssignment = Output.prototype.Assignment.extend({
+  signature: [
+    [
+      {
+        object: ['Query', 'Selector']
+      }
+    ], {
+      property: ['String'],
+      value: ['Any']
+    }
+  ],
+  log: function() {},
+  unlog: function() {},
+  advices: [
+    function(engine, operation, command) {
+      var parent, rule;
+      parent = operation;
+      rule = void 0;
+      while (parent.parent) {
+        if (!rule && parent[0] === 'rule') {
+          rule = parent;
+        }
+        parent = parent.parent;
+      }
+      operation.index || (operation.index = parent.assignments = (parent.assignments || 0) + 1);
+      if (rule) {
+        (rule.properties || (rule.properties = [])).push(operation.index);
+      }
+    }
+  ]
+}, {
+  'set': function(object, property, value, engine, operation, continuation, scope) {
+    if (typeof engine.setStyle === "function") {
+      engine.setStyle(object || scope, property, value, continuation, operation);
+    }
+  }
+});
 
 
 
@@ -23431,11 +23407,12 @@ Document = (function(superClass) {
   Document.prototype.write = function(update) {
     var assigned;
     this.input.Selector.disconnect(this, true);
-    this.propagate(update.changes);
+    this.output.merge(update.changes);
     this.input.Stylesheet.rematch(this);
     if (assigned = this.assign(update.changes)) {
       update.assigned = true;
     }
+    update.changes = void 0;
     this.input.Selector.connect(this, true);
     return assigned;
   };
@@ -23645,7 +23622,7 @@ Document = (function(superClass) {
     }
   };
 
-  Document.prototype.setStyle = function(element, property, value, continuation, operation) {
+  Document.prototype.setStyle = function(element, property, value, continuation, operation, bypass) {
     var camel, parent, path, prop, ref;
     if (value == null) {
       value = '';
@@ -23657,16 +23634,7 @@ Document = (function(superClass) {
       case "y":
         property = "top";
     }
-    if (!(prop = this.output.properties[property])) {
-      return;
-    }
-    camel = prop.camelized || this.camelize(property);
-    if (typeof value !== 'string') {
-      if (value < 0 && (property === 'width' || property === 'height')) {
-        this.console.warn(property + ' of', element, ' is negative: ', value);
-      }
-      value = prop.format(value);
-    } else if (parent = operation) {
+    if (parent = operation) {
       while (parent.parent) {
         parent = parent.parent;
         if (parent.command.type === 'Condition' && !parent.command.global) {
@@ -23678,6 +23646,16 @@ Document = (function(superClass) {
           return;
         }
       }
+    }
+    if (!(prop = this.output.properties[property])) {
+      return;
+    }
+    camel = prop.camelized || this.camelize(property);
+    if (typeof value !== 'string') {
+      if (value < 0 && (property === 'width' || property === 'height')) {
+        this.console.warn(property + ' of', element, ' is negative: ', value);
+      }
+      value = prop.format(value);
     }
     path = this.getPath(element, 'intrinsic-' + property);
     if ((ref = this.data.watchers) != null ? ref[path] : void 0) {
@@ -23871,7 +23849,7 @@ Document = (function(superClass) {
    */
 
   Document.prototype.assign = function(data) {
-    var camel, changes, element, id, positions, prop, properties, styles, transforms, value;
+    var camel, changes, element, id, path, positions, prop, properties, styles, transforms, value;
     if (!(changes = this.group(data))) {
       return;
     }
@@ -23887,8 +23865,9 @@ Document = (function(superClass) {
         if ((element != null ? element.nodeType : void 0) === 1) {
           element.style[camel] = value != null ? this.output.Matrix.prototype.format(value) : '';
         } else {
-          if (value != null) {
-            this.output.set(id, 'final-transform', value);
+          path = this.output.getPath(id, 'final-transform');
+          if ((value != null) || (this.output.values[path] != null)) {
+            this.output.set(null, path, value);
           }
         }
       }
@@ -25624,7 +25603,7 @@ Stylesheet = (function(superClass) {
   Stylesheet.CanonicalizeSelectorRegExp = new RegExp("[$][a-z0-9]+[" + Command.prototype.DESCEND + "]\\s*", "gi");
 
   Stylesheet.prototype.update = function(engine, operation, property, value, stylesheet, rule) {
-    var body, generated, i, index, j, k, l, len, needle, next, ops, other, previous, prop, ref, ref1, ref2, ref3, rules, selectors, sheet, text, watchers;
+    var body, generated, i, index, j, k, l, len, needle, next, ops, other, previous, prop, ref, ref1, ref2, rules, selectors, sheet, text, watchers;
     watchers = this.getWatchers(engine, stylesheet);
     if (!(sheet = stylesheet.sheet)) {
       if ((ref = stylesheet.parentNode) != null) {
@@ -25632,8 +25611,13 @@ Stylesheet = (function(superClass) {
       }
       return;
     }
-    if (prop = (ref1 = engine.output.properties[property]) != null ? ref1.property : void 0) {
-      property = prop;
+    if (prop = engine.output.properties[property]) {
+      if (prop.property) {
+        property = prop.property;
+      }
+      if (typeof value !== 'string') {
+        value = prop.format(value);
+      }
     }
     needle = this.getOperation(operation, watchers, rule);
     previous = [];
@@ -25681,7 +25665,7 @@ Stylesheet = (function(superClass) {
       if (needle === operation.index) {
         needle++;
       }
-      for (index = l = ref2 = needle, ref3 = watchers.length; ref2 <= ref3 ? l < ref3 : l > ref3; index = ref2 <= ref3 ? ++l : --l) {
+      for (index = l = ref1 = needle, ref2 = watchers.length; ref1 <= ref2 ? l < ref2 : l > ref2; index = ref1 <= ref2 ? ++l : --l) {
         if (ops = watchers[index]) {
           next = this.getRule(watchers[ops[0]][0]);
           if (next !== rule) {
@@ -25778,7 +25762,7 @@ Stylesheet = (function(superClass) {
     var rule, stylesheet;
     if (rule = this.getRule(operation)) {
       if (stylesheet = this.getStylesheet(engine, continuation)) {
-        if (this.watch(engine, operation, continuation, stylesheet)) {
+        if (this.watch(engine, operation, continuation, stylesheet, value)) {
           if (this.update(engine, operation, property, value, stylesheet, rule)) {
             engine.updating.restyled = true;
           }
@@ -25806,12 +25790,12 @@ Stylesheet = (function(superClass) {
     }
   };
 
-  Stylesheet.prototype.watch = function(engine, operation, continuation, stylesheet) {
-    var meta, name1, watchers;
+  Stylesheet.prototype.watch = function(engine, operation, continuation, stylesheet, value) {
+    var i, meta, name1, watchers;
     watchers = this.getWatchers(engine, stylesheet);
     meta = (watchers[name1 = operation.index] || (watchers[name1] = []));
-    if (meta.indexOf(continuation) > -1) {
-      return;
+    if ((i = meta.indexOf(continuation)) > -1) {
+      return i === 0;
     }
     (watchers[continuation] || (watchers[continuation] = [])).push(operation);
     return meta.push(continuation) === 1;
@@ -25830,7 +25814,7 @@ Stylesheet = (function(superClass) {
     if (!observers.length) {
       delete watchers[continuation];
     }
-    if (!meta.length) {
+    if (meta.length === 0) {
       delete watchers[index];
       return this.update(engine, operation, operation[1], '', stylesheet, this.getRule(operation));
     }

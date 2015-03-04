@@ -146,10 +146,11 @@ class Document extends Engine
 
   write: (update) ->
     @input.Selector.disconnect(@, true)
-    @propagate(update.changes)
+    @output.merge(update.changes)
     @input.Stylesheet.rematch(@)
     if assigned = @assign(update.changes)
       update.assigned = true
+    update.changes = undefined
     @input.Selector.connect(@, true)
     return assigned
 
@@ -310,12 +311,22 @@ class Document extends Engine
       element.style.position = ''
 
 
-  setStyle: (element, property, value = '', continuation, operation) -> 
+  setStyle: (element, property, value = '', continuation, operation, bypass) -> 
     switch property
       when "x"
         property = "left"
       when "y"
         property = "top"
+
+    if parent = operation
+      while parent.parent
+        parent = parent.parent
+        if parent.command.type == 'Condition' && !parent.command.global
+          break
+
+      if parent.command.parse
+        if parent.command.set @, operation, @Command::delimit(continuation), element, property, value
+          return
 
     return unless prop = @output.properties[property]
     camel = prop.camelized || @camelize(property)
@@ -326,16 +337,7 @@ class Document extends Engine
 
       value = prop.format(value)
 
-
-    else if parent = operation
-      while parent.parent
-        parent = parent.parent
-        if parent.command.type == 'Condition' && !parent.command.global
-          break
-
-      if parent.command.parse
-        if parent.command.set @, operation, @Command::delimit(continuation), element, property, value
-          return
+      
 
     path = @getPath(element, 'intrinsic-' + property)
 
@@ -518,8 +520,9 @@ class Document extends Engine
         if element?.nodeType == 1
           element.style[camel] = if value? then @output.Matrix::format(value) else ''
         else
-          if value?
-            @output.set(id, 'final-transform', value)
+          path = @output.getPath(id, 'final-transform')
+          if value? || @output.values[path]?
+            @output.set(null, path, value)
 
       if !styles && !positions
         @console.end(changes)
