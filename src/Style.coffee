@@ -187,7 +187,11 @@ class Shorthand
       when 'object'
         name = operation[0]
         if typeof name == 'number'
-          return styles.engine.Matrix.prototype.format(operation)
+          value = operation.valueOf()
+          if value != operation
+            return value
+          else
+            return styles.engine.Matrix::format(operation)
         else if (styles.engine.signatures[name] || styles.engine.input.signatures[name])?.Number?.resolved
           return @toExpressionString(key, operation[1], true) + name
         else

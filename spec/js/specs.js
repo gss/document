@@ -2977,11 +2977,11 @@ describe('Nested Rules', function() {
             expect(Object.keys(engine.output.watched).length).to.eql(0);
             expect((k = Object.keys(engine.observers)).length).to.eql(1);
             expect(Object.keys(engine.observers[k[0]]).length).to.eql(9);
-            container.removeEventListener('solve', listener);
+            engine.removeEventListener('solve', listener);
             return done();
           }
         };
-        container.addEventListener('solve', listener);
+        engine.addEventListener('solve', listener);
         engine.solve(rules);
         return container.innerHTML = "<div id=\"container\" >\n  <div class=\"vessel\">\n    <div id=\"box1\" class=\"box\"></div>\n    <div id=\"box2\" class=\"box\"></div>\n  </div>\n</div>\n<div id=\"box3\" class=\"box\"></div>\n<div id=\"box4\" class=\"box\"></div>";
       });
@@ -6596,22 +6596,23 @@ describe('GSS engine', function() {
               assert(text2.style['lineHeight'] === "42px");
               assert(text1.style['fontSize'] === "42px");
               assert(text2.style['fontSize'] === "42px");
-              assert(e.detail['$text1[line-height]'] === 42);
-              assert(e.detail['$text2[line-height]'] === 42);
-              assert(e.detail['$text1[font-size]'] === 42);
-              assert(e.detail['$text2[font-size]'] === 42);
+              assert(e['$text1[line-height]'] === 42);
+              assert(e['$text2[line-height]'] === 42);
+              assert(e['$text1[font-size]'] === 42);
+              assert(e['$text2[font-size]'] === 42);
               return container.innerHTML = "";
             } else {
               engine.removeEventListener('solved', onSolved);
               return done();
             }
           };
-          container.addEventListener('solved', onSolved);
+          engine.addEventListener('solved', onSolved);
           return engine.solve(ast);
         });
       });
     };
-    return test(true);
+    test(true);
+    return test(false);
   });
   describe('Before IDs exist', function() {
     var ast, button1, button2;
@@ -6658,7 +6659,7 @@ describe('GSS engine', function() {
           return done();
         }
       };
-      container.addEventListener('solved', onSolved);
+      engine.addEventListener('solved', onSolved);
       container.innerHTML = "<div>        \n  <button id=\"button2\">Second</button>\n  <button id=\"button1\">One</button>        \n</div>";
       button1 = engine.id('button1');
       return button2 = engine.id('button2');
@@ -6689,12 +6690,12 @@ describe('GSS engine', function() {
           assert(w === 100, "button2 width: " + w);
           return container.innerHTML = "";
         } else {
-          container.removeEventListener('solved', onSolved);
+          engine.removeEventListener('solved', onSolved);
           return done();
         }
       };
       document.getElementById('w').innerHTML = "<div>        \n     <div id=\"b1\"></div>\n     <div id=\"b2\"></div>\n</div>";
-      container.addEventListener('solved', onSolved);
+      engine.addEventListener('solved', onSolved);
       return engine.solve(ast);
     });
   });
@@ -6711,15 +6712,14 @@ describe('GSS engine', function() {
     return it('var == var * (num / num)', function(done) {
       var onSolved;
       onSolved = function(e) {
-        expect(e.detail).to.eql({
+        expect(e).to.eql({
           'y': 10,
-          'x': 5,
-          engine: engine
+          'x': 5
         });
-        container.removeEventListener('solved', onSolved);
+        engine.removeEventListener('solved', onSolved);
         return done();
       };
-      container.addEventListener('solved', onSolved);
+      engine.addEventListener('solved', onSolved);
       return engine.solve([['==', ['get', 'y'], 10], ['==', ['get', 'x'], ['*', ['get', 'y'], 0.5]]]);
     });
   });
@@ -6738,17 +6738,14 @@ describe('GSS engine', function() {
     return it('engine.vars are set', function(done) {
       var onSolved;
       onSolved = function(e) {
-        var values;
-        values = e.detail;
-        expect(values).to.eql({
+        expect(e).to.eql({
           'col-width': 100,
-          'row-height': 50,
-          engine: engine
+          'row-height': 50
         });
-        container.removeEventListener('solved', onSolved);
+        engine.removeEventListener('solved', onSolved);
         return done();
       };
-      container.addEventListener('solved', onSolved);
+      engine.addEventListener('solved', onSolved);
       return engine.solve([['==', ['get', 'col-width'], 100], ['==', ['get', 'row-height'], 50]]);
     });
   });
@@ -6809,11 +6806,11 @@ describe('GSS engine', function() {
               ]
             ]
           ]);
-          container.removeEventListener('solved', listener);
+          engine.removeEventListener('solved', listener);
           return done();
         };
-        container.addEventListener('solved', listener);
         engine = new GSS(container);
+        engine.addEventListener('solved', listener);
         return container.innerHTML = "<style type=\"text/gss-ast\" scoped id=\"style1\">\n  [\"==\", [\"get\",[\".\", \"box\"],\"x\"], 100]\n</style>\n<div id=\"box1\" class=\"box\"></div>\n<div id=\"box2\" class=\"box\"></div>";
       });
     });
@@ -7088,9 +7085,9 @@ describe('GSS engine', function() {
     return it('scoped value is bridged downward', function(done) {
       var cListener, count, wListener;
       cListener = function(e) {
-        return container.removeEventListener('solved', cListener);
+        return engine.removeEventListener('solved', cListener);
       };
-      container.addEventListener('solved', cListener);
+      engine.addEventListener('solved', cListener);
       count = 0;
       wListener = function(e) {
         count++;
@@ -9232,14 +9229,12 @@ describe("GSS.View", function() {
     return it('before & after', function(done) {
       var onSolved, target1, target2;
       onSolved = function(e) {
-        var values;
-        values = e.detail.values;
         assert(target1.style['width'] === "88px", "width should be 88px");
         assert(target2.style['width'] === "88px", "width should be 88px");
-        container.removeEventListener('solved', onSolved);
+        engine.removeEventListener('solved', onSolved);
         return done();
       };
-      container.addEventListener('solved', onSolved);
+      engine.addEventListener('solved', onSolved);
       engine.solve([['==', ['get', ['.', 'target'], 'width'], 88]]);
       container.innerHTML = "<div>\n  <div>\n    <div style=\"width:10px;\" class=\"target\">\n      <div>\n        <div>\n          <div style=\"width:10px;\" class=\"target\">\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>        ";
       target1 = engine["class"]('target')[0];

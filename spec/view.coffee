@@ -22,12 +22,11 @@ describe "GSS.View", ->
                    
     it 'before & after', (done) ->
       onSolved = (e) ->
-        values = e.detail.values
         assert target1.style['width'] is "88px","width should be 88px"
         assert target2.style['width'] is "88px","width should be 88px"
-        container.removeEventListener 'solved', onSolved
+        engine.removeEventListener 'solved', onSolved
         done()
-      container.addEventListener 'solved', onSolved
+      engine.addEventListener 'solved', onSolved
       engine.solve [
           ['==', ['get',['.', 'target'],   'width'], 88]
         ]

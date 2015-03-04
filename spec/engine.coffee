@@ -117,19 +117,20 @@ describe 'GSS engine', ->
               assert text2.style['lineHeight'] is "42px"
               assert text1.style['fontSize'] is "42px"
               assert text2.style['fontSize'] is "42px"
-              assert e.detail['$text1[line-height]'] is 42
-              assert e.detail['$text2[line-height]'] is 42
-              assert e.detail['$text1[font-size]'] is 42
-              assert e.detail['$text2[font-size]'] is 42
+              assert e['$text1[line-height]'] is 42
+              assert e['$text2[line-height]'] is 42
+              assert e['$text1[font-size]'] is 42
+              assert e['$text2[font-size]'] is 42
               container.innerHTML = ""
             else
               engine.removeEventListener 'solved', onSolved
               done()
-          container.addEventListener 'solved', onSolved
+          engine.addEventListener 'solved', onSolved
           engine.solve ast
           
     test(true)              
-  
+    test(false)
+
   describe 'Before IDs exist', ->
     engine = null
     container = null
@@ -178,7 +179,7 @@ describe 'GSS engine', ->
           engine.removeEventListener 'solved', onSolved
           done()
 
-      container.addEventListener 'solved', onSolved
+      engine.addEventListener 'solved', onSolved
       container.innerHTML = """
       <div>        
         <button id="button2">Second</button>
@@ -226,7 +227,7 @@ describe 'GSS engine', ->
           assert w is 100, "button2 width: #{w}"
           container.innerHTML = ""
         else
-          container.removeEventListener 'solved', onSolved
+          engine.removeEventListener 'solved', onSolved
           done()
       document.getElementById('w').innerHTML = """
       <div>        
@@ -234,7 +235,7 @@ describe 'GSS engine', ->
            <div id="b2"></div>
       </div>
       """
-      container.addEventListener 'solved', onSolved
+      engine.addEventListener 'solved', onSolved
       engine.solve ast      
   
   describe 'Math', ->
@@ -249,13 +250,12 @@ describe 'GSS engine', ->
     
     it 'var == var * (num / num)', (done) ->
       onSolved =  (e) ->
-        expect(e.detail).to.eql 
+        expect(e).to.eql 
           'y': 10
           'x': 5
-          engine: engine
-        container.removeEventListener 'solved', onSolved
+        engine.removeEventListener 'solved', onSolved
         done()
-      container.addEventListener 'solved', onSolved
+      engine.addEventListener 'solved', onSolved
       engine.solve [
         ['==', ['get', 'y'], 10]
         ['==', ['get', 'x'], 
@@ -277,14 +277,12 @@ describe 'GSS engine', ->
     
     it 'engine.vars are set', (done) ->
       onSolved =  (e) ->
-        values = e.detail
-        expect(values).to.eql 
+        expect(e).to.eql 
           'col-width': 100
           'row-height': 50
-          engine: engine
-        container.removeEventListener 'solved', onSolved
+        engine.removeEventListener 'solved', onSolved
         done()
-      container.addEventListener 'solved', onSolved
+      engine.addEventListener 'solved', onSolved
       engine.solve [
           ['==', ['get', 'col-width'], 100]
           ['==', ['get', 'row-height'], 50]
@@ -348,10 +346,10 @@ describe 'GSS engine', ->
                 ['==', ['get','$box2[x]'], 100]
               ]]
             ]
-          container.removeEventListener 'solved', listener
+          engine.removeEventListener 'solved', listener
           done()
-        container.addEventListener 'solved', listener
         engine = new GSS(container)
+        engine.addEventListener 'solved', listener
         container.innerHTML =  """
           <style type="text/gss-ast" scoped id="style1">
             ["==", ["get",[".", "box"],"x"], 100]
@@ -698,9 +696,9 @@ describe 'GSS engine', ->
 
     it 'scoped value is bridged downward', (done) ->
       cListener = (e) ->           
-        container.removeEventListener 'solved', cListener
+        engine.removeEventListener 'solved', cListener
       
-      container.addEventListener 'solved', cListener
+      engine.addEventListener 'solved', cListener
       count = 0
       wListener = (e) ->     
         count++      

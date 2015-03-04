@@ -2182,9 +2182,9 @@ describe 'Nested Rules', ->
             expect((k = Object.keys(engine.observers)).length).to.eql(1)
             expect(Object.keys(engine.observers[k[0]]).length).to.eql(9)
 
-            container.removeEventListener 'solve', listener
+            engine.removeEventListener 'solve', listener
             done()
-        container.addEventListener 'solve', listener
+        engine.addEventListener 'solve', listener
         
         engine.solve rules
         container.innerHTML =  """

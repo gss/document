@@ -62,22 +62,22 @@ class Matrix extends Command
 
   format: (matrix) ->
     return 'matrix3d(' + 
-      matrix[0 ].toFixed(20) + ',' + 
-      matrix[1 ].toFixed(20) + ',' + 
-      matrix[2 ].toFixed(20) + ',' + 
-      matrix[3 ].toFixed(20) + ',' + 
-      matrix[4 ].toFixed(20) + ',' + 
-      matrix[5 ].toFixed(20) + ',' + 
-      matrix[6 ].toFixed(20) + ',' + 
-      matrix[7 ].toFixed(20) + ',' + 
-      matrix[8 ].toFixed(20) + ',' + 
-      matrix[9 ].toFixed(20) + ',' + 
-      matrix[10].toFixed(20) + ',' +
-      matrix[11].toFixed(20) + ',' +
-      matrix[12].toFixed(20) + ',' +
-      matrix[13].toFixed(20) + ',' +
-      matrix[14].toFixed(20) + ',' +
-      matrix[15].toFixed(20) + ')'
+      matrix[0 ] + ',' + 
+      matrix[1 ] + ',' + 
+      matrix[2 ] + ',' + 
+      matrix[3 ] + ',' + 
+      matrix[4 ] + ',' + 
+      matrix[5 ] + ',' + 
+      matrix[6 ] + ',' + 
+      matrix[7 ] + ',' + 
+      matrix[8 ] + ',' + 
+      matrix[9 ] + ',' + 
+      matrix[10] + ',' +
+      matrix[11] + ',' +
+      matrix[12] + ',' +
+      matrix[13] + ',' +
+      matrix[14] + ',' +
+      matrix[15] + ')'
 
 class Matrix::Sequence extends Command.Sequence
 
