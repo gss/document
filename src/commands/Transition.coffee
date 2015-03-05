@@ -9,32 +9,148 @@ class Transition extends Range.Progress
           return true
 
 
+  size: 4
 
   @define #fixme?
     '...': Range['...'].prototype.execute
 
-  update: (range, engine, operation, continuation, scope) ->
+  compute: (range, now, from) ->
     start = range[0] || 0
     end   = range[1] || 0
-    time = new Date
-    started = range[4] ||= time
-    value = (time - started - start) / ((end - start) || 1)
 
-    @ascend(engine, operation, continuation, scope, value, true)
+    return (now - from - start) / ((end - start) || 1)
 
+  complete: (value) ->
     if value >= 1
       return true
 
+  update: (range, engine, operation, continuation, scope) ->
+    now   = Date.now()
+    from  = range[4] ||= now
+
+    value = @compute(range, now, from)
+    if value == true
+      return true
+    if value?
+      @ascend(engine, operation, continuation, scope, value, true)
+
+    return @complete(value)
 
 
+# Code taken from rebound.js. Thanks facebook!
+class Transition.Spring extends Transition
 
-class Spring extends Range.Progress
+  signature: [
+    tension: ['Number']
+    friction: ['Number']
+  ]
+
+  condition: null
 
   @define
 
-    'friction': ->
+    'spring': (tension = 40, friction = 7)->
+      return @wrap [0, 1, null, 0, # start, end, now, target
+                    0, 0,       # time, accumulator 
+                    0, 0,       # velocity, position (fixme)
+                    0, 0, 0, 0, # temp, previous states 
+                    @getTension(tension), @getFriction(friction), 0]
 
-    'tension': ->
+  valueOf: ->
+    if (value = @[2])?
+      start = @[0]
+      end = @[1]
+      return value * ((end - start) || 1) + start
+
+  getTension: (value) ->
+    return (value - 30.0) * 3.62 + 194.0
+
+  getFriction: (value) ->
+    return (value - 8.0) * 3.0 + 25.0;
+
+  compute: (range, now, from) ->
+    start = range[0] || 0
+    end   = range[1] || 0
+    from  = range[14] || from
+
+    range[5] = Math.min(@MAX, range[5] + (now - from) / 1000)
+
+    tension = range[12]
+    friction = range[13]
+
+    velocity = range[6]
+    position = old = range[2]
+
+    Tv = range[8]
+    Tp = range[9]
+
+    Pv = range[10]
+    Pp = range[11]
+
+    STEP = @STEP
+    HALF = @HALF
+
+    while range[5] >= STEP
+      range[5] -= STEP
+
+      if range[5] < STEP
+        range[10] = velocity
+        range[11] = position
+
+      Av = velocity
+      Aa = (tension * (end - Tp)) - friction * velocity
+
+      Tp = position + Av * HALF
+      Tv = velocity + Aa * HALF
+
+      Bv = Tv
+      Ba = (tension * (end - Tp)) - friction * Tv
+
+      Tp = position + Bv * HALF
+      Tv = velocity + Ba * HALF
+
+      Cv = Tv
+      Ca = (tension * (end - Tp)) - friction * Tv
+
+      Tp = position + Cv * HALF
+      Tv = velocity + Ca * HALF
+
+      Dv = Tv
+      Da = (tension * (end - Tp)) - friction * Tv
+
+      dxdt = (Av + 2 * (Bv + Cv) + Dv) / 6;
+      dvdt = (Aa + 2 * (Ba + Ca) + Da) / 6
+
+      position += dxdt * STEP
+      velocity += dvdt * STEP
+
+    if interpolation = range[5] / STEP
+      position = position * interpolation + range[10] * (1 - interpolation)
+      velocity = velocity * interpolation + range[11] * (1 - interpolation)
+
+    range[6] = velocity
+    range[2] = position
+
+    range[8] = Tv
+    range[9] = Tp
+
+    range[14] = now
+
+    if range[7] && Math.abs(velocity) < @REST_THRESHOLD
+      range[7] = 0
+      return true
+    else if Math.abs(old - position) > @DISPLACEMENT_THRESHOLD
+      range[7] = 1
+      return position
+
+  complete: (value) ->
+    return window.zzz
+
+  STEP: 0.001
+  HALF: 0.0005
+  MAX: 0.064
+  DISPLACEMENT_THRESHOLD: 0.001
+  REST_THRESHOLD: 0.001
 
 
 module.exports = Transition

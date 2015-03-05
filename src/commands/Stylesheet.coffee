@@ -157,8 +157,6 @@ class Stylesheet extends Command.List
     if (i = meta.indexOf(continuation)) > -1
       return i == 0
 
-    if watchers[continuation]?.indexOf(operation) > -1
-      debugger
     (watchers[continuation] ||= []).push(operation)
     return meta.push(continuation) == 1
 
@@ -280,6 +278,7 @@ class Stylesheet extends Command.List
     continuation = @prototype.getCanonicalSelector(continuation).
                     replace(/\s+/, @prototype.DESCEND)
 
+
     if value
       append = (engine.updating.matches ||= {})[node._gss_id] ||= []
       remove = engine.updating.unmatches?[node._gss_id]
@@ -315,10 +314,9 @@ class Stylesheet extends Command.List
         if tokens = element.getAttribute('matches')
           bits = tokens.split(' ')
           for value in values
-            if (index = bits.indexOf(value)) == -1
+            if (index = bits.indexOf(value)) > -1
               bits.splice(index, 1)
-
-        if matches && bits.length
+        if bits.length
           element.setAttribute('matches', bits.join(' '))
         else
           element.removeAttribute('matches')

@@ -28,24 +28,6 @@ class Matrix extends Command
 
     return argument
 
-  xascend: (engine, operation, continuation, scope, result) ->
-
-    #if parent = operation.parent
-    #  while parent.command.sequence
-    #    if parent.indexOf(operation) == parent.length - 1
-    #      unless parent.parent
-    #        break 
-    #      parent = parent.parent
-    #      operation = parent
-    #    else
-    #      return super
-    #  if parent.type == 'Assignment'
-    #    return super
-
-
-    return super
-
-
   mat3: (matrix = @_mat4.create(), method, a, b, c) ->
     if matrix.length == 9
       return @_mat3[method](matrix, matrix, a, b, c)
@@ -121,6 +103,15 @@ class Matrix.Transformation1 extends Matrix
       @mat4       matrix, 'scale',  [1, 1, z]
     
     scale:       (matrix, x) ->
+      @mat4       matrix, 'scale',  [x, x, 1]
+    
+    skewX:      (matrix, y) ->
+      @mat3       matrix, 'scale',  [1, y, 1]
+    
+    skewY:      (matrix, z) ->
+      @mat4       matrix, 'scale',  [1, 1, z]
+    
+    skew:       (matrix, x) ->
       @mat4       matrix, 'scale',  [x, x, 1]
     
     rotate:      (matrix, angle) ->

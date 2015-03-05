@@ -236,8 +236,11 @@ class Document extends Engine
         update.removed = undefined
 
       if @ranges
-        requestAnimationFrame =>
-          @solve 'Transition', ->
+        cancelAnimationFrame(@transitioning)
+        engine = @
+        @transitioning = requestAnimationFrame ->
+          @transitioning = undefined
+          engine.solve 'Transition', ->
             @updating.ranges = true
             return
 
@@ -276,6 +279,9 @@ class Document extends Engine
     scroll: (e = '::window') ->
       id = e.target && @identify(e.target) || e
       @solve 'Scroll', id, ->
+        if @transitioning
+          cancelAnimationFrame(@transitioning)
+          @updating.ranges = true
         if id == '::window'
           @data.verify('::document', "scroll-top")
           @data.verify('::document', "scroll-left")
