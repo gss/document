@@ -303,19 +303,20 @@ describe 'Ranges', ->
 
     describe 'with transition range on the left', ->
       describe 'and static range on the right', ->
-        it 'should map ranges over time', ->
+        xit 'should map ranges over time', (done) ->
           first = true
           engine.addEventListener 'solved', listener = (solution) ->
             if first
               first = false
-              expect(solution.A).to.eql(undefined)
+              expect(+solution.A).to.eql(0)
+            else if +solution.A == 1
               engine.remove('tracking')
             else if solution.A == null
               engine.removeEventListener('solved', listener)
               done()
 
           engine.solve(['=', ['get', 'A'], ['map', 
-            ['spring', 10, 20],
+            ['spring', 1000, 10],
             [
               '...',
               0,
@@ -323,14 +324,14 @@ describe 'Ranges', ->
             ]
           ]], 'tracking')
 
-          expect(engine.values.A).to.eql(undefined)
-          #expect(engine.ranges).to.be.eql(undefined)
+          expect(engine.values.A).to.not.eql(undefined)
+          expect(engine.ranges).to.not.eql(undefined)
 
 
       xdescribe 'and update property on the right', ->
         it 'should map ranges over time', ->
 
-      describe 'and transition on the right', ->
+      xdescribe 'and transition on the right', ->
         it 'should map ranges over time', ->
           first = true
           engine.addEventListener 'solved', listener = (solution) ->

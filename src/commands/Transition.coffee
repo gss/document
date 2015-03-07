@@ -61,7 +61,7 @@ class Transition.Spring extends Transition
   @define
 
     'spring': (tension = 40, friction = 7)->
-      return @wrap [0, 1, null, 0, # start, end, now, target
+      return @wrap [0, 1, null, 1, # start, end, now, target
                     0, 0,       # time, accumulator 
                     0, 0,       # velocity, position (fixme)
                     0, 0, 0, 0, # temp, previous states 
@@ -82,7 +82,7 @@ class Transition.Spring extends Transition
   compute: (range, now, from) ->
     start = range[0] || 0
     end   = range[1] || 0
-    goal  = range[3] || 1
+    goal  = range[3] ? 1
     from  = range[14] || from
 
     range[5] = Math.min(@MAX, range[5] + (now - from) / 1000)

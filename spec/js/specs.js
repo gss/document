@@ -852,6 +852,98 @@ describe('GSS engine', function() {
 
 
 },{}],6:[function(require,module,exports){
+describe('Ranges', function() {
+  var engine;
+  engine = null;
+  before(function() {
+    engine = new GSS;
+    return engine.compile();
+  });
+  describe('constructor', function() {
+    return it('should create range', function() {
+      expect(engine.output.solve(['...', 10]).slice()).to.eql([false, 10]);
+      expect(engine.output.solve(['...', false, 10]).slice()).to.eql([false, 10]);
+      expect(engine.output.solve(['...', 10, 20]).slice()).to.eql([10, 20]);
+      return expect(engine.output.solve(['...', 20, false]).slice()).to.eql([20]);
+    });
+  });
+  describe('boundaries', function() {
+    it('should clip by starting point', function() {
+      expect(engine.output.solve(['<', 10, ['...', 1, 20]]).slice()).to.eql([10, 20]);
+      expect(engine.output.solve(['<', 10, ['...', false, 5]]).slice()).to.eql([10, 5]);
+      expect(engine.output.solve(['<', 10, ['...', false, 15]]).slice()).to.eql([10, 15]);
+      expect(engine.output.solve(['<', 10, ['...', 5, false]]).slice()).to.eql([10]);
+      expect(engine.output.solve(['<', 10, ['...', 15, false]]).slice()).to.eql([15]);
+      expect(engine.output.solve(['<', 10, ['...', 15, 5]]).slice()).to.eql([15, 10]);
+      expect(engine.output.solve(['<', ['...', 15, 5], 10]).slice()).to.eql([10, 5]);
+      expect(engine.output.solve(['<', 10, ['...', 15, 5]]).slice()).to.eql([15, 10]);
+      return expect(engine.output.solve(['<', ['...', 15, 5], 0]).slice()).to.eql([0, 5]);
+    });
+    it('should clip by ending point', function() {
+      expect(engine.output.solve(['<', ['...', 1, 20], 10]).slice()).to.eql([1, 10]);
+      expect(engine.output.solve(['<', ['...', false, 5], 10]).slice()).to.eql([false, 5]);
+      expect(engine.output.solve(['<', ['...', false, 15], 10]).slice()).to.eql([false, 10]);
+      expect(engine.output.solve(['<', ['...', 5, false], 10]).slice()).to.eql([5, 10]);
+      expect(engine.output.solve(['>', 10, ['...', 5, false]]).slice()).to.eql([5, 10]);
+      return expect(engine.output.solve(['>', ['...', 15, false], 10]).slice()).to.eql([15]);
+    });
+    it('should scale by starting point', function() {
+      expect(engine.output.solve(['<', 10, ['...', 0, 20, 0.75]]).slice().slice()).to.eql([10, 20, 0.5]);
+      expect(engine.output.solve(['<', 10, ['...', false, 5, 0.5]]).slice().slice()).to.eql([10, 5, 1.5]);
+      expect(engine.output.solve(['<', 10, ['...', false, 15, 0.5]]).slice().slice()).to.eql([10, 15, -0.5]);
+      expect(engine.output.solve(['<', 10, ['...', 5, false, 0.5]])[2]).to.eql(0.75);
+      return expect(engine.output.solve(['>', ['...', 15, false, 1], 10])[2]).to.eql(1);
+    });
+    it('should scale by ending point', function() {
+      expect(engine.output.solve(['<', ['...', 0, 20, 0.5], 10]).slice().slice()).to.eql([0, 10, 1]);
+      expect(engine.output.solve(['<', ['...', false, 5, 0.5], 10]).slice().slice()).to.eql([false, 5, 0.5]);
+      expect(engine.output.solve(['<', ['...', false, 15, 0.5], 10]).slice().slice()).to.eql([false, 10, 0.75]);
+      expect(engine.output.solve(['<', ['...', 5, false, 0.5], 10]).slice().slice()).to.eql([5, 10, -0.5]);
+      expect(engine.output.solve(['>', 10, ['...', 5, false, 0.5]]).slice().slice()).to.eql([5, 10, -0.5]);
+      return expect(engine.output.solve(['>', ['...', 15, false, 0.5], 10])[2]).to.eql(0.5);
+    });
+    describe('values', function() {
+      return it('should create a range from two numbers', function() {
+        expect(engine.output.solve(['>', 30, 20]).slice().slice()).to.eql([20, false, 1.5]);
+        return expect(engine.output.solve(['>', 20, 40]).slice().slice()).to.eql([40, false, -.5]);
+      });
+    });
+    return xdescribe('mapper', function() {
+      describe('mapped explicitly', function() {
+        return it('should map one range to another', function() {
+          return engine.output.solve(['map', ['...', 1, 20], ['...', -20, -1]]);
+        });
+      });
+      describe('with transformation', function() {
+        return it('should map one range to another with', function() {
+          engine = new GSS(document.createElement('div'));
+          return engine.solve(['--', ['out', ['ease', ['...', 1, 2]]], ['in', ['quad', ['...', 3, 4]]]]);
+        });
+      });
+      describe('with modifiers', function() {
+        it('should default to double clip', function() {
+          engine = new GSS(document.createElement('div'));
+          return engine.solve(['--', ['...', 1, 2], ['...', 3, 4]]);
+        });
+        return it('should force LTR order and invert modifiers', function() {
+          engine = new GSS(document.createElement('div'));
+          return engine.solve(['-~', ['...', 3, 4], ['...', 1, 2]]);
+        });
+      });
+      return describe('with time', function() {
+        return it('should map one range to another with', function() {
+          engine = new GSS(document.createElement('div'));
+          return engine.solve(['~-', ['out', ['ease', ['...', 1, 2]]], ['in', ['quad', ['...', 3, 4]]]]);
+        });
+      });
+    });
+  });
+  return describe('binders', function() {});
+});
+
+
+
+},{}],7:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -1129,7 +1221,7 @@ describe('Signatures', function() {
 
 
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -1324,7 +1416,7 @@ describe('Cassowary Thread', function() {
 
 
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 require("gss-engine/spec/cassowary");
 
 require("gss-engine/spec/thread");
@@ -1339,7 +1431,7 @@ require("gss-engine/spec/assignments");
 
 require("./assignments");
 
-require("gss-engine/spec/assignments");
+require("gss-engine/spec/ranges");
 
 require("./ranges");
 
@@ -1375,7 +1467,7 @@ require("./poly-test/full");
 
 
 
-},{"./assignments":9,"./command":11,"./command-nested-rules":10,"./conditions":12,"./domain":13,"./end-to-end":14,"./engine":15,"./matrix":16,"./perf":17,"./poly-test/full":18,"./ranges":19,"./selectors":20,"./styles":21,"./stylesheet":22,"./units":23,"./view":24,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/signatures":6,"gss-engine/spec/thread":7}],9:[function(require,module,exports){
+},{"./assignments":10,"./command":12,"./command-nested-rules":11,"./conditions":13,"./domain":14,"./end-to-end":15,"./engine":16,"./matrix":17,"./perf":18,"./poly-test/full":19,"./ranges":20,"./selectors":21,"./styles":22,"./stylesheet":23,"./units":24,"./view":25,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/ranges":6,"gss-engine/spec/signatures":7,"gss-engine/spec/thread":8}],10:[function(require,module,exports){
 describe('Assignments', function() {
   return describe('with units', function() {
     return it('should compute', function(done) {
@@ -1406,7 +1498,7 @@ describe('Assignments', function() {
 
 
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var fixtures, remove, stringify;
 
 stringify = function(o) {
@@ -2991,7 +3083,7 @@ describe('Nested Rules', function() {
 
 
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var Engine, assert, expect, remove, stringify;
 
 Engine = GSS.Engine;
@@ -3699,7 +3791,7 @@ describe('GSS commands', function() {
 
 
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var Engine, assert, expect, fixtures, remove;
 
 Engine = GSS;
@@ -3770,7 +3862,7 @@ xdescribe('Conditions', function() {
 
 
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var assert, expect;
 
 assert = chai.assert;
@@ -3878,7 +3970,7 @@ describe('Domain', function() {
 
 
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var assert, expect, remove, stringify;
 
 assert = chai.assert;
@@ -6501,7 +6593,7 @@ describe('End - to - End', function() {
 
 
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var Engine, assert, expect, fixtures, remove;
 
 Engine = GSS.Engine;
@@ -7165,7 +7257,7 @@ describe('GSS engine', function() {
 
 
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var assert, expect, property;
 
 expect = chai.expect;
@@ -7547,7 +7639,7 @@ describe('Matrix', function() {
 
 
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var Engine, assert, expect, remove, stringify;
 
 Engine = GSS.Engine;
@@ -7666,7 +7758,7 @@ describe('Perf', function() {
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var DEMOS, assert, expect, remove, roughAssert;
 
 DEMOS = {
@@ -8040,7 +8132,7 @@ describe('Full page tests', function() {
 
 
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 describe('Ranges', function() {
   var engine;
   engine = null;
@@ -8276,27 +8368,29 @@ describe('Ranges', function() {
     });
     return describe('with transition range on the left', function() {
       describe('and static range on the right', function() {
-        return it('should map ranges over time', function() {
+        return xit('should map ranges over time', function(done) {
           var first, listener;
           first = true;
           engine.addEventListener('solved', listener = function(solution) {
             if (first) {
               first = false;
-              expect(solution.A).to.eql(void 0);
+              return expect(+solution.A).to.eql(0);
+            } else if (+solution.A === 1) {
               return engine.remove('tracking');
             } else if (solution.A === null) {
               engine.removeEventListener('solved', listener);
               return done();
             }
           });
-          engine.solve(['=', ['get', 'A'], ['map', ['spring', 10, 20], ['...', 0, 1]]], 'tracking');
-          return expect(engine.values.A).to.eql(void 0);
+          engine.solve(['=', ['get', 'A'], ['map', ['spring', 1000, 10], ['...', 0, 1]]], 'tracking');
+          expect(engine.values.A).to.not.eql(void 0);
+          return expect(engine.ranges).to.not.eql(void 0);
         });
       });
       xdescribe('and update property on the right', function() {
         return it('should map ranges over time', function() {});
       });
-      describe('and transition on the right', function() {
+      xdescribe('and transition on the right', function() {
         return it('should map ranges over time', function() {
           var first, listener;
           first = true;
@@ -8323,7 +8417,7 @@ describe('Ranges', function() {
 
 
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -8443,7 +8537,7 @@ describe('Selectors', function() {
 
 
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -8627,7 +8721,7 @@ describe('Styles', function() {
 
 
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var IE10, assert, expect;
 
 expect = chai.expect;
@@ -9167,7 +9261,7 @@ describe('Stylesheet', function() {
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var assert, expect, remove;
 
 expect = chai.expect;
@@ -9300,7 +9394,7 @@ describe('Units', function() {
 
 
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var assert, expect, remove;
 
 assert = chai.assert;
@@ -9417,4 +9511,4 @@ describe("GSS.View", function() {
 
 
 
-},{}]},{},[8]);
+},{}]},{},[9]);

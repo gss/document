@@ -5548,16 +5548,16 @@ Range.Mapper = (function(_super) {
         return right;
       } else {
         engine.updating.ranges = true;
-        if (left.push) {
+        if (left.length < 4) {
           if ((left[0] != null) && (left[1] != null)) {
             right[2] = left[0] || null;
             right[3] = ((_ref1 = (_ref2 = left[2]) != null ? _ref2 : left[1]) != null ? _ref1 : left) || 0;
           }
         } else {
           if (right.length < 4) {
-            right[2] = left;
+            right[2] = +left;
           } else {
-            right[3] = left || 0;
+            right[3] = +left || 0;
           }
         }
         if (right.operation) {
@@ -5565,6 +5565,8 @@ Range.Mapper = (function(_super) {
         }
         if (!left.push) {
           return this.valueOf.call(right);
+        } else {
+          return right;
         }
       }
     }
@@ -26548,7 +26550,7 @@ Transition.Spring = (function(superClass) {
       if (friction == null) {
         friction = 7;
       }
-      return this.wrap([0, 1, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, this.getTension(tension), this.getFriction(friction), 0]);
+      return this.wrap([0, 1, null, 1, 0, 0, 0, 0, 0, 0, 0, 0, this.getTension(tension), this.getFriction(friction), 0]);
     }
   });
 
@@ -26570,10 +26572,10 @@ Transition.Spring = (function(superClass) {
   };
 
   Spring.prototype.compute = function(range, now, from) {
-    var Aa, Av, Ba, Bv, Ca, Cv, Da, Dv, HALF, Pp, Pv, STEP, Tp, Tv, dvdt, dxdt, end, friction, goal, interpolation, old, position, start, tension, velocity;
+    var Aa, Av, Ba, Bv, Ca, Cv, Da, Dv, HALF, Pp, Pv, STEP, Tp, Tv, dvdt, dxdt, end, friction, goal, interpolation, old, position, ref, start, tension, velocity;
     start = range[0] || 0;
     end = range[1] || 0;
-    goal = range[3] || 1;
+    goal = (ref = range[3]) != null ? ref : 1;
     from = range[14] || from;
     range[5] = Math.min(this.MAX, range[5] + (now - from) / 1000);
     tension = range[12];
