@@ -10,6 +10,7 @@ class Transition extends Range.Progress
 
 
   size: 4
+  lazy: true
 
   @define #fixme?
     '...': Range['...'].prototype.execute
@@ -18,9 +19,9 @@ class Transition extends Range.Progress
     start = range[0] || 0
     end   = range[1] || 0
 
-    return (now - from - start) / ((end - start) || 1)
+    return Math.min(1, (now - from - start) / ((end - start) || 1))
 
-  complete: (value) ->
+  complete: (range, value) ->
     if value >= 1
       return true
 
@@ -31,10 +32,20 @@ class Transition extends Range.Progress
     value = @compute(range, now, from)
     if value == true
       return true
-    if value?
-      @ascend(engine, operation, continuation, scope, value, true)
 
-    return @complete(value)
+    if !value? && !range[2]?
+      value = range[0]
+
+    if value?
+      copy = range.slice()
+      copy[2] = value
+      copy.valueOf = range.valueOf
+      copy.operation = range.operation
+      copy.continuation = range.continuation
+      copy.scope = range.scope
+      @ascend(engine, operation, continuation, scope, copy, true)
+
+    return @complete(range, value)
 
 
 # Code taken from rebound.js. Thanks facebook!
@@ -71,6 +82,7 @@ class Transition.Spring extends Transition
   compute: (range, now, from) ->
     start = range[0] || 0
     end   = range[1] || 0
+    goal  = range[3] || 1
     from  = range[14] || from
 
     range[5] = Math.min(@MAX, range[5] + (now - from) / 1000)
@@ -98,25 +110,25 @@ class Transition.Spring extends Transition
         range[11] = position
 
       Av = velocity
-      Aa = (tension * (end - Tp)) - friction * velocity
+      Aa = (tension * (goal - Tp)) - friction * velocity
 
       Tp = position + Av * HALF
       Tv = velocity + Aa * HALF
 
       Bv = Tv
-      Ba = (tension * (end - Tp)) - friction * Tv
+      Ba = (tension * (goal - Tp)) - friction * Tv
 
       Tp = position + Bv * HALF
       Tv = velocity + Ba * HALF
 
       Cv = Tv
-      Ca = (tension * (end - Tp)) - friction * Tv
+      Ca = (tension * (goal - Tp)) - friction * Tv
 
       Tp = position + Cv * HALF
       Tv = velocity + Ca * HALF
 
       Dv = Tv
-      Da = (tension * (end - Tp)) - friction * Tv
+      Da = (tension * (goal - Tp)) - friction * Tv
 
       dxdt = (Av + 2 * (Bv + Cv) + Dv) / 6;
       dvdt = (Aa + 2 * (Ba + Ca) + Da) / 6
@@ -129,28 +141,34 @@ class Transition.Spring extends Transition
       velocity = velocity * interpolation + range[11] * (1 - interpolation)
 
     range[6] = velocity
-    range[2] = position
 
     range[8] = Tv
     range[9] = Tp
 
     range[14] = now
 
-    if range[7] && Math.abs(velocity) < @REST_THRESHOLD
-      range[7] = 0
-      return true
-    else if Math.abs(old - position) > @DISPLACEMENT_THRESHOLD
+    if range[7] && Math.abs(range[6]) < @REST_THRESHOLD
+      if position != goal
+        return goal
+      else
+        return
+
+    range[2] = position
+
+    if Math.abs(old - position) > @DISPLACEMENT_THRESHOLD
       range[7] = 1
       return position
 
-  complete: (value) ->
-    return window.zzz
+  complete: (range, value) ->
+    if range[7] && Math.abs(range[6]) < @REST_THRESHOLD
+      range[7] = 0
+      return true
 
   STEP: 0.001
   HALF: 0.0005
   MAX: 0.064
-  DISPLACEMENT_THRESHOLD: 0.001
-  REST_THRESHOLD: 0.001
+  DISPLACEMENT_THRESHOLD: 0.0001
+  REST_THRESHOLD: 0.0001
 
 
 module.exports = Transition

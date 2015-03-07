@@ -295,8 +295,8 @@ assert = chai.assert;
 expect = chai.expect;
 
 remove = function(el) {
-  var ref;
-  return el != null ? (ref = el.parentNode) != null ? ref.removeChild(el) : void 0 : void 0;
+  var _ref;
+  return el != null ? (_ref = el.parentNode) != null ? _ref.removeChild(el) : void 0 : void 0;
 };
 
 fixtures = document.getElementById('fixtures');
@@ -787,8 +787,8 @@ assert = chai.assert;
 expect = chai.expect;
 
 remove = function(el) {
-  var ref;
-  return el != null ? (ref = el.parentNode) != null ? ref.removeChild(el) : void 0 : void 0;
+  var _ref;
+  return el != null ? (_ref = el.parentNode) != null ? _ref.removeChild(el) : void 0 : void 0;
 };
 
 fixtures = null;
@@ -8072,8 +8072,8 @@ describe('Ranges', function() {
                 counter = 0;
                 engine.addEventListener('solved', listener = function(solution) {
                   if (++counter === 1) {
-                    return expect(solution.A).to.eql(0);
-                  } else if (solution.A === 1) {
+                    return expect(+solution.A).to.eql(0);
+                  } else if (+solution.A === 1) {
                     return engine.remove('tracking');
                   } else if (solution.A === null) {
                     engine.removeEventListener('solved', listener);
@@ -8090,7 +8090,7 @@ describe('Ranges', function() {
                   counter = 0;
                   engine.addEventListener('solved', listener = function(solution) {
                     if (++counter === 1) {
-                      return expect(solution.A).to.eql(0);
+                      return expect(+solution.A).to.eql(0);
                     } else if (solution.A === 1) {
                       return engine.remove('tracking');
                     } else if (solution.A === null) {
@@ -8109,8 +8109,8 @@ describe('Ranges', function() {
                   counter = 0;
                   engine.addEventListener('solved', listener = function(solution) {
                     if (++counter === 1) {
-                      return expect(solution.A).to.eql(0.5);
-                    } else if (solution.A === 1) {
+                      return expect(+solution.A).to.eql(0.5);
+                    } else if (+solution.A === 1) {
                       return engine.remove('tracking');
                     } else if (solution.A === null) {
                       engine.removeEventListener('solved', listener);
@@ -8128,8 +8128,8 @@ describe('Ranges', function() {
                 engine.addEventListener('solved', listener = function(solution) {
                   if (first) {
                     first = false;
-                    return expect(solution.A).to.eql(0);
-                  } else if (solution.A === 1) {
+                    return expect(+solution.A).to.eql(0);
+                  } else if (+solution.A === 1) {
                     return engine.remove('tracking');
                   } else if (solution.A === null) {
                     engine.removeEventListener('solved', listener);
@@ -8147,8 +8147,8 @@ describe('Ranges', function() {
                 counter = 0;
                 engine.addEventListener('solved', listener = function(solution) {
                   if (++counter === 1) {
-                    return expect(solution.A).to.eql(0);
-                  } else if (solution.A >= 1) {
+                    return expect(+solution.A).to.eql(0);
+                  } else if (+solution.A >= 1) {
                     return engine.remove('tracking');
                   } else if (solution.A === null) {
                     engine.removeEventListener('solved', listener);
@@ -8164,8 +8164,8 @@ describe('Ranges', function() {
                 counter = 0;
                 engine.addEventListener('solved', listener = function(solution) {
                   if (++counter === 1) {
-                    return expect(solution.A).to.eql(0);
-                  } else if (solution.A >= 1) {
+                    return expect(+solution.A).to.eql(0);
+                  } else if (+solution.A >= 1) {
                     return engine.remove('tracking');
                   } else if (solution.A === null) {
                     engine.removeEventListener('solved', listener);
@@ -8185,8 +8185,8 @@ describe('Ranges', function() {
                 counter = 0;
                 engine.addEventListener('solved', listener = function(solution) {
                   if (++counter === 1) {
-                    return expect(solution.A).not.to.eql(1);
-                  } else if (solution.A === 1) {
+                    return expect(+solution.A).not.to.eql(1);
+                  } else if (+solution.A === 1) {
                     return engine.remove('tracking');
                   } else if (solution.A === null) {
                     engine.removeEventListener('solved', listener);
@@ -8204,8 +8204,8 @@ describe('Ranges', function() {
                 engine.addEventListener('solved', listener = function(solution) {
                   if (first) {
                     first = false;
-                    return expect(solution.A).to.not.eql(-1);
-                  } else if (solution.A === 1) {
+                    return expect(+solution.A).to.not.eql(-1);
+                  } else if (+solution.A === 1) {
                     return engine.remove('tracking');
                   } else if (solution.A === null) {
                     engine.removeEventListener('solved', listener);
@@ -8224,8 +8224,8 @@ describe('Ranges', function() {
                 counter = 0;
                 engine.addEventListener('solved', listener = function(solution) {
                   if (++counter === 1) {
-                    return expect(solution.A).not.to.eql(1);
-                  } else if (solution.A >= 1) {
+                    return expect(+solution.A).not.to.eql(1);
+                  } else if (+solution.A >= 1) {
                     return engine.remove('tracking');
                   } else if (solution.A === null) {
                     engine.removeEventListener('solved', listener);
@@ -8242,8 +8242,8 @@ describe('Ranges', function() {
                 engine.addEventListener('solved', listener = function(solution) {
                   if (first) {
                     first = false;
-                    return expect(solution.A).to.eql(-1);
-                  } else if (solution.A >= 1) {
+                    return expect(+solution.A).to.eql(-1);
+                  } else if (+solution.A >= 1) {
                     return engine.remove('tracking');
                   } else if (solution.A === null) {
                     engine.removeEventListener('solved', listener);
@@ -8275,14 +8275,44 @@ describe('Ranges', function() {
       });
     });
     return describe('with transition range on the left', function() {
-      xdescribe('and static range on the right', function() {
-        return it('should map ranges over time', function() {});
+      describe('and static range on the right', function() {
+        return it('should map ranges over time', function() {
+          var first, listener;
+          first = true;
+          engine.addEventListener('solved', listener = function(solution) {
+            if (first) {
+              first = false;
+              expect(solution.A).to.eql(void 0);
+              return engine.remove('tracking');
+            } else if (solution.A === null) {
+              engine.removeEventListener('solved', listener);
+              return done();
+            }
+          });
+          engine.solve(['=', ['get', 'A'], ['map', ['spring', 10, 20], ['...', 0, 1]]], 'tracking');
+          return expect(engine.values.A).to.eql(void 0);
+        });
       });
       xdescribe('and update property on the right', function() {
         return it('should map ranges over time', function() {});
       });
-      xdescribe('and transition on the right', function() {
-        return it('should do nothing', function() {});
+      describe('and transition on the right', function() {
+        return it('should map ranges over time', function() {
+          var first, listener;
+          first = true;
+          engine.addEventListener('solved', listener = function(solution) {
+            if (first) {
+              first = false;
+              expect(solution.A).to.eql(void 0);
+              return engine.remove('tracking');
+            } else if (solution.A === null) {
+              engine.removeEventListener('solved', listener);
+              return done();
+            }
+          });
+          engine.solve(['=', ['get', 'A'], ['map', ['spring', 10, 20], ['...', 0, 1]]], 'tracking');
+          return expect(engine.values.A).to.eql(void 0);
+        });
       });
       return xdescribe('and spring on the right', function() {
         return it('should start transition', function() {});

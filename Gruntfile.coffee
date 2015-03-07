@@ -43,7 +43,7 @@ module.exports = ->
         files: ['spec/**/*.coffee']
         tasks: ['browserify:spec']
       src:
-        files: ['src/**/*.coffee']
+        files: ['src/**/*.coffee', '../engine/src/**/*.coffee']
         tasks: ['browserify:dist']
 
 

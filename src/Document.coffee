@@ -39,17 +39,16 @@ class Document extends Engine
 
     pretransform: (id) ->
       #if element = @identity[id]
-
       return @Matrix.rst(
-        @get(id, 'rotate-x')    || 0
-        @get(id, 'rotate-y')    || 0
-        @get(id, 'rotate-z')    || 0
-        @get(id, 'scale-x')     ? 1
-        @get(id, 'scale-y')     ? 1
-        @get(id, 'scale-z')     ? 1
-        @get(id, 'translate-x') || 0
-        @get(id, 'translate-y') || 0
-        @get(id, 'translate-z') || 0
+        +@get(id, 'rotate-x')    || 0
+        +@get(id, 'rotate-y')    || 0
+        +@get(id, 'rotate-z')    || 0
+        +(@get(id, 'scale-x')     ? 1)
+        +(@get(id, 'scale-y')     ? 1)
+        +(@get(id, 'scale-z')     ? 1)
+        +@get(id, 'translate-x') || 0
+        +@get(id, 'translate-y') || 0
+        +@get(id, 'translate-z') || 0
       )
 
 

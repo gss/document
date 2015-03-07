@@ -79,7 +79,6 @@ describe 'Perf', ->
           GSS.console.profile('100 serially')  
           listener = (e) ->       
             count++
-            #GSS.console.error(count)
             if count is 100
               engine.removeEventListener 'solve', listener
               GSS.console.profileEnd('100 serially')

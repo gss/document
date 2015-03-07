@@ -30,8 +30,8 @@ describe 'Ranges', ->
                 counter = 0
                 engine.addEventListener 'solved', listener = (solution) ->
                   if ++counter == 1
-                    expect(solution.A).to.eql(0)
-                  else if solution.A == 1
+                    expect(+solution.A).to.eql(0)
+                  else if +solution.A == 1
                     engine.remove('tracking')
                   else if solution.A == null
                     engine.removeEventListener('solved', listener)
@@ -57,7 +57,7 @@ describe 'Ranges', ->
                   counter = 0
                   engine.addEventListener 'solved', listener = (solution) ->
                     if ++counter == 1
-                      expect(solution.A).to.eql(0)
+                      expect(+solution.A).to.eql(0)
                     else if solution.A == 1
                       engine.remove('tracking')
                     else if solution.A == null
@@ -85,8 +85,8 @@ describe 'Ranges', ->
                   counter = 0
                   engine.addEventListener 'solved', listener = (solution) ->
                     if ++counter == 1
-                      expect(solution.A).to.eql(0.5)
-                    else if solution.A == 1
+                      expect(+solution.A).to.eql(0.5)
+                    else if +solution.A == 1
                       engine.remove('tracking')
                     else if solution.A == null
                       engine.removeEventListener('solved', listener)
@@ -113,8 +113,8 @@ describe 'Ranges', ->
                 engine.addEventListener 'solved', listener = (solution) ->
                   if first
                     first = false
-                    expect(solution.A).to.eql(0)
-                  else if solution.A == 1
+                    expect(+solution.A).to.eql(0)
+                  else if +solution.A == 1
                     engine.remove('tracking')
                   else if solution.A == null
                     engine.removeEventListener('solved', listener)
@@ -140,8 +140,8 @@ describe 'Ranges', ->
                 counter = 0
                 engine.addEventListener 'solved', listener = (solution) ->
                   if ++counter == 1
-                    expect(solution.A).to.eql(0)
-                  else if solution.A >= 1
+                    expect(+solution.A).to.eql(0)
+                  else if +solution.A >= 1
                     engine.remove('tracking')
                   else if solution.A == null
                     engine.removeEventListener('solved', listener)
@@ -167,8 +167,8 @@ describe 'Ranges', ->
                 counter = 0
                 engine.addEventListener 'solved', listener = (solution) ->
                   if ++counter == 1
-                    expect(solution.A).to.eql(0)
-                  else if solution.A >= 1
+                    expect(+solution.A).to.eql(0)
+                  else if +solution.A >= 1
                     engine.remove('tracking')
                   else if solution.A == null
                     engine.removeEventListener('solved', listener)
@@ -195,8 +195,8 @@ describe 'Ranges', ->
                 counter = 0
                 engine.addEventListener 'solved', listener = (solution) ->
                   if ++counter == 1
-                    expect(solution.A).not.to.eql(1)
-                  else if solution.A == 1
+                    expect(+solution.A).not.to.eql(1)
+                  else if +solution.A == 1
                     engine.remove('tracking')
                   else if solution.A == null
                     engine.removeEventListener('solved', listener)
@@ -220,8 +220,8 @@ describe 'Ranges', ->
                 engine.addEventListener 'solved', listener = (solution) ->
                   if first
                     first = false
-                    expect(solution.A).to.not.eql(-1)
-                  else if solution.A == 1
+                    expect(+solution.A).to.not.eql(-1)
+                  else if +solution.A == 1
                     engine.remove('tracking')
                   else if solution.A == null
                     engine.removeEventListener('solved', listener)
@@ -244,8 +244,8 @@ describe 'Ranges', ->
                 counter = 0
                 engine.addEventListener 'solved', listener = (solution) ->
                   if ++counter == 1
-                    expect(solution.A).not.to.eql(1)
-                  else if solution.A >= 1
+                    expect(+solution.A).not.to.eql(1)
+                  else if +solution.A >= 1
                     engine.remove('tracking')
                   else if solution.A == null
                     engine.removeEventListener('solved', listener)
@@ -267,8 +267,8 @@ describe 'Ranges', ->
                 engine.addEventListener 'solved', listener = (solution) ->
                   if first
                     first = false
-                    expect(solution.A).to.eql(-1)
-                  else if solution.A >= 1
+                    expect(+solution.A).to.eql(-1)
+                  else if +solution.A >= 1
                     engine.remove('tracking')
                   else if solution.A == null
                     engine.removeEventListener('solved', listener)
@@ -302,14 +302,57 @@ describe 'Ranges', ->
 
 
     describe 'with transition range on the left', ->
-      xdescribe 'and static range on the right', ->
+      describe 'and static range on the right', ->
         it 'should map ranges over time', ->
+          first = true
+          engine.addEventListener 'solved', listener = (solution) ->
+            if first
+              first = false
+              expect(solution.A).to.eql(undefined)
+              engine.remove('tracking')
+            else if solution.A == null
+              engine.removeEventListener('solved', listener)
+              done()
+
+          engine.solve(['=', ['get', 'A'], ['map', 
+            ['spring', 10, 20],
+            [
+              '...',
+              0,
+              1
+            ]
+          ]], 'tracking')
+
+          expect(engine.values.A).to.eql(undefined)
+          #expect(engine.ranges).to.be.eql(undefined)
+
 
       xdescribe 'and update property on the right', ->
         it 'should map ranges over time', ->
 
-      xdescribe 'and transition on the right', ->
-        it 'should do nothing', ->
+      describe 'and transition on the right', ->
+        it 'should map ranges over time', ->
+          first = true
+          engine.addEventListener 'solved', listener = (solution) ->
+            if first
+              first = false
+              expect(solution.A).to.eql(undefined)
+              engine.remove('tracking')
+            else if solution.A == null
+              engine.removeEventListener('solved', listener)
+              done()
+
+          engine.solve(['=', ['get', 'A'], ['map', 
+            ['spring', 10, 20],
+            [
+              '...',
+              0,
+              1
+            ]
+          ]], 'tracking')
+
+          expect(engine.values.A).to.eql(undefined)
+          #expect(engine.ranges).to.be.eql(undefined)
 
       xdescribe 'and spring on the right', ->
         it 'should start transition', ->
