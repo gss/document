@@ -888,24 +888,25 @@ describe('Ranges', function() {
       return expect(engine.output.solve(['>', ['...', 15, false], 10]).slice()).to.eql([15]);
     });
     it('should scale by starting point', function() {
-      expect(engine.output.solve(['<', 10, ['...', 0, 20, 0.75]]).slice().slice()).to.eql([10, 20, 0.5]);
-      expect(engine.output.solve(['<', 10, ['...', false, 5, 0.5]]).slice().slice()).to.eql([10, 5, 1.5]);
-      expect(engine.output.solve(['<', 10, ['...', false, 15, 0.5]]).slice().slice()).to.eql([10, 15, -0.5]);
+      expect(engine.output.solve(['<', 10, ['...', 0, 20, 0.75]]).slice()).to.eql([10, 20, 0.5]);
+      debugger;
+      expect(engine.output.solve(['<', 10, ['...', false, 5, 0.5]]).slice()).to.eql([10, 5, 1.5]);
+      expect(engine.output.solve(['<', 10, ['...', false, 15, 0.5]]).slice()).to.eql([10, 15, -0.5]);
       expect(engine.output.solve(['<', 10, ['...', 5, false, 0.5]])[2]).to.eql(0.75);
       return expect(engine.output.solve(['>', ['...', 15, false, 1], 10])[2]).to.eql(1);
     });
     it('should scale by ending point', function() {
-      expect(engine.output.solve(['<', ['...', 0, 20, 0.5], 10]).slice().slice()).to.eql([0, 10, 1]);
-      expect(engine.output.solve(['<', ['...', false, 5, 0.5], 10]).slice().slice()).to.eql([false, 5, 0.5]);
-      expect(engine.output.solve(['<', ['...', false, 15, 0.5], 10]).slice().slice()).to.eql([false, 10, 0.75]);
-      expect(engine.output.solve(['<', ['...', 5, false, 0.5], 10]).slice().slice()).to.eql([5, 10, -0.5]);
-      expect(engine.output.solve(['>', 10, ['...', 5, false, 0.5]]).slice().slice()).to.eql([5, 10, -0.5]);
+      expect(engine.output.solve(['<', ['...', 0, 20, 0.5], 10]).slice()).to.eql([0, 10, 1]);
+      expect(engine.output.solve(['<', ['...', false, 5, 0.5], 10]).slice()).to.eql([false, 5, 0.5]);
+      expect(engine.output.solve(['<', ['...', false, 15, 0.5], 10]).slice()).to.eql([false, 10, 0.75]);
+      expect(engine.output.solve(['<', ['...', 5, false, 0.5], 10]).slice()).to.eql([5, 10, -0.5]);
+      expect(engine.output.solve(['>', 10, ['...', 5, false, 0.5]]).slice()).to.eql([5, 10, -0.5]);
       return expect(engine.output.solve(['>', ['...', 15, false, 0.5], 10])[2]).to.eql(0.5);
     });
     describe('values', function() {
       return it('should create a range from two numbers', function() {
-        expect(engine.output.solve(['>', 30, 20]).slice().slice()).to.eql([20, false, 1.5]);
-        return expect(engine.output.solve(['>', 20, 40]).slice().slice()).to.eql([40, false, -.5]);
+        expect(engine.output.solve(['>', 30, 20]).slice()).to.eql([20, false, 1.5]);
+        return expect(engine.output.solve(['>', 20, 40]).slice()).to.eql([40, false, -.5]);
       });
     });
     return xdescribe('mapper', function() {
@@ -4611,6 +4612,34 @@ describe('End - to - End', function() {
             "md2": 71 / 4
           });
           return done();
+        });
+      });
+    });
+    describe('custom selectors with expressions', function() {
+      return it('should work', function(done) {
+        container = document.createElement('div');
+        container.style.left = 0;
+        container.style.top = 0;
+        container.style.position = 'absolute';
+        window.$engine = engine = new GSS(container);
+        document.body.appendChild(container);
+        container.innerHTML = "<p id=\"p1\"></p>\n<p id=\"p2\"></p>\n<p id=\"p3\"></p>\n<p id=\"p4\"></p>\n<p id=\"p5\"></p>\n<p id=\"p6\"></p>\n<p id=\"p7\"></p>\n<p id=\"p8\"></p>\n\n<style type=\"text/gss\">\n  p {\n    width: == 50;\n  }\n\n  p:even {\n    height: == 100;\n  }\n  p:odd {\n    height: == 50;\n  }\n</style>";
+        return engine.then(function(solution) {
+          expect(solution['$p1[height]']).to.eql(100);
+          expect(solution['$p2[height]']).to.eql(50);
+          expect(solution['$p3[height]']).to.eql(100);
+          expect(solution['$p4[height]']).to.eql(50);
+          expect(solution['$p5[height]']).to.eql(100);
+          expect(solution['$p6[height]']).to.eql(50);
+          expect(solution['$p7[height]']).to.eql(100);
+          expect(solution['$p8[height]']).to.eql(50);
+          engine.scope.innerHTML = "";
+          return engine.then(function(solution) {
+            expect(solution['$article1[width]']).to.eql(null);
+            expect(solution['$article2[width]']).to.eql(null);
+            expect(engine.values).to.eql({});
+            return done();
+          });
         });
       });
     });
@@ -8366,7 +8395,7 @@ describe('Ranges', function() {
         return it('should start transition', function() {});
       });
     });
-    return describe('with transition range on the left', function() {
+    describe('with transition range on the left', function() {
       describe('and static range on the right', function() {
         return xit('should map ranges over time', function(done) {
           var first, listener;
@@ -8391,22 +8420,38 @@ describe('Ranges', function() {
         return it('should map ranges over time', function() {});
       });
       xdescribe('and transition on the right', function() {
-        return it('should map ranges over time', function() {
+        return it('should map ranges over time', function() {});
+      });
+      return xdescribe('and spring on the right', function() {
+        return it('should start transition', function() {});
+      });
+    });
+    return describe('with spring range on the left', function() {
+      describe('and static range on the right', function() {
+        return xit('should map ranges over time', function(done) {
           var first, listener;
           first = true;
           engine.addEventListener('solved', listener = function(solution) {
             if (first) {
               first = false;
-              expect(solution.A).to.eql(void 0);
+              return expect(+solution.A).to.eql(0);
+            } else if (+solution.A === 1) {
               return engine.remove('tracking');
             } else if (solution.A === null) {
               engine.removeEventListener('solved', listener);
               return done();
             }
           });
-          engine.solve(['=', ['get', 'A'], ['map', ['spring', 10, 20], ['...', 0, 1]]], 'tracking');
-          return expect(engine.values.A).to.eql(void 0);
+          engine.solve(['=', ['get', 'A'], ['map', ['spring', 1000, 10], ['...', 0, 1]]], 'tracking');
+          expect(engine.values.A).to.not.eql(void 0);
+          return expect(engine.ranges).to.not.eql(void 0);
         });
+      });
+      xdescribe('and update property on the right', function() {
+        return it('should map ranges over time', function() {});
+      });
+      xdescribe('and transition on the right', function() {
+        return it('should map ranges over time', function() {});
       });
       return xdescribe('and spring on the right', function() {
         return it('should start transition', function() {});

@@ -15,6 +15,9 @@ class Transition extends Range.Progress
   @define #fixme?
     '...': Range['...'].prototype.execute
 
+  valueOf: ->
+    return @[2]
+    
   compute: (range, now, from) ->
     start = range[0] || 0
     end   = range[1] || 0
@@ -24,6 +27,11 @@ class Transition extends Range.Progress
   complete: (range, value) ->
     if value >= 1
       return true
+
+  #before: (args, engine, operation, continuation, scope) ->
+  #  if ranges = engine.ranges?[continuation]
+  #    if (index = ranges.indexof(operation)) > -1
+  #      return ranges[index + 2]
 
   update: (range, engine, operation, continuation, scope) ->
     now   = Date.now()
@@ -37,12 +45,8 @@ class Transition extends Range.Progress
       value = range[0]
 
     if value?
-      copy = range.slice()
+      copy = @copy(range)
       copy[2] = value
-      copy.valueOf = range.valueOf
-      copy.operation = range.operation
-      copy.continuation = range.continuation
-      copy.scope = range.scope
       @ascend(engine, operation, continuation, scope, copy, true)
 
     return @complete(range, value)
