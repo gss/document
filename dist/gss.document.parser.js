@@ -26431,9 +26431,12 @@ Stylesheet.Import = (function(superClass) {
     return result;
   };
 
-  Import.prototype.ascend = function(engine, operation, continuation, scope, result) {
+  Import.prototype.ascend = function(engine, operation, continuation, scope, result, ascender, ascending) {
     if (result.length === 0) {
       return;
+    }
+    if (ascender === 1 && ascending && ascending.scoped) {
+      scope = engine.getScopeElement(ascending);
     }
     this.schedule(engine, result, this.delimit(continuation, this.DESCEND), scope);
   };

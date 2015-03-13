@@ -5605,7 +5605,47 @@ describe('End - to - End', function() {
           }
         };
         engine.addEventListener('solve', listen);
-        return container.innerHTML = "<section id=\"s1\">\n  <article id=\"a1\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b1\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <!-- <img src=\"images/post2.jpg\"> -->\n       <div class=\"cover\"  ></div>\n       <div class=\"title\"  id=\"title1\" >\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n       <div class=\"source\"  >\n         <a href=\"http://www.entrepreneur.com/article/238255\">via entrepreneur.com</a>\n       </div>\n       <div class=\"author w-name w-avatar\"  >\n         <!-- <div class=\"name\">@d4tocchini</div> -->\n         <!-- <div class=\"avatar\" ></div> -->\n       </div>\n     </div>\n   </article>\n</section>\n<section id=\"s2\">\n  <style type=\"text/gss\" src=\"./fixtures/external-scoped-gss.gss\" scoped></style>\n  <article id=\"a2\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b2\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <!-- <img src=\"images/post2.jpg\"> -->\n       <div class=\"cover\"  ></div>\n       <div class=\"title\" id=\"title2\">\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n       <div class=\"source\"  >\n         <a href=\"http://www.entrepreneur.com/article/238255\">via entrepreneur.com</a>\n       </div>\n       <div class=\"author w-name w-avatar\"  >\n         <!-- <div class=\"name\">@d4tocchini</div> -->\n         <!-- <div class=\"avatar\" ></div> -->\n       </div>\n     </div>\n  </article>\n</section>\n\n";
+        return container.innerHTML = "<section id=\"s1\">\n  <article id=\"a1\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b1\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\"  id=\"title1\" >\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n   </article>\n</section>\n<section id=\"s2\">\n  <style type=\"text/gss\" src=\"./fixtures/external-scoped-gss.gss\" scoped></style>\n  <article id=\"a2\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b2\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\" id=\"title2\">\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n  </article>\n</section>\n";
+      });
+    });
+    describe("single imported scoped file with some selectors", function() {
+      return it('should compute', function(done) {
+        var counter, listen;
+        counter = 0;
+        listen = function(e) {
+          counter++;
+          if (counter === 1) {
+            expect(engine.values['$title1[width]']).to.eql(void 0);
+            expect(engine.values['$title2[width]']).to.eql(300);
+            return container.innerHTML = "";
+          } else {
+            expect(engine.values).to.eql({});
+            engine.removeEventListener('solve', listen);
+            return done();
+          }
+        };
+        engine.addEventListener('solve', listen);
+        return container.innerHTML = "<section id=\"s1\">\n  <article id=\"a1\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b1\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\"  id=\"title1\" >\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n   </article>\n</section>\n<section id=\"s2\">\n  <style type=\"text/gss\">\n    #s2 {\n      @import ./fixtures/external-scoped-gss.gss;\n    }\n  </style>\n  <article id=\"a2\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b2\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\" id=\"title2\">\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n  </article>\n</section>\n";
+      });
+    });
+    describe("imported file accessing parent scopes", function() {
+      return it('should compute', function(done) {
+        var counter, listen;
+        counter = 0;
+        listen = function(e) {
+          counter++;
+          if (counter === 1) {
+            expect(engine.values['$s1[width]']).to.eql(100);
+            expect(engine.values['$s2[width]']).to.eql(100);
+            return container.innerHTML = "";
+          } else {
+            expect(engine.values).to.eql({});
+            engine.removeEventListener('solve', listen);
+            return done();
+          }
+        };
+        engine.addEventListener('solve', listen);
+        return container.innerHTML = "<section id=\"s1\">\n  <style type=\"text/gss\" scoped>\n    &width == 100;\n  </style>\n  <article id=\"a1\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b1\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\"  id=\"title1\" >\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n   </article>\n</section>\n<section id=\"s2\">\n  <style type=\"text/gss\">\n    #s2 {\n      $ #s1 {\n        @import ./fixtures/external-ascending-gss.gss;\n      }\n    }\n  </style>\n  <article id=\"a2\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b2\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\" id=\"title2\">\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n  </article>\n</section>\n";
       });
     });
     describe("single scoped file", function() {
@@ -5627,6 +5667,27 @@ describe('End - to - End', function() {
         };
         engine.addEventListener('solve', listen);
         return container.innerHTML = "<div id=\"something\">\n  <link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n</div>";
+      });
+    });
+    describe("single imported file", function() {
+      return it('should compute', function(done) {
+        var counter, listen;
+        counter = 0;
+        listen = function(e) {
+          counter++;
+          if (counter === 1) {
+            expect(engine.values).to.eql({
+              "$something[external-file]": 1000
+            });
+            return container.innerHTML = "";
+          } else {
+            expect(engine.values).to.eql({});
+            engine.removeEventListener('solve', listen);
+            return done();
+          }
+        };
+        engine.addEventListener('solve', listen);
+        return container.innerHTML = "<style type=\"text/gss\">\n  #something { \n    @import ./fixtures/external-file.gss; \n  }\n</style>\n<div id=\"something\">\n</div>";
       });
     });
     describe("single file", function() {

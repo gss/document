@@ -451,9 +451,12 @@ class Stylesheet.Import extends Query
 
     return result
 
-  ascend: (engine, operation, continuation, scope, result) ->
+  ascend: (engine, operation, continuation, scope, result, ascender, ascending) ->
     if result.length == 0
       return
+
+    if ascender == 1 && ascending && ascending.scoped
+      scope = engine.getScopeElement(ascending)
 
     @schedule(engine, result, @delimit(continuation, @DESCEND), scope)
     return

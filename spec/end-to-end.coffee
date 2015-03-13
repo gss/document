@@ -2145,17 +2145,8 @@ describe 'End - to - End', ->
     <section id="s1">
       <article id="a1" class="post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC "  >
          <div id="b1" class="block media image w-cover landscape w-title w-source from-Twitter w-author">
-           <!-- <img src="images/post2.jpg"> -->
-           <div class="cover"  ></div>
            <div class="title"  id="title1" >
               3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website
-           </div>
-           <div class="source"  >
-             <a href="http://www.entrepreneur.com/article/238255">via entrepreneur.com</a>
-           </div>
-           <div class="author w-name w-avatar"  >
-             <!-- <div class="name">@d4tocchini</div> -->
-             <!-- <div class="avatar" ></div> -->
            </div>
          </div>
        </article>
@@ -2164,22 +2155,109 @@ describe 'End - to - End', ->
       <style type="text/gss" src="./fixtures/external-scoped-gss.gss" scoped></style>
       <article id="a2" class="post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC "  >
          <div id="b2" class="block media image w-cover landscape w-title w-source from-Twitter w-author">
-           <!-- <img src="images/post2.jpg"> -->
-           <div class="cover"  ></div>
            <div class="title" id="title2">
               3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website
-           </div>
-           <div class="source"  >
-             <a href="http://www.entrepreneur.com/article/238255">via entrepreneur.com</a>
-           </div>
-           <div class="author w-name w-avatar"  >
-             <!-- <div class="name">@d4tocchini</div> -->
-             <!-- <div class="avatar" ></div> -->
            </div>
          </div>
       </article>
     </section>
 
+"""
+
+
+
+
+    describe "single imported scoped file with some selectors", ->
+    
+      it 'should compute', (done) ->
+        counter = 0
+        listen = (e) ->     
+          counter++
+          if counter == 1
+            expect(engine.values['$title1[width]']).to.eql undefined
+            expect(engine.values['$title2[width]']).to.eql 300
+            container.innerHTML = ""
+          else
+            expect(engine.values).to.eql {}
+            engine.removeEventListener 'solve', listen
+            done()     
+                       
+        engine.addEventListener 'solve', listen
+    
+        container.innerHTML =  """
+    <section id="s1">
+      <article id="a1" class="post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC "  >
+         <div id="b1" class="block media image w-cover landscape w-title w-source from-Twitter w-author">
+           <div class="title"  id="title1" >
+              3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website
+           </div>
+         </div>
+       </article>
+    </section>
+    <section id="s2">
+      <style type="text/gss">
+        #s2 {
+          @import ./fixtures/external-scoped-gss.gss;
+        }
+      </style>
+      <article id="a2" class="post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC "  >
+         <div id="b2" class="block media image w-cover landscape w-title w-source from-Twitter w-author">
+           <div class="title" id="title2">
+              3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website
+           </div>
+         </div>
+      </article>
+    </section>
+
+"""
+
+
+    describe "imported file accessing parent scopes", ->
+    
+      it 'should compute', (done) ->
+        counter = 0
+        listen = (e) ->     
+          counter++
+          if counter == 1
+            expect(engine.values['$s1[width]']).to.eql 100
+            expect(engine.values['$s2[width]']).to.eql 100
+            container.innerHTML = ""
+          else
+            expect(engine.values).to.eql {}
+            engine.removeEventListener 'solve', listen
+            done()     
+                       
+        engine.addEventListener 'solve', listen
+    
+        container.innerHTML =  """
+    <section id="s1">
+      <style type="text/gss" scoped>
+        &width == 100;
+      </style>
+      <article id="a1" class="post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC "  >
+         <div id="b1" class="block media image w-cover landscape w-title w-source from-Twitter w-author">
+           <div class="title"  id="title1" >
+              3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website
+           </div>
+         </div>
+       </article>
+    </section>
+    <section id="s2">
+      <style type="text/gss">
+        #s2 {
+          $ #s1 {
+            @import ./fixtures/external-ascending-gss.gss;
+          }
+        }
+      </style>
+      <article id="a2" class="post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC "  >
+         <div id="b2" class="block media image w-cover landscape w-title w-source from-Twitter w-author">
+           <div class="title" id="title2">
+              3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website
+           </div>
+         </div>
+      </article>
+    </section>
 
 """
 
@@ -2203,6 +2281,33 @@ describe 'End - to - End', ->
         container.innerHTML =  """
             <div id="something">
               <link rel="stylesheet" type="text/gss" href="./fixtures/external-file.gss" scoped></link>
+            </div>
+          """
+
+    describe "single imported file", ->
+    
+      it 'should compute', (done) ->
+        counter = 0
+        listen = (e) ->     
+          counter++
+          if counter == 1
+            expect(engine.values).to.eql 
+              "$something[external-file]": 1000
+            container.innerHTML = ""
+          else
+            expect(engine.values).to.eql {}
+            engine.removeEventListener 'solve', listen
+            done()     
+                       
+        engine.addEventListener 'solve', listen
+    
+        container.innerHTML =  """
+            <style type="text/gss">
+              #something { 
+                @import ./fixtures/external-file.gss; 
+              }
+            </style>
+            <div id="something">
             </div>
           """
 
