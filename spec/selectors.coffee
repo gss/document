@@ -43,12 +43,18 @@ describe 'Selectors', ->
     it 'should group elements in comma', ->
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).path).to.eql('p.active')
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).selector).to.eql('p.active')
-      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).tail.command.path).to.eql('p')
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).tail).to.eql(undefined)
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).head.command.path).to.eql('p.active')
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).head.command.selector).to.eql('p.active')
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['tag', 'p']]).selector).to.eql('p.active,p')
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['tag', 'p']]).path).to.eql('p.active,p')
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['tag', 'p']]).head.command.selector).to.eql('p.active,p')
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['tag', 'p']]).head.command.path).to.eql('p.active,p')
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['tag', 'p']]).tail).to.eql(undefined)
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['~~', ['tag', 'p']]]).path).to.eql('p.active,p~~')
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['~~', ['tag', 'p']]]).selector).to.eql(undefined)
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['~~', ['tag', 'p']]]).head).to.eql(undefined)
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['~~', ['tag', 'p']]]).tail).to.eql(undefined)
 
       expect(engine.input.Command([',', ['.', ['~~'], 'active'], ['.', ['++'], 'active']]).selector).to.eql(undefined)
       expect(engine.input.Command([',', ['.', 'a'], ['.', [' ', ['$']], 'b']]).selector).to.eql(undefined)
@@ -123,17 +129,28 @@ describe 'Selectors', ->
       expect(e.command.path).to.eql('>p.active #button')
 
     it 'should group elements in comma', ->
-
+      expect(engine.input.Command([',', [['.', 'p']], [['.', 'active']]]).path).to.eql('.p,.active')
+      expect(engine.input.Command([',', [['.', 'p']], [['.', 'active']]]).selector).to.eql('.p,.active')
+      expect(engine.input.Command([',', [['.', 'p']], [['.', 'active']]]).head.command.selector).to.eql('.p,.active')
+      expect(engine.input.Command([',', [['.', 'p']], [['.', 'active']]]).tail).to.eql(undefined)
+      expect(engine.input.Command([',', ['.', 'p'], ['.', 'active']]).path).to.eql('.p,.active')
+      expect(engine.input.Command([',', ['.', 'p'], ['.', 'active']]).selector).to.eql('.p,.active')
+      expect(engine.input.Command([',', ['.', 'p'], ['.', 'active']]).head.command.selector).to.eql('.p,.active')
+      expect(engine.input.Command([',', ['.', 'p'], ['.', 'active']]).tail).to.eql(undefined)
+      
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], [['tag', 'p'], ['~~']]]).path).to.eql('p.active,p~~')
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).selector).to.eql('p.active,p')
+      expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).path).to.eql('p.active,p')
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']]]).path).to.eql('p.active')
       engine.input.Command(last = [',', [['tag', 'p'], ['.', 'active']]])
       expect(last.command.path).to.eql('p.active')
 
-      expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']]]).tail.command.path).to.eql('p.active')
+      expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']]]).tail).to.eql(undefined)
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']]]).head.command.path).to.eql('p.active')
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).path).to.eql('p.active,p')
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).selector).to.eql('p.active,p')
+      expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).tail).to.eql(undefined)
+      expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).head.command.path).to.eql('p.active,p')
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], [['tag', 'p'], ['~~']]]).selector).to.eql(undefined)
 
       expect(engine.input.Command([',', [['~~'], ['.', 'active']], [['++'], ['.', 'active']]]).selector).to.eql(undefined)

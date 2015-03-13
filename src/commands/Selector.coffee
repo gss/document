@@ -27,7 +27,7 @@ class Selector extends Query
     (((parent || @)[prefix + name] ||= {})[suffix] ||= []).push operation
     
     # Register every selector step within a composite selector
-    if @tail
+    if @head
       if context = operation.context
         if context.command.head == (parent || @).head 
           context.command.prepare(context, parent || @)
@@ -45,7 +45,7 @@ class Selector extends Query
     if ascender?
       args[0] = ascending
     else
-      @tail.command.contextualize(args, engine, @tail, continuation, scope)
+      @tail?.command.contextualize(args, engine, @tail, continuation, scope)
 
 
     command.log(args, engine, operation, continuation, scope, command.selecting && 'select' || 'match')
@@ -352,6 +352,9 @@ class Selector::Sequence extends Selector
       @selector = last.selector
       @tags = last.tags
 
+  selecting: true
+  tags: ['selector']
+
 for property, value of Query::Sequence::
   unless property == 'constructor' || property == 'retrieve' || property == 'type'
     Selector::Sequence::[property] = value
@@ -364,16 +367,20 @@ Selector::checkers.selector = (command, other, parent, operation) ->
     if other instanceof Selector.Combinator && operation[0] != ' '
       return
 
+
+  # Comma can only combine multiple native selectors
+  if parent[0] == ','
+    if operation.length == 1 && typeof operation[0] == 'object'
+      other = operation[0].command
+
+    return unless (other.selector || other.key) == other.path
+
   if !command.key && !other.selector && other.key != other.path
     return
 
   # Can't append combinator to qualifying selector 
   if selecting = command.selecting
     return unless other.selecting
-
-  # Comma can only combine multiple native selectors
-  if parent[0] == ','
-    return unless (other.selector || other.key) == other.path
 
   return true
 
@@ -388,14 +395,19 @@ Selector::mergers.selector = (command, other, parent, operation, inherited) ->
   command.head = parent
   command.tail = other.tail ||= operation
   command.tail.command.head = parent
+
+  if command.proxy
+    command.head = parent
+    command.tail = undefined
   
-  left = other.selector || other.key
-  right = command.selector || command.key
+  left = other.selector || other.key || other.path
+  right = command.selector || command.key# || command.path
   command.selector = 
     if inherited
       right + command.separator + left
     else
       left + right
+
   return true
 
 

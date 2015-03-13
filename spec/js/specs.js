@@ -4615,34 +4615,6 @@ describe('End - to - End', function() {
         });
       });
     });
-    describe('custom selectors with expressions', function() {
-      return it('should work', function(done) {
-        container = document.createElement('div');
-        container.style.left = 0;
-        container.style.top = 0;
-        container.style.position = 'absolute';
-        window.$engine = engine = new GSS(container);
-        document.body.appendChild(container);
-        container.innerHTML = "<p id=\"p1\"></p>\n<p id=\"p2\"></p>\n<p id=\"p3\"></p>\n<p id=\"p4\"></p>\n<p id=\"p5\"></p>\n<p id=\"p6\"></p>\n<p id=\"p7\"></p>\n<p id=\"p8\"></p>\n\n<style type=\"text/gss\">\n  p {\n    width: == 50;\n  }\n\n  p:even {\n    height: == 100;\n  }\n  p:odd {\n    height: == 50;\n  }\n</style>";
-        return engine.then(function(solution) {
-          expect(solution['$p1[height]']).to.eql(100);
-          expect(solution['$p2[height]']).to.eql(50);
-          expect(solution['$p3[height]']).to.eql(100);
-          expect(solution['$p4[height]']).to.eql(50);
-          expect(solution['$p5[height]']).to.eql(100);
-          expect(solution['$p6[height]']).to.eql(50);
-          expect(solution['$p7[height]']).to.eql(100);
-          expect(solution['$p8[height]']).to.eql(50);
-          engine.scope.innerHTML = "";
-          return engine.then(function(solution) {
-            expect(solution['$article1[width]']).to.eql(null);
-            expect(solution['$article2[width]']).to.eql(null);
-            expect(engine.values).to.eql({});
-            return done();
-          });
-        });
-      });
-    });
     describe('scoped order dependent selectors', function() {
       return it('should deliver', function(done) {
         container = document.createElement('div');
@@ -8509,12 +8481,18 @@ describe('Selectors', function() {
     return it('should group elements in comma', function() {
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).path).to.eql('p.active');
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).selector).to.eql('p.active');
-      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).tail.command.path).to.eql('p');
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).tail).to.eql(void 0);
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).head.command.path).to.eql('p.active');
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active']]).head.command.selector).to.eql('p.active');
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['tag', 'p']]).selector).to.eql('p.active,p');
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['tag', 'p']]).path).to.eql('p.active,p');
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['tag', 'p']]).head.command.selector).to.eql('p.active,p');
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['tag', 'p']]).head.command.path).to.eql('p.active,p');
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['tag', 'p']]).tail).to.eql(void 0);
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['~~', ['tag', 'p']]]).path).to.eql('p.active,p~~');
       expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['~~', ['tag', 'p']]]).selector).to.eql(void 0);
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['~~', ['tag', 'p']]]).head).to.eql(void 0);
+      expect(engine.input.Command([',', ['.', ['tag', 'p'], 'active'], ['~~', ['tag', 'p']]]).tail).to.eql(void 0);
       expect(engine.input.Command([',', ['.', ['~~'], 'active'], ['.', ['++'], 'active']]).selector).to.eql(void 0);
       expect(engine.input.Command([',', ['.', 'a'], ['.', [' ', ['$']], 'b']]).selector).to.eql(void 0);
       return expect(engine.input.Command([',', ['.', 'a'], ['.', ['$'], 'b']]).selector).to.eql(void 0);
@@ -8561,15 +8539,26 @@ describe('Selectors', function() {
     });
     return it('should group elements in comma', function() {
       var last;
+      expect(engine.input.Command([',', [['.', 'p']], [['.', 'active']]]).path).to.eql('.p,.active');
+      expect(engine.input.Command([',', [['.', 'p']], [['.', 'active']]]).selector).to.eql('.p,.active');
+      expect(engine.input.Command([',', [['.', 'p']], [['.', 'active']]]).head.command.selector).to.eql('.p,.active');
+      expect(engine.input.Command([',', [['.', 'p']], [['.', 'active']]]).tail).to.eql(void 0);
+      expect(engine.input.Command([',', ['.', 'p'], ['.', 'active']]).path).to.eql('.p,.active');
+      expect(engine.input.Command([',', ['.', 'p'], ['.', 'active']]).selector).to.eql('.p,.active');
+      expect(engine.input.Command([',', ['.', 'p'], ['.', 'active']]).head.command.selector).to.eql('.p,.active');
+      expect(engine.input.Command([',', ['.', 'p'], ['.', 'active']]).tail).to.eql(void 0);
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], [['tag', 'p'], ['~~']]]).path).to.eql('p.active,p~~');
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).selector).to.eql('p.active,p');
+      expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).path).to.eql('p.active,p');
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']]]).path).to.eql('p.active');
       engine.input.Command(last = [',', [['tag', 'p'], ['.', 'active']]]);
       expect(last.command.path).to.eql('p.active');
-      expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']]]).tail.command.path).to.eql('p.active');
+      expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']]]).tail).to.eql(void 0);
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']]]).head.command.path).to.eql('p.active');
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).path).to.eql('p.active,p');
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).selector).to.eql('p.active,p');
+      expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).tail).to.eql(void 0);
+      expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], ['tag', 'p']]).head.command.path).to.eql('p.active,p');
       expect(engine.input.Command([',', [['tag', 'p'], ['.', 'active']], [['tag', 'p'], ['~~']]]).selector).to.eql(void 0);
       expect(engine.input.Command([',', [['~~'], ['.', 'active']], [['++'], ['.', 'active']]]).selector).to.eql(void 0);
       expect(engine.input.Command([',', ['.', 'a'], [['$'], [' '], ['.', 'b']]]).selector).to.eql(void 0);

@@ -90,12 +90,6 @@ class Document extends Engine
     immediate:    true
     Properties:   require('./properties/Getters')
 
-    Length:       Document.Measurement.Length
-    Time:         Document.Measurement.Time
-    Frequency:    Document.Measurement.Frequency
-    Angle:        Document.Measurement.Angle
-    Percentage:   Document.Measurement.Percentage
-
     perform: ->
       if arguments.length < 4 && @data.subscribers
         @console.start('Measure', @values)
