@@ -435,6 +435,10 @@ class Stylesheet.Import extends Query
     @set engine, path, result
 
     contd = @delimit(continuation, @DESCEND)
+
+    if node.scoped
+      scope = engine.getScopeElement(node)
+
     # Subscribe to @parse
     @subscribe(engine, result, contd, scope, path)
     

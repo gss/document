@@ -5588,6 +5588,47 @@ describe('End - to - End', function() {
   });
   describe('External .gss files', function() {
     this.timeout(40000);
+    describe("single scoped file with some selectors", function() {
+      return it('should compute', function(done) {
+        var counter, listen;
+        counter = 0;
+        listen = function(e) {
+          counter++;
+          if (counter === 1) {
+            expect(engine.values['$title1[width]']).to.eql(void 0);
+            expect(engine.values['$title2[width]']).to.eql(300);
+            return container.innerHTML = "";
+          } else {
+            expect(engine.values).to.eql({});
+            engine.removeEventListener('solve', listen);
+            return done();
+          }
+        };
+        engine.addEventListener('solve', listen);
+        return container.innerHTML = "<section id=\"s1\">\n  <article id=\"a1\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b1\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <!-- <img src=\"images/post2.jpg\"> -->\n       <div class=\"cover\"  ></div>\n       <div class=\"title\"  id=\"title1\" >\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n       <div class=\"source\"  >\n         <a href=\"http://www.entrepreneur.com/article/238255\">via entrepreneur.com</a>\n       </div>\n       <div class=\"author w-name w-avatar\"  >\n         <!-- <div class=\"name\">@d4tocchini</div> -->\n         <!-- <div class=\"avatar\" ></div> -->\n       </div>\n     </div>\n   </article>\n</section>\n<section id=\"s2\">\n  <style type=\"text/gss\" src=\"./fixtures/external-scoped-gss.gss\" scoped></style>\n  <article id=\"a2\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b2\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <!-- <img src=\"images/post2.jpg\"> -->\n       <div class=\"cover\"  ></div>\n       <div class=\"title\" id=\"title2\">\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n       <div class=\"source\"  >\n         <a href=\"http://www.entrepreneur.com/article/238255\">via entrepreneur.com</a>\n       </div>\n       <div class=\"author w-name w-avatar\"  >\n         <!-- <div class=\"name\">@d4tocchini</div> -->\n         <!-- <div class=\"avatar\" ></div> -->\n       </div>\n     </div>\n  </article>\n</section>\n\n";
+      });
+    });
+    describe("single scoped file", function() {
+      return it('should compute', function(done) {
+        var counter, listen;
+        counter = 0;
+        listen = function(e) {
+          counter++;
+          if (counter === 1) {
+            expect(engine.values).to.eql({
+              "$something[external-file]": 1000
+            });
+            return container.innerHTML = "";
+          } else {
+            expect(engine.values).to.eql({});
+            engine.removeEventListener('solve', listen);
+            return done();
+          }
+        };
+        engine.addEventListener('solve', listen);
+        return container.innerHTML = "<div id=\"something\">\n  <link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n</div>";
+      });
+    });
     describe("single file", function() {
       return it('should compute', function(done) {
         var counter, listen;

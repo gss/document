@@ -1,0 +1,10 @@
+.post{
+   width: == 300 !strong;
+   height: == ^height;
+   .post .title{
+     font-size: = $md * 12;
+     width: == ^width;
+     height: == 22 * $md;
+     center-x: == ^center-x;
+   }
+}

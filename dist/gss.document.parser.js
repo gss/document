@@ -2317,6 +2317,7 @@ Engine = (function() {
       case 'HEAD':
         return document;
       case 'STYLE':
+      case 'LINK':
         if (node.scoped) {
           return this.getScopeElement(node.parentNode);
         }
@@ -3629,7 +3630,6 @@ Query = (function(_super) {
               if ((parent = engine.getScopeElement(scope.parentNode)) === engine.scope) {
                 return;
               }
-              return parent;
             }
             return scope._gss_id;
           }
@@ -26420,6 +26420,9 @@ Stylesheet.Import = (function(superClass) {
     path = result.command.source;
     this.set(engine, path, result);
     contd = this.delimit(continuation, this.DESCEND);
+    if (node.scoped) {
+      scope = engine.getScopeElement(node);
+    }
     this.subscribe(engine, result, contd, scope, path);
     this.subscribe(engine, result, contd, scope, node);
     if (result.command.users === 0) {
