@@ -3629,6 +3629,7 @@ Query = (function(_super) {
               if ((parent = engine.getScopeElement(scope.parentNode)) === engine.scope) {
                 return;
               }
+              return parent;
             }
             return scope._gss_id;
           }

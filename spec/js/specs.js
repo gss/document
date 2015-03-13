@@ -5541,6 +5541,53 @@ describe('End - to - End', function() {
   });
   describe('External .gss files', function() {
     this.timeout(40000);
+    describe("single scoped file", function() {
+      return it('should compute', function(done) {
+        var counter, listen;
+        counter = 0;
+        listen = function(e) {
+          counter++;
+          if (counter === 1) {
+            expect(engine.values).to.eql({
+              "$something[external-file]": 1000
+            });
+            return container.innerHTML = "";
+          } else {
+            expect(engine.values).to.eql({});
+            engine.removeEventListener('solve', listen);
+            return done();
+          }
+        };
+        engine.addEventListener('solve', listen);
+        return container.innerHTML = "<div id=\"something\">\n  <link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n</div>";
+      });
+    });
+    return describe("multiple files", function() {
+      return it('should compute', function(done) {
+        var counter, listen;
+        counter = 0;
+        listen = function(e) {
+          counter++;
+          if (counter === 1) {
+            expect(engine.values).to.eql({
+              "external-file": 1000,
+              "external-file-2": 2000,
+              "external-file-3": 3000
+            });
+            return container.innerHTML = "";
+          } else {
+            expect(engine.values).to.eql({});
+            engine.removeEventListener('solve', listen);
+            return done();
+          }
+        };
+        engine.addEventListener('solve', listen);
+        return container.innerHTML = "<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-2.gss\" scoped></link>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-3.gss\" scoped></link>";
+      });
+    });
+  });
+  describe('External .gss files', function() {
+    this.timeout(40000);
     describe("single file", function() {
       return it('should compute', function(done) {
         var counter, listen;
