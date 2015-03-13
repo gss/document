@@ -1,6 +1,13 @@
 class Styles
   constructor: (@engine) ->
 
+  content: [
+    ->
+      console.log(123)
+
+    content: ['String', 'Variable']
+  ]
+
   # Transforms L2-like individual properties
   rotate: [
     task:    'pretransform'

@@ -25908,7 +25908,7 @@ Stylesheet = (function(superClass) {
   Stylesheet.CanonicalizeSelectorRegExp = new RegExp("[$][a-z0-9]+[" + Command.prototype.DESCEND + "]\\s*", "gi");
 
   Stylesheet.prototype.update = function(engine, operation, property, value, stylesheet, rule) {
-    var body, generated, index, j, len, needle, ops, other, previous, prop, ref, rules, selectors, sheet, watchers;
+    var body, generated, i, index, j, len, needle, ops, other, previous, prop, ref, rules, selectors, sheet, watchers;
     watchers = this.getWatchers(engine, stylesheet);
     if (!(sheet = stylesheet.sheet)) {
       if ((ref = stylesheet.parentNode) != null) {
@@ -25943,7 +25943,11 @@ Stylesheet = (function(superClass) {
     index = previous.length;
     generated = rules[index];
     if (generated && (needle !== operation.index || value === '' || (other === rule && index !== needle))) {
-      generated.style[property] = value;
+      if ((i = value.indexOf('!important')) > -1) {
+        generated.style.setProperty(property, value.substring(0, i), 'important');
+      } else {
+        generated.style[property] = value;
+      }
       if (generated.style.length === 0) {
         sheet.deleteRule(index);
       }

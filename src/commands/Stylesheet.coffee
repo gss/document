@@ -70,7 +70,12 @@ class Stylesheet extends Command.List
     index = previous.length
     generated = rules[index]
     if generated && (needle != operation.index || value == '' || (other == rule && index != needle))
-      generated.style[property] = value
+      
+      if (i = value.indexOf('!important')) > -1
+        generated.style.setProperty(property, value.substring(0, i), 'important')
+      else
+        generated.style[property] = value
+      
       if generated.style.length == 0
         sheet.deleteRule(index)
     else
