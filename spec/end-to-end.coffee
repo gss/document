@@ -886,22 +886,117 @@ describe 'End - to - End', ->
                           """
                         done()
 
-    xdescribe 'imported', ->
+    describe 'scoped + css', ->
       it 'should dump', (done) ->
         container.innerHTML =  """
-          <div class="outer">
+          <div class="outer" id="azaza">
+            <style scoped src="./fixtures/external-file-css1.gss" type="text/gss"></style>
+            <button></button>
+            <button></button>
+          </div>  
+          <div class="outie" id="outzor">
+            <style scoped src="./fixtures/external-file-css1.gss" type="text/gss"></style>
             <button></button>
             <button></button>
           </div>
-          <div class="outie">
-            <button></button>
-            <button></button>
+          """
+        engine.once 'solve', ->
+          expect(getSource(engine.tag('style')[1])).to.equal """
+            #azaza button{z-index:1;}
+            """
+          expect(getSource(engine.tag('style')[3])).to.equal """
+            #outzor button{z-index:1;}
+            """
+          for el in engine.scope.querySelectorAll('#azaza button') by -1
+            el.parentNode.removeChild(el)
+
+          engine.then ->
+            expect(getSource(engine.tag('style')[1])).to.equal ""
+            expect(getSource(engine.tag('style')[3])).to.equal """
+              #outzor button{z-index:1;}
+              """
+            done()
+
+    describe 'imported and scoped', ->
+      it 'should dump', (done) ->
+        container.innerHTML =  """
+          <div id="something">
+            <div class="outer">
+              <button></button>
+              <button></button>
+            </div>
+            <div class="outie">
+              <button></button>
+              <button></button>
+            </div>
+            <style type="text/gss" scoped>
+              .outer, .outie {
+                @import fixtures/external-file-css1.gss;
+              }
+            </style>
           </div>
-          <style type="text/gss" scoped>
-            .outer, .outie {
-              @import fixtures/external-file-css1.gss;
-            }
-          </style>
+          <div id="otherthing">
+            <div class="outer">
+              <button></button>
+              <button></button>
+            </div>
+            <div class="outie">
+              <button></button>
+              <button></button>
+            </div>
+            <style type="text/gss" scoped>
+              .outer, .outie {
+                @import fixtures/external-file-css1.gss;
+              }
+            </style>
+          </div>
+          """
+        engine.once 'solve', ->
+          expect(engine.tag('style').length).to.eql(4)
+          expect(getSource(engine.tag('style')[1])).to.equal """
+            #something .outer button, #something .outie button{z-index:1;}
+            """
+          expect(getSource(engine.tag('style')[3])).to.equal """
+            #otherthing .outer button, #otherthing .outie button{z-index:1;}
+            """
+          for el in engine.tag('div')
+            el.setAttribute('class', '')
+
+          engine.then ->
+            expect(engine.tag('style').length).to.eql(4)
+            expect(getSource(engine.tag('style')[1])).to.equal """"""
+            expect(getSource(engine.tag('style')[3])).to.equal """"""
+            engine.tag('div')[1].setAttribute('class', 'outer')
+            
+            engine.then ->
+              expect(engine.tag('style').length).to.eql(4)
+              expect(getSource(engine.tag('style')[1])).to.equal """
+                #something .outer button, #something .outie button{z-index:1;}
+                """
+              expect(getSource(engine.tag('style')[3])).to.equal """"""
+              done()
+
+
+    describe 'imported', ->
+      it 'should dump', (done) ->
+        container.innerHTML =  """
+          <div id="something">
+            <div class="outer">
+              <button></button>
+              <button></button>
+            </div>
+            <div class="outie">
+              <button></button>
+              <button></button>
+            </div>
+            <style type="text/gss">
+              .outer, .outie {
+                @import fixtures/external-file-css1.gss;
+
+                opacity: 1;
+              }
+            </style>
+          </div>
           """
         engine.once 'solve', ->
           expect(getSource(engine.tag('style')[1])).to.equal """
@@ -911,8 +1006,7 @@ describe 'End - to - End', ->
             el.className = ''
 
           engine.then ->
-            expect(getSource(engine.tag('style')[1])).to.equal """
-              """
+            expect(getSource(engine.tag('style')[1])).to.equal """"""
             engine.tag('div')[0].className = 'outer'
             
             engine.then ->
@@ -920,6 +1014,8 @@ describe 'End - to - End', ->
                 .outer button, .outie button{z-index:1;}
                 """
               done()
+
+
 
   
   # CCSS

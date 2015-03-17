@@ -32,7 +32,7 @@ describe 'Domain', ->
         document.body.removeChild(el)
 
 
-  describe 'solvers in worker', ->
+  describe 'solvers html in worker ', ->
     @timeout 60000
 
 

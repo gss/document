@@ -29,7 +29,7 @@ class Selector extends Query
     # Register every selector step within a composite selector
     if @head
       if context = operation.context
-        if context.command.head == (parent || @).head 
+        if context.command.tail == (parent || @).tail 
           context.command.prepare(context, parent || @)
       for argument in operation
         if argument.command?.head == (parent || @).head
@@ -823,7 +823,7 @@ Selector.define
       sy = engine.data.watch(engine.scope, 'scroll-top',      operation, continuation, scope) - (offset || 0)
       sh = engine.data.watch(engine.scope, property,          operation, continuation, scope) + (offset || 0) * 2
 
-      if (ey <= sy && ey + eh > sy + sh)  || # mid
+      if (ey <= sy && ey + eh >= sy + sh)  || # mid
          (ey > sy && ey < sy + sh)        || # top
          (ey + eh > sy && ey + eh < sy + sh) # bottom
         return node

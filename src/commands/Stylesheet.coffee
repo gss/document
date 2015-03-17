@@ -101,8 +101,8 @@ class Stylesheet extends Command.List
     path = continuation
     boundary = path.lastIndexOf('@import')
     index = path.indexOf(@DESCEND, boundary)
-    if boundary > -1
-      prefix = @getCanonicalSelector(path.substring(0, boundary))
+    if boundary > -1 && path.indexOf(@DESCEND) + 1 != boundary
+      prefix = engine.Query::getCanonicalPath(path.substring(0, boundary))
       path = prefix + continuation.substring(boundary, index)
     else
       path = path.substring(0, index)
@@ -112,6 +112,10 @@ class Stylesheet extends Command.List
         continuation = continuation.substring(0, index)
       sheet = engine.stylesheets[path] = document.createElement('STYLE')
       if anchor = engine.Query::getByPath(engine, continuation)
+        if anchor.scoped?
+          if scope = engine.getScopeElement(anchor.parentNode)
+            if scope.nodeType == 1
+              sheet.scoping = scope.id
 
         if imported = engine.imported[anchor._gss_id]
           sheet.selectors = imported[path]
@@ -194,7 +198,11 @@ class Stylesheet extends Command.List
     return sheet.join('')
 
   getSelector: (stylesheet, operation) ->
-    return @getSelectors(stylesheet, operation).join(', ')
+    selectors = @getSelectors(stylesheet, operation)
+    if stylesheet.scoping
+      for selector, index in selectors
+        selectors[index] = '#' + stylesheet.scoping + ' ' + selector
+    return selectors.join(', ')
 
   getSelectors: (stylesheet, operation) ->
     parent = operation
@@ -372,31 +380,32 @@ class Stylesheet.Import extends Query
         command = stylesheet.command
         if stylesheet.length
           stylesheet.splice(0)
-          if node.parentNode
-            command.users = 0
-            @uncontinuate(engine, path)
-            if text
-              stylesheet.push.apply(stylesheet, command.parse(engine, type, text))
-              @continuate(engine, path)
-              return
-          else
-            @clean(engine, path)
-            return 
+          if node
+            if node.parentNode
+              command.users = 0
+              @uncontinuate(engine, path)
+              if text
+                stylesheet.push.apply(stylesheet, command.parse(engine, type, text))
+                @continuate(engine, path)
+                return
+            else
+              @clean(engine, path)
+              return 
       else
         stylesheet = []
         command = stylesheet.command = new Stylesheet(engine, operation, continuation, node)
         command.key = @getGlobalPath(engine, operation, continuation, node, 'import')
         command.source = path
 
-        if node?.getAttribute('scoped')?
-          node.scoped = command.scoped = true
+      if node?.getAttribute('scoped')?
+        node.scoped = command.scoped = true
 
 
       if (index = continuation.indexOf(@DESCEND)) > -1
         left = continuation.substring(0, index)
         if anchor = engine.Query::getByPath(engine, left)
-          if anchor.tagName == 'STYLE'
-            left = engine.Stylesheet::getCanonicalSelector(continuation) + command.key
+          if anchor.tagName == 'STYLE' || anchor.tagName == 'LINK'
+            left = engine.Query::getCanonicalPath(continuation) + command.key
             imported = engine.imported[anchor._gss_id] ||= {}
             imported[left] = engine.Stylesheet::getSelectors(null, operation)
       

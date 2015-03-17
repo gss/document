@@ -3895,7 +3895,7 @@ describe('Domain', function() {
       });
     });
   });
-  return describe('solvers in worker', function() {
+  return describe('solvers html in worker ', function() {
     this.timeout(60000);
     it('should receieve measurements from document to make substitutions', function(done) {
       var problem, root;
@@ -4535,9 +4535,57 @@ describe('End - to - End', function() {
         });
       });
     });
-    return xdescribe('imported', function() {
+    describe('scoped + css', function() {
       return it('should dump', function(done) {
-        container.innerHTML = "<div class=\"outer\">\n  <button></button>\n  <button></button>\n</div>\n<div class=\"outie\">\n  <button></button>\n  <button></button>\n</div>\n<style type=\"text/gss\" scoped>\n  .outer, .outie {\n    @import fixtures/external-file-css1.gss;\n  }\n</style>";
+        container.innerHTML = "<div class=\"outer\" id=\"azaza\">\n  <style scoped src=\"./fixtures/external-file-css1.gss\" type=\"text/gss\"></style>\n  <button></button>\n  <button></button>\n</div>  \n<div class=\"outie\" id=\"outzor\">\n  <style scoped src=\"./fixtures/external-file-css1.gss\" type=\"text/gss\"></style>\n  <button></button>\n  <button></button>\n</div>";
+        return engine.once('solve', function() {
+          var el, i, ref;
+          expect(getSource(engine.tag('style')[1])).to.equal("#azaza button{z-index:1;}");
+          expect(getSource(engine.tag('style')[3])).to.equal("#outzor button{z-index:1;}");
+          ref = engine.scope.querySelectorAll('#azaza button');
+          for (i = ref.length - 1; i >= 0; i += -1) {
+            el = ref[i];
+            el.parentNode.removeChild(el);
+          }
+          return engine.then(function() {
+            expect(getSource(engine.tag('style')[1])).to.equal("");
+            expect(getSource(engine.tag('style')[3])).to.equal("#outzor button{z-index:1;}");
+            return done();
+          });
+        });
+      });
+    });
+    describe('imported and scoped', function() {
+      return it('should dump', function(done) {
+        container.innerHTML = "<div id=\"something\">\n  <div class=\"outer\">\n    <button></button>\n    <button></button>\n  </div>\n  <div class=\"outie\">\n    <button></button>\n    <button></button>\n  </div>\n  <style type=\"text/gss\" scoped>\n    .outer, .outie {\n      @import fixtures/external-file-css1.gss;\n    }\n  </style>\n</div>\n<div id=\"otherthing\">\n  <div class=\"outer\">\n    <button></button>\n    <button></button>\n  </div>\n  <div class=\"outie\">\n    <button></button>\n    <button></button>\n  </div>\n  <style type=\"text/gss\" scoped>\n    .outer, .outie {\n      @import fixtures/external-file-css1.gss;\n    }\n  </style>\n</div>";
+        return engine.once('solve', function() {
+          var el, i, len, ref;
+          expect(engine.tag('style').length).to.eql(4);
+          expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
+          expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
+          ref = engine.tag('div');
+          for (i = 0, len = ref.length; i < len; i++) {
+            el = ref[i];
+            el.setAttribute('class', '');
+          }
+          return engine.then(function() {
+            expect(engine.tag('style').length).to.eql(4);
+            expect(getSource(engine.tag('style')[1])).to.equal("");
+            expect(getSource(engine.tag('style')[3])).to.equal("");
+            engine.tag('div')[1].setAttribute('class', 'outer');
+            return engine.then(function() {
+              expect(engine.tag('style').length).to.eql(4);
+              expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
+              expect(getSource(engine.tag('style')[3])).to.equal("");
+              return done();
+            });
+          });
+        });
+      });
+    });
+    return describe('imported', function() {
+      return it('should dump', function(done) {
+        container.innerHTML = "<div id=\"something\">\n  <div class=\"outer\">\n    <button></button>\n    <button></button>\n  </div>\n  <div class=\"outie\">\n    <button></button>\n    <button></button>\n  </div>\n  <style type=\"text/gss\">\n    .outer, .outie {\n      @import fixtures/external-file-css1.gss;\n\n      opacity: 1;\n    }\n  </style>\n</div>";
         return engine.once('solve', function() {
           var el, i, len, ref;
           expect(getSource(engine.tag('style')[1])).to.equal(".outer button, .outie button{z-index:1;}");
@@ -4547,7 +4595,7 @@ describe('End - to - End', function() {
             el.className = '';
           }
           return engine.then(function() {
-            expect(getSource(engine.tag('style')[1])).to.equal("              ");
+            expect(getSource(engine.tag('style')[1])).to.equal("");
             engine.tag('div')[0].className = 'outer';
             return engine.then(function() {
               expect(getSource(engine.tag('style')[1])).to.equal(".outer button, .outie button{z-index:1;}");
