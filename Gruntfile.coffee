@@ -40,7 +40,7 @@ module.exports = ->
     # Automated recompilation and testing when developing
     watch:
       spec:
-        files: ['spec/**/*.coffee']
+        files: ['spec/**/*.coffee', '../engine/spec/**/*.coffee']
         tasks: ['browserify:spec']
       src:
         files: ['src/**/*.coffee', '../engine/src/**/*.coffee']

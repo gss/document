@@ -85,9 +85,10 @@ class Stylesheet extends Command.List
     return true
 
   onClean: (engine, operation, query, watcher, subscope) ->
-    if @users && !--@users
-      engine.Query::clean(engine, @source)
+    if @users 
       engine.Query::unobserve(engine, @source, @delimit(query))
+      if !--@users
+        engine.Query::clean(engine, @source)
 
 
   getRule: (operation) ->
@@ -164,7 +165,7 @@ class Stylesheet extends Command.List
 
     meta = (watchers[operation.index] ||= [])
     if (i = meta.indexOf(continuation)) > -1
-      return i == 0
+      return false
 
     (watchers[continuation] ||= []).push(operation)
     return meta.push(continuation) == 1
@@ -378,23 +379,27 @@ class Stylesheet.Import extends Query
 
       if stylesheet = engine.queries[path]
         command = stylesheet.command
-        if stylesheet.length
-          stylesheet.splice(0)
-          if node
-            if node.parentNode
-              command.users = 0
-              @uncontinuate(engine, path)
-              if text
-                stylesheet.push.apply(stylesheet, command.parse(engine, type, text))
-                @continuate(engine, path)
-                return
-            else
-              @clean(engine, path)
-              return 
+        if node
+          if !node.parentNode || (text && command.text != text)
+            stylesheet.length = 0
+            if node
+              if node.parentNode
+                command.users = 0
+                @uncontinuate(engine, path)
+                if text
+                  stylesheet.push.apply(stylesheet, command.parse(engine, type, text))
+                  @continuate(engine, path)
+                  return
+              else
+                @clean(engine, path)
+
       else
         stylesheet = []
         command = stylesheet.command = new Stylesheet(engine, operation, continuation, node)
-        command.key = @getGlobalPath(engine, operation, continuation, node, 'import')
+        if text
+          command.key = ''
+        else
+          command.key = @getGlobalPath(engine, operation, continuation, node, 'import')
         command.source = path
 
       if node?.getAttribute('scoped')?
@@ -409,19 +414,22 @@ class Stylesheet.Import extends Query
             imported = engine.imported[anchor._gss_id] ||= {}
             imported[left] = engine.Stylesheet::getSelectors(null, operation)
       
-      if text
-        stylesheet.push.apply(stylesheet, command.parse(engine, type, text))
-
-      else unless command.resolver
-        engine.updating.block(engine)
-        command.resolver = (text) =>
-          command.resolver = undefined
+      unless stylesheet.length
+        if text
+          command.text = text
           stylesheet.push.apply(stylesheet, command.parse(engine, type, text))
-          @continuate(engine, command.source)
-          if engine.updating.unblock(engine) && async
-            engine.engine.commit()
-        @resolve src, method, command.resolver
-        async = true
+
+        else unless command.resolver
+          engine.updating.block(engine)
+          command.resolver = (text) =>
+            command.resolver = undefined
+            command.text = text
+            stylesheet.push.apply(stylesheet, command.parse(engine, type, text))
+            @continuate(engine, command.source)
+            if engine.updating.unblock(engine) && async
+              engine.engine.commit()
+          @resolve src, method, command.resolver
+          async = true
 
 
 
@@ -439,23 +447,25 @@ class Stylesheet.Import extends Query
 
   after: (args, result, engine, operation, continuation, scope) ->
     return result unless result?
+
     node = if args[0]?.nodeType == 1 then args[0] else scope
     path = result.command.source
     @set engine, path, result
 
+
     contd = @delimit(continuation, @DESCEND)
 
     if node.scoped
-      scope = engine.getScopeElement(node)
+      node = scope = engine.getScopeElement(node)
+
+    if result.command.users == 0
+      @continuate(engine, path)
 
     # Subscribe to @parse
     @subscribe(engine, result, contd, scope, path)
     
     # Subscribe to @import
     @subscribe(engine, result, contd, scope, node)
-
-    if result.command.users == 0
-      @continuate(engine, path)
 
 
     return result
@@ -467,7 +477,12 @@ class Stylesheet.Import extends Query
     if ascender == 1 && ascending && ascending.scoped
       scope = engine.getScopeElement(ascending)
 
-    @schedule(engine, result, @delimit(continuation, @DESCEND), scope)
+    if result.command.hasOwnProperty('resolver') && continuation.indexOf(result.command.key) == -1
+      continuation = @delimit(continuation, @DESCEND) + result.command.key
+    else
+      continuation = @delimit(continuation, @DESCEND)
+
+    @schedule(engine, result, continuation, scope)
     return
 
 

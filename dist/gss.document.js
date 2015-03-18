@@ -1889,6 +1889,7 @@ Engine = (function() {
     while (!(update.isDone() && !update.isDirty())) {
       this.triggerEvent('commit', update);
       if (update.blocking) {
+        update.reset();
         return update;
       }
       this.triggerEvent('assign', update);
@@ -2894,6 +2895,9 @@ Query = (function(_super) {
     id = engine.identify(node);
     observers = (_base = engine.engine.observers)[id] || (_base[id] = []);
     if (engine.indexOfTriplet(observers, operation, continuation, scope) === -1) {
+      if (id === '$6') {
+        debugger;
+      }
       if (typeof (_base1 = operation.command).prepare === "function") {
         _base1.prepare(operation);
       }
@@ -3009,7 +3013,7 @@ Query = (function(_super) {
   };
 
   Query.prototype.unobserve = function(engine, id, path, continuation, scope) {
-    var index, observers, query, refs, subscope, watcher, _base, _results;
+    var index, observers, query, refs, subscope, watcher, _base;
     if (typeof id === 'object') {
       observers = id;
       id = void 0;
@@ -3022,7 +3026,6 @@ Query = (function(_super) {
       refs = this.getVariants(path);
     }
     index = 0;
-    _results = [];
     while (watcher = observers[index]) {
       query = observers[index + 1];
       if (refs && refs.indexOf(query) === -1) {
@@ -3031,21 +3034,16 @@ Query = (function(_super) {
       }
       subscope = observers[index + 2];
       observers.splice(index, 3);
-      if (id != null) {
+      if ((id != null) && (engine.identity[id] != null)) {
         if (typeof (_base = watcher.command).onClean === "function") {
           _base.onClean(engine, watcher, query, watcher, subscope);
         }
         this.clean(engine, watcher, query, watcher, subscope, continuation);
         if (!observers.length) {
-          _results.push(delete engine.observers[id]);
-        } else {
-          _results.push(void 0);
+          delete engine.observers[id];
         }
-      } else {
-        _results.push(void 0);
       }
     }
-    return _results;
   };
 
   Query.prototype.snapshot = function(engine, key, collection) {
@@ -3605,7 +3603,7 @@ Query = (function(_super) {
     var index, observers, _base;
     observers = (_base = engine.pairs)[left] || (_base[left] = []);
     if ((index = engine.indexOfTriplet(observers, right, operation, scope)) !== -1) {
-      return observers.splice(index, 3);
+      return observesers.splice(index, 3);
     }
   };
 
@@ -3619,6 +3617,7 @@ Query = (function(_super) {
               if ((parent = engine.getScopeElement(scope.parentNode)) === engine.scope) {
                 return;
               }
+              return parent;
             }
             return scope._gss_id;
           }
@@ -4914,18 +4913,18 @@ Constraint = Command.extend({
     if (false) {
       engine.instance = void 0;
       engine.construct();
-      if (engine.constraints) {
-        _ref2 = engine.constraints;
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          constraint = _ref2[_k];
-          engine.Constraint.prototype.inject(engine, constraint);
-        }
-      }
       if (editing = engine.editing) {
         engine.editing = void 0;
         for (property in editing) {
           constraint = editing[property];
           engine.edit(engine.variables[property], engine.variables[property].value);
+        }
+      }
+      if (engine.constraints) {
+        _ref2 = engine.constraints;
+        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+          constraint = _ref2[_k];
+          engine.Constraint.prototype.inject(engine, constraint);
         }
       }
     } else {
@@ -5031,16 +5030,14 @@ Constraint = Command.extend({
           others = other.variables;
           for (path in vars) {
             variable = vars[path];
-            if (variable.domain === engine) {
-              if (others[path]) {
-                if (groupped && groupped !== group) {
-                  groupped.push.apply(groupped, group);
-                  groups.splice(groups.indexOf(group), 1);
-                } else {
-                  groupped = group;
-                }
-                break;
+            if (others[path]) {
+              if (groupped && groupped !== group) {
+                groupped.push.apply(groupped, group);
+                groups.splice(groups.indexOf(group), 1);
+              } else {
+                groupped = group;
               }
+              break;
             }
           }
           if (groups.indexOf(group) === -1) {
@@ -10016,9 +10013,11 @@ Stylesheet = (function(superClass) {
   };
 
   Stylesheet.prototype.onClean = function(engine, operation, query, watcher, subscope) {
-    if (this.users && !--this.users) {
-      engine.Query.prototype.clean(engine, this.source);
-      return engine.Query.prototype.unobserve(engine, this.source, this.delimit(query));
+    if (this.users) {
+      engine.Query.prototype.unobserve(engine, this.source, this.delimit(query));
+      if (!--this.users) {
+        return engine.Query.prototype.clean(engine, this.source);
+      }
     }
   };
 
@@ -10132,7 +10131,7 @@ Stylesheet = (function(superClass) {
     watchers = this.getWatchers(engine, stylesheet);
     meta = (watchers[name1 = operation.index] || (watchers[name1] = []));
     if ((i = meta.indexOf(continuation)) > -1) {
-      return i === 0;
+      return false;
     }
     (watchers[continuation] || (watchers[continuation] = [])).push(operation);
     return meta.push(continuation) === 1;
@@ -10410,27 +10409,32 @@ Stylesheet.Import = (function(superClass) {
       path = this.getGlobalPath(engine, operation, continuation, node);
       if (stylesheet = engine.queries[path]) {
         command = stylesheet.command;
-        if (stylesheet.length) {
-          stylesheet.splice(0);
-          if (node) {
-            if (node.parentNode) {
-              command.users = 0;
-              this.uncontinuate(engine, path);
-              if (text) {
-                stylesheet.push.apply(stylesheet, command.parse(engine, type, text));
-                this.continuate(engine, path);
-                return;
+        if (node) {
+          if (!node.parentNode || (text && command.text !== text)) {
+            stylesheet.length = 0;
+            if (node) {
+              if (node.parentNode) {
+                command.users = 0;
+                this.uncontinuate(engine, path);
+                if (text) {
+                  stylesheet.push.apply(stylesheet, command.parse(engine, type, text));
+                  this.continuate(engine, path);
+                  return;
+                }
+              } else {
+                this.clean(engine, path);
               }
-            } else {
-              this.clean(engine, path);
-              return;
             }
           }
         }
       } else {
         stylesheet = [];
         command = stylesheet.command = new Stylesheet(engine, operation, continuation, node);
-        command.key = this.getGlobalPath(engine, operation, continuation, node, 'import');
+        if (text) {
+          command.key = '';
+        } else {
+          command.key = this.getGlobalPath(engine, operation, continuation, node, 'import');
+        }
         command.source = path;
       }
       if ((node != null ? node.getAttribute('scoped') : void 0) != null) {
@@ -10446,22 +10450,26 @@ Stylesheet.Import = (function(superClass) {
           }
         }
       }
-      if (text) {
-        stylesheet.push.apply(stylesheet, command.parse(engine, type, text));
-      } else if (!command.resolver) {
-        engine.updating.block(engine);
-        command.resolver = (function(_this) {
-          return function(text) {
-            command.resolver = void 0;
-            stylesheet.push.apply(stylesheet, command.parse(engine, type, text));
-            _this.continuate(engine, command.source);
-            if (engine.updating.unblock(engine) && async) {
-              return engine.engine.commit();
-            }
-          };
-        })(this);
-        this.resolve(src, method, command.resolver);
-        async = true;
+      if (!stylesheet.length) {
+        if (text) {
+          command.text = text;
+          stylesheet.push.apply(stylesheet, command.parse(engine, type, text));
+        } else if (!command.resolver) {
+          engine.updating.block(engine);
+          command.resolver = (function(_this) {
+            return function(text) {
+              command.resolver = void 0;
+              command.text = text;
+              stylesheet.push.apply(stylesheet, command.parse(engine, type, text));
+              _this.continuate(engine, command.source);
+              if (engine.updating.unblock(engine) && async) {
+                return engine.engine.commit();
+              }
+            };
+          })(this);
+          this.resolve(src, method, command.resolver);
+          async = true;
+        }
       }
       return stylesheet;
     }
@@ -10493,13 +10501,13 @@ Stylesheet.Import = (function(superClass) {
     this.set(engine, path, result);
     contd = this.delimit(continuation, this.DESCEND);
     if (node.scoped) {
-      scope = engine.getScopeElement(node);
+      node = scope = engine.getScopeElement(node);
     }
-    this.subscribe(engine, result, contd, scope, path);
-    this.subscribe(engine, result, contd, scope, node);
     if (result.command.users === 0) {
       this.continuate(engine, path);
     }
+    this.subscribe(engine, result, contd, scope, path);
+    this.subscribe(engine, result, contd, scope, node);
     return result;
   };
 
@@ -10510,7 +10518,12 @@ Stylesheet.Import = (function(superClass) {
     if (ascender === 1 && ascending && ascending.scoped) {
       scope = engine.getScopeElement(ascending);
     }
-    this.schedule(engine, result, this.delimit(continuation, this.DESCEND), scope);
+    if (result.command.hasOwnProperty('resolver') && continuation.indexOf(result.command.key) === -1) {
+      continuation = this.delimit(continuation, this.DESCEND) + result.command.key;
+    } else {
+      continuation = this.delimit(continuation, this.DESCEND);
+    }
+    this.schedule(engine, result, continuation, scope);
   };
 
   Import.prototype.write = function(engine, operation, continuation, scope, node) {

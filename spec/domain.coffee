@@ -77,8 +77,8 @@ describe 'Domain', ->
               "x": null
             , (solution) ->
               expect(solution).to.eql 
-                result: 0
-                x: 21
+                result: 21
+                x: 0
               root.removeChild(engine.id('box0'))
               engine.then (solution) ->
                 expect(solution).to.eql 

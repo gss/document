@@ -527,8 +527,8 @@ describe('Domain', function() {
       return expect(engine.solve({
         a: null
       })).to.eql({
-        result: 0,
-        a: -1
+        result: 1,
+        a: 0
       });
     });
   });
@@ -567,8 +567,8 @@ describe('Domain', function() {
               "x": null
             }, function(solution) {
               expect(solution).to.eql({
-                result: 0,
-                x: 21
+                result: 21,
+                x: 0
               });
               engine.remove('my_funny_tracker_path');
               return engine.then(function(solution) {
@@ -3928,8 +3928,8 @@ describe('Domain', function() {
               "x": null
             }, function(solution) {
               expect(solution).to.eql({
-                result: 0,
-                x: 21
+                result: 21,
+                x: 0
               });
               root.removeChild(engine.id('box0'));
               return engine.then(function(solution) {
@@ -4568,27 +4568,51 @@ describe('End - to - End', function() {
             el = ref[i];
             el.setAttribute('class', '');
           }
+          console.log('should be 4');
           return engine.then(function() {
             expect(engine.tag('style').length).to.eql(4);
             expect(getSource(engine.tag('style')[1])).to.equal("");
             expect(getSource(engine.tag('style')[3])).to.equal("");
             engine.tag('div')[1].setAttribute('class', 'outer');
+            console.log('should be 0');
             return engine.then(function() {
               expect(engine.tag('style').length).to.eql(4);
               expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
               expect(getSource(engine.tag('style')[3])).to.equal("");
-              return done();
+              engine.tag('div')[4].setAttribute('class', 'outie');
+              console.log('should be 1');
+              return engine.then(function() {
+                expect(engine.tag('style').length).to.eql(4);
+                expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
+                expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
+                console.log('should be 2');
+                engine.tag('div')[1].setAttribute('class', '');
+                return engine.then(function() {
+                  expect(engine.tag('style').length).to.eql(4);
+                  expect(getSource(engine.tag('style')[1])).to.equal("");
+                  expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
+                  engine.tag('div')[4].setAttribute('class', '');
+                  return engine.then(function() {
+                    expect(engine.tag('style').length).to.eql(4);
+                    expect(getSource(engine.tag('style')[1])).to.equal("");
+                    expect(getSource(engine.tag('style')[3])).to.equal("");
+                    return done();
+                  });
+                });
+              });
             });
           });
         });
       });
     });
-    return describe('imported', function() {
+    return describe('imported and unscoped', function() {
       return it('should dump', function(done) {
         container.innerHTML = "<div id=\"something\">\n  <div class=\"outer\">\n    <button></button>\n    <button></button>\n  </div>\n  <div class=\"outie\">\n    <button></button>\n    <button></button>\n  </div>\n  <style type=\"text/gss\">\n    .outer, .outie {\n      @import fixtures/external-file-css1.gss;\n\n      opacity: 1;\n    }\n  </style>\n</div>";
         return engine.once('solve', function() {
           var el, i, len, ref;
           expect(getSource(engine.tag('style')[1])).to.equal(".outer button, .outie button{z-index:1;}");
+          expect(getSource(engine.tag('style')[2])).to.equal(".outer, .outie{opacity:1;}");
+          expect(engine.tag('style').length).to.eql(3);
           ref = engine.tag('div');
           for (i = 0, len = ref.length; i < len; i++) {
             el = ref[i];
@@ -4596,10 +4620,29 @@ describe('End - to - End', function() {
           }
           return engine.then(function() {
             expect(getSource(engine.tag('style')[1])).to.equal("");
+            expect(getSource(engine.tag('style')[2])).to.equal("");
             engine.tag('div')[0].className = 'outer';
+            expect(engine.tag('style').length).to.eql(3);
             return engine.then(function() {
               expect(getSource(engine.tag('style')[1])).to.equal(".outer button, .outie button{z-index:1;}");
-              return done();
+              expect(getSource(engine.tag('style')[2])).to.equal(".outer, .outie{opacity:1;}");
+              expect(engine.tag('style').length).to.eql(3);
+              engine.tag('div')[2].className = 'outer';
+              return engine.then(function() {
+                var j, len1, ref1;
+                expect(engine.tag('style').length).to.eql(3);
+                expect(getSource(engine.tag('style')[1])).to.equal(".outer button, .outie button{z-index:1;}");
+                ref1 = engine.tag('div');
+                for (j = 0, len1 = ref1.length; j < len1; j++) {
+                  el = ref1[j];
+                  el.className = '';
+                }
+                return engine.then(function() {
+                  expect(getSource(engine.tag('style')[1])).to.equal("");
+                  expect(getSource(engine.tag('style')[2])).to.equal("");
+                  return done();
+                });
+              });
             });
           });
         });
@@ -7963,7 +8006,7 @@ DEMOS = {
   FACE_DETECTION_SECTION: "<section class=\"demo\">\n\n  <h1 class=\"title\" id=\"title\">We've already broken ground on more than 30 layout filters.</h1>\n  <h2 class=\"subtitle\">Before we invest the hard work of making each bullet-proof, we need to know this is wanted & needed, become a founding member & help us help you!</h2>\n  <img class=\"image\" src=\"image.png\">\n\n</section>\n\n<style type=\"text/gss\" scoped>\n  [md] == 72 !require;\n  [md-sub] == 8;\n  $[width] == $[intrinsic-width];\n\n\n  .demo {\n    @if $[width] < 500 {\n      .title {\n        &margin-top == [md-sub];\n      }\n    } @else {\n      .title {\n        &margin-top == [md];\n        &padding-top == ([md-sub] * 6) - 8;\n      }\n    }\n\n  }\n\n</style>\n",
   SCOPING: "<button id=\"box1\" class=\"box w-virtual\" onclick=\"\n  this.setAttribute('class', \n    'box ' + (this.className.indexOf('wo') > -1 ? 'w-virtual' : 'wo-virtual'))\">\n  <div class=\"innie\" id=\"innie1\" ></div>\n</button>\n<button id=\"box2\" class=\"box wo-virtual\" onclick=\"this.setAttribute('class', \n  'box ' + (this.className.indexOf('wo') > -1 && 'w-virtual' || 'wo-virtual'))\">\n  <div class=\"innie\" id=\"innie2\" ></div>\n</button>\n<button id=\"box3\" class=\"box w-virtual\" onclick=\"this.setAttribute('class', \n  'box ' + (this.className.indexOf('wo') > -1 && 'w-virtual' || 'wo-virtual'))\">\n  <div class=\"innie\" id=\"innie3\" ></div>\n</button>\n\n<style>\n* {\n  box-sizing: border-box;\n}\n\n.box {\n  background-color: hsl(220,50%,50%);\n}    \n.wo-virtual .innie {\n  background-color: hsl(360,100%,50%);\n}\n.w-virtual .innie {\n  background-color: hsl(180,100%,50%);\n}\n.w-virtual:after {\n  content: 'W/ SCOPED VIRTUAL';\n  font-size: 40px;\n  top: 32px;\n  left: 32px;\n  position:absolute;\n}\n.wo-virtual:after {\n  content: 'W/O VIRTUAL';\n  font-size: 40px;\n  top: 32px;\n  left: 32px;\n  position:absolute;\n}\n\n</style>\n<style type=\"text/gss\">\n\n\n$[left] == 0;\n$[top] == 0;\n$[height] == $[intrinsic-height];\n$[width] == $[intrinsic-width];\n\n.box {\n  \"zone\" {\n    @h |-(&)-| in(&.w-virtual) gap(20);\n    @h |(&.w-virtual .innie)|;\n  }\n}\n\n.box.w-virtual {\n  @v |-(&\"zone\")-| in(&) gap(20);\n  @v |(& .innie)| in(&\"zone\");\n}\n.box.wo-virtual {\n  @h |-(& .innie)-| in(&) gap(20);\n  @v |-(& .innie)-| in(&) gap(20);\n}\n\n@v |-10-(.box)-20-... in($) {\n        \n  @h |~100~(&)~100~| in($);\n  \n  &[x] + 20 == &:next[x];\n  &[right] - 20 == &:next[right];\n  \n  height: == 300;\n  \n}\n\n</style>\n",
   GSS1: "<style scoped>\n  header {\n    background: orange;\n    height: 50px;\n  }\n\n  main {\n    background: yellow;\n    height: 100px;\n    z-index: 10;\n  }\n\n  footer {\n    background: red;\n    width: 10px;\n    height: 20px;\n  }\n\n  aside {\n    background: blue;\n    width: 100px;\n  }\n\n  ul li {\n    list-style: none;\n    background: green;\n    top: 5px;\n  }\n</style>\n<style type=\"text/gss\" scoped>\n  // plural selectors can be used as singular, a la jQ\n  [left-margin] == (main)[right];\n\n  // global condition with nested rules\n  @if (main)[top] > 50 {\n    main {\n      background: blue;\n    }\n  }\n  header {\n    ::[left] == 0;\n    // condition inside css rule\n    @if ($[intrinsic-width] > $[intrinsic-height]) {\n      ::[width] == $[intrinsic-width] / 4;\n      opacity: 0.5;\n    } @else {\n      ::[width] == $[intrinsic-width] / 2;\n      opacity: 0.75;\n    }\n  }\n  footer {\n    ::[top] == $(main)[height]; \n    ::[height] == $[intrinsic-height] * 2;\n  }\n\n  aside {\n    ::[left] == ($ main)[right];\n    ::[height] == 100;\n    ::[top] == $(header)[intrinsic-height] + $(header)[intrinsic-y];\n  }\n\n  main {\n    // Bind things to scroll position\n    ::[top] == $scroll-top;// + header[intrinsic-y];\n    ::[width] == $(aside)[intrinsic-width];\n    ::[left] == $(header)[right];\n\n    ::[height] == $[intrinsic-height] - $(header)[intrinsic-height];\n  } \n  // Custom combinators\n  ul li !~ li {\n\n    ::[height] == 30;\n    \n    // FIXME: Regular css style is never removed (needs specificity sorting and groupping);\n    background-color: yellowgreen;\n  }\n\n  // Chains\n  ul li {\n    // justify by using variable\n    ::[width] == $[li-width];\n    :previous[right] == &[left];\n    :last[right] == $[intrinsic-width] - 16;\n    :first[left] == 0;\n  }\n</style>\n\n\n<header id=\"header\"></header>\n<main id=\"main\">\n  <ul>\n    <li id=\"li1\">1</li>\n    <li id=\"li2\">2</li>\n    <li id=\"li3\">3</li>\n  </ul>\n</main>\n<aside id=\"aside\"></aside>\n<footer id=\"footer\"></footer>",
-  PROFILE_CARD: "  <style>\n    #profile-card-demo * { \n      box-sizing: border-box;\n      -webkit-box-sizing: border-box;\n      -moz-box-sizing: border-box;\n    }\n\n    #profile-card-demo {\n      background-color: hsl(3, 18%, 43%);\n    }\n\n    #profile-card-demo * {\n      -webkit-backface-visibility: hidden;\n      margin: 0px;\n      padding: 0px;\n      outline: none;\n    }\n\n    #background {\n      background-color: hsl(3, 18%, 43%);\n      position: absolute;\n      top: 0px;\n      bottom: 0px;\n      right: 0px;\n      left: 0px;\n      z-index: -1;\n      background-image: url('assets/cover.jpg');\n      background-size: cover;\n      background-position: 50% 50%;\n      opacity: .7;\n      -webkit-filter: blur(5px) contrast(.7);\n    }\n\n    #cover {\n      background-color: #ccc;\n      background-image: url('assets/cover.jpg');\n      background-size: cover;\n      background-position: 50% 50%;\n    }\n\n    #avatar {\n      background-image: url('assets/avatar.jpg');\n      background-size: cover;\n      background-position: 50% 50%;\n      border: 10px solid hsl(39, 40%, 90%);\n      box-shadow: 0 1px 1px hsla(0,0%,0%,.5);\n    }\n\n    #profile-card-demo h1 {\n      color: white;\n      text-shadow: 0 1px 1px hsla(0,0%,0%,.5);\n      font-size: 40px;\n      line-height: 1.5em;\n      font-family: \"adelle\",georgia,serif;\n      font-style: normal;\n      font-weight: 400;\n    }\n\n    #profile-card-demo button {\n      color: hsl(3, 18%, 43%);\n      background-color: hsl(39, 40%, 90%);\n      text-shadow: 0 1px hsla(3, 18%, 100%, .5);\n      font-family: \"proxima-nova-soft\",sans-serif;\n      font-style: normal;\n      font-weight: 700;\n      font-size: 14px;\n      text-transform:uppercase;\n      letter-spacing:.1em;\n      border: none;  \n    }\n\n    #profile-card-demo button.primary {\n      background-color: #e38f71;\n      color: white;\n      text-shadow: 0 -1px hsla(3, 18%, 43%, .5);\n    }\n\n    #profile-card-demo #profile-card, .card {\n      background-color: hsl(39, 40%, 90%);\n      border: 1px solid hsla(0,0%,100%,.6);\n      box-shadow: 0 5px 8px hsla(0,0%,0%,.3);  \n    }\n  </style>\n<style type=\"text/gss\" scoped>\n/* vars */\n[gap] == 20 !required;\n[flex-gap] >= [gap] * 2 !required;\n[radius] == 10 !required;\n[outer-radius] == [radius] * 2 !required;\n\n/* scope-as-window for tests */\n$[left] == 0;\n$[top] == 0;\n$[width] == $[intrinsic-width] !require;\n$[height] == $[intrinsic-height] !require;\n\n/* elements */\n#profile-card {      \n&width == $[width] - 480;            \n&height == $[height] - 480;\n&[center-x] == $[center-x];\n&[center-y] == $[center-y];        \n&border-radius == [outer-radius];\n}\n\n#avatar {\n&height == 160 !required;\n&width == ::[height];\n&border-radius == ::[height] / 2;        \n}\n\n#name {\n&height == ::[intrinsic-height] !required;\n&width == ::[intrinsic-width] !required;\n}\n\n#cover {\n&border-radius == [radius];\n}\n\nbutton {\n&width == ::[intrinsic-width] !required;\n&height == ::[intrinsic-height] !required;        \n&padding == [gap];\n&padding-top == [gap] / 2;\n&padding-bottom == [gap] / 2;\n&border-radius == [radius];\n}\n\n\n@h |~-~(#name)~-~| in(#cover) gap([gap]*2) !strong;\n\n/* landscape profile-card */\n@if #profile-card[width] >= #profile-card[height] {\n\n@v |\n    -\n    (#avatar)\n    -\n    (#name)\n    -\n   |\n  in(#cover)\n  gap([gap]) outer-gap([flex-gap]) {\n    &[center-x] == ($ #cover)[center-x];\n}\n\n@h |-10-(#cover)-10-|\n  in(#profile-card);\n\n@v |\n    -10-\n    (#cover)\n    -\n    (#follow)\n    -\n   |\n  in(#profile-card)\n  gap([gap]) !strong;\n\n#follow[center-x] == #profile-card[center-x];\n\n@h |-(#message)~-~(#follow)~-~(#following)-(#followers)-|\n  in(#profile-card)\n  gap([gap])\n  !strong {\n    :next[top] == &top;\n  }\n}\n\n/* portrait profile-card */\n@else {\n@v |\n    -\n    (#avatar)\n    -\n    (#name)\n    -\n    (#follow)\n    -\n    (#message)\n    -\n    (#following)\n    -\n    (#followers)\n    -\n   |\n  in(#cover)\n  gap([gap])\n  outer-gap([flex-gap]) !strong {\n    &[center-x] == ($ #profile-card)[center-x];\n}\n\n@h |-10-(#cover)-10-| in(#profile-card) !strong;\n@v |-10-(#cover)-10-| in(#profile-card) !strong;\n}\n\n  </style>\n  <div id=\"background\"></div>\n  <div id=\"profile-card\"></div>\n  <div id=\"cover\"></div>\n  <div id=\"avatar\"></div>\n  <h1 id=\"name\"><span>Dan Daniels</span></h1>\n  <button id=\"follow\" class=\"primary\">Follow</button>\n  <button id=\"following\">Following</button>\n  <button id=\"followers\">Followers</button>\n  <button id=\"message\">Message</button>",
+  PROFILE_CARD: "  <style>\n    #profile-card-demo * { \n      box-sizing: border-box;\n      -webkit-box-sizing: border-box;\n      -moz-box-sizing: border-box;\n    }\n\n    #profile-card-demo {\n      background-color: hsl(3, 18%, 43%);\n    }\n\n    #profile-card-demo * {\n      -webkit-backface-visibility: hidden;\n      margin: 0px;\n      padding: 0px;\n      outline: none;\n    }\n\n    #background {\n      background-color: hsl(3, 18%, 43%);\n      position: absolute;\n      top: 0px;\n      bottom: 0px;\n      right: 0px;\n      left: 0px;\n      z-index: -1;\n      background-image: url('assets/cover.jpg');\n      background-size: cover;\n      background-position: 50% 50%;\n      opacity: .7;\n      -webkit-filter: blur(5px) contrast(.7);\n    }\n\n    #cover {\n      background-color: #ccc;\n      background-image: url('assets/cover.jpg');\n      background-size: cover;\n      background-position: 50% 50%;\n    }\n\n    #avatar {\n      background-image: url('assets/avatar.jpg');\n      background-size: cover;\n      background-position: 50% 50%;\n      border: 10px solid hsl(39, 40%, 90%);\n      box-shadow: 0 1px 1px hsla(0,0%,0%,.5);\n    }\n\n    #profile-card-demo h1 {\n      color: white;\n      text-shadow: 0 1px 1px hsla(0,0%,0%,.5);\n      font-size: 40px;\n      line-height: 1.5em;\n      font-family: \"adelle\",georgia,serif;\n      font-style: normal;\n      font-weight: 400;\n    }\n\n    #profile-card-demo button {\n      color: hsl(3, 18%, 43%);\n      background-color: hsl(39, 40%, 90%);\n      text-shadow: 0 1px hsla(3, 18%, 100%, .5);\n      font-family: \"proxima-nova-soft\",sans-serif;\n      font-style: normal;\n      font-weight: 700;\n      font-size: 14px;\n      text-transform:uppercase;\n      letter-spacing:.1em;\n      border: none;  \n    }\n\n    #profile-card-demo button.primary {\n      background-color: #e38f71;\n      color: white;\n      text-shadow: 0 -1px hsla(3, 18%, 43%, .5);\n    }\n\n    #profile-card-demo #profile-card, .card {\n      background-color: hsl(39, 40%, 90%);\n      border: 1px solid hsla(0,0%,100%,.6);\n      box-shadow: 0 5px 8px hsla(0,0%,0%,.3);  \n    }\n  </style>\n<style type=\"text/gss\" scoped>\n/* vars */\n[gap] == 20 !required;\n[flex-gap] >= [gap] * 2 !required;\n[radius] == 10 !required;\n[outer-radius] == [radius] * 2 !required;\n\n/* scope-as-window for tests */\n$[left] == 0;\n$[top] == 0;\n$[width] == $[intrinsic-width] !require;\n$[height] == $[intrinsic-height] !require;\n\n/* elements */\n#profile-card {      \n&width == $[width] - 480 !strong;            \n&height == $[height] - 480;\n&[center-x] == $[center-x];\n&[center-y] == $[center-y];        \n&border-radius == [outer-radius];\n}\n\n#avatar {\n&height == 160 !required;\n&width == ::[height];\n&border-radius == ::[height] / 2;        \n}\n\n#name {\n&height == ::[intrinsic-height] !required;\n&width == ::[intrinsic-width] !required;\n}\n\n#cover {\n&border-radius == [radius];\n}\n\nbutton {\n&width == ::[intrinsic-width] !required;\n&height == ::[intrinsic-height] !required;        \n&padding == [gap];\n&padding-top == [gap] / 2;\n&padding-bottom == [gap] / 2;\n&border-radius == [radius];\n}\n\n\n@h |~-~(#name)~-~| in(#cover) gap([gap]*2) !strong;\n\n/* landscape profile-card */\n@if #profile-card[width] >= #profile-card[height] {\n\n@v |\n    -\n    (#avatar)\n    -\n    (#name)\n    -\n   |\n  in(#cover)\n  gap([gap]) outer-gap([flex-gap]) {\n    &[center-x] == ($ #cover)[center-x];\n}\n\n@h |-10-(#cover)-10-|\n  in(#profile-card);\n\n@v |\n    -10-\n    (#cover)\n    -\n    (#follow)\n    -\n   |\n  in(#profile-card)\n  gap([gap]) !strong;\n\n#follow[center-x] == #profile-card[center-x];\n\n@h |-(#message)~-~(#follow)~-~(#following)-(#followers)-|\n  in(#profile-card)\n  gap([gap])\n  !strong {\n    :next[top] == &top;\n  }\n}\n\n/* portrait profile-card */\n@else {\n@v |\n    -\n    (#avatar)\n    -\n    (#name)\n    -\n    (#follow)\n    -\n    (#message)\n    -\n    (#following)\n    -\n    (#followers)\n    -\n   |\n  in(#cover)\n  gap([gap])\n  outer-gap([flex-gap]) !strong {\n    &[center-x] == ($ #profile-card)[center-x];\n}\n\n@h |-10-(#cover)-10-| in(#profile-card) !strong;\n@v |-10-(#cover)-10-| in(#profile-card) !strong;\n}\n\n  </style>\n  <div id=\"background\"></div>\n  <div id=\"profile-card\"></div>\n  <div id=\"cover\"></div>\n  <div id=\"avatar\"></div>\n  <h1 id=\"name\"><span>Dan Daniels</span></h1>\n  <button id=\"follow\" class=\"primary\">Follow</button>\n  <button id=\"following\">Following</button>\n  <button id=\"followers\">Followers</button>\n  <button id=\"message\">Message</button>",
   ADAPTIVE_ASPECT: "<header id=\"header\">header</header>\n\n<article id=\"article\">\n  <p>ISTANBUL — Forty-nine Turkish hostages who had been held for months in Iraq by Islamic State militants were returned to Turkey on Saturday after what Turkey said was a covert operation led by its intelligence agency.</p>\n  <p>The hostages, including diplomats and their families, had been seized in June from the Turkish Consulate in Mosul, in northern Iraq.</p>\n  <p>“The Turkish intelligence agency has followed the situation very sensitively and patiently since the beginning and, as a result, conducted a successful rescue operation,” President Recep Tayyip Erdogan said in a statement Saturday.</p>\n  <p>The details of the hostages’ release were unclear. The semiofficial Turkish news agency Anadolu reported that Turkey had not paid ransom or engaged in a military operation, but said it had used drones to track the hostages, who had been moved at least eight times during their 101 days in captivity.</p>\n  <p>Times Topic: Islamic State in Iraq and Syria (ISIS) Back and Forth, Wearily, Across the ISIS BorderSEPT. 20, 2014 The agency said that Turkish intelligence teams had tried five times to rescue the hostages, but that each attempt had been thwarted by clashes in the area where they were being held.</p>\n  <p>An employee of the Turkish Consulate in Mosul was greeted by family members. Credit Reuters One senior American official, who asked not to be named, said Saturday that Turkey had not notified the United States before securing the return of the hostages, or made a specific request for American military help in connection with their release.</p>\n  <p>“I am sharing joyful news, which as a nation we have been waiting for,” Prime Minister Ahmet Davutoglu said in Baku, Azerbaijan, where he was on an official visit.</p>\n  <p>“After intense efforts that lasted days and weeks, in the early hours, our citizens were handed over to us and we brought them back to our country,” he said.</p>\n  <p>The prime minister left Baku for the Turkish province of Urfa, where the freed hostages, who included Consul General Ozturk Yilmaz, other diplomats, children and consulate guards, had been brought from Raqqa, Syria, the de facto headquarters of the Islamic State militants.</p>\n</article>\n\n<footer id=\"footer\">footer</footer>\n\n<style>\n* {\n  box-sizing: border-box;\n  margin: 0;      \n}\nhtml {\n  background-color: hsl(0,0%,95%);\n}\narticle {\n  background-color: hsl(0,0%,99%);\n  padding: 72px;\n  -webkit-column-width: 400px;\n  column-width: 400px;\n  overflow-x: " + (window.atob && 'auto' || 'hidden') + ";\n  font-size: 20px;\n  line-height: 30px;\n}\nheader {\n  background-color: hsl(0,0%,90%);\n  padding: 16px;\n  text-align: center;\n}\nfooter {\n  background-color: hsl(0,0%,85%);\n  padding: 16px;\n  text-align: center;\n}\np {\n  margin-bottom: 1em;\n}\n</style>\n<style type=\"text/gss\">\n// vertical article\n  \n$[left] == 0;\n$[top] == 0;\n$[height] == $[intrinsic-height];\n$[width] == $[intrinsic-width];\n$[article-gap] >= 16;\n\n@if $[intrinsic-width] < $[intrinsic-height] {\n  @h |-(article)-| gap($[article-gap]) in($) {\n    height: == &[intrinsic-height];\n    width: <= 800;        \n  }\n  @v |\n    -72-\n    (header)\n    (article)\n    (footer)\n    \n    in($);\n  \n  header, footer {\n    height: == 72;\n    @h |(&)| in($ article);\n  }\n}\n\n// horizontal article\n@else {\n  @v |-(article)-| gap($[article-gap]) in($) {\n    width: == &[intrinsic-width];\n    height: <= 600;   \n  }\n  \n  @h |\n    -16-\n    (header)\n    (footer)\n    (article)        \n    \n    in($);\n  \n  header, footer {\n    width: == 72;\n    @v |(&)| in($ article);\n  }\n}\n\n\n</style>\n"
 };
 
@@ -8218,13 +8261,12 @@ describe('Full page tests', function() {
               }
               container.setAttribute('style', 'height: 1024px; width: 768px; position: absolute; overflow: auto; left: 0; top: 0');
               return engine.then(function(solution) {
-                roughAssert(solution['flex-gap'], 109);
-                roughAssert(solution['$follow[y]'], 728);
-                roughAssert(solution['$follow[x]'], 240);
+                roughAssert(solution['flex-gap'], 40);
+                roughAssert(solution['$follow[y]'], 544);
+                roughAssert(solution['$follow[x]'], 320);
                 container.setAttribute('style', 'height: 1280px; width: 768px; position: absolute; overflow: auto; left: 0; top: 0');
                 return engine.then(function(solution) {
                   roughAssert(solution['$follow[y]'], 668);
-                  roughAssert(solution['$follow[x]'], 329.5);
                   roughAssert(solution['flex-gap'], 158);
                   container.setAttribute('style', 'height: 1024px; width: 768px; position: absolute; overflow: auto; left: 0; top: 0');
                   return engine.then(function(solution) {
