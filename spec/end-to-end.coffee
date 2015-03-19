@@ -962,13 +962,11 @@ describe 'End - to - End', ->
           for el in engine.tag('div')
             el.setAttribute('class', '')
 
-          console.log('should be 4')
           engine.then ->
             expect(engine.tag('style').length).to.eql(4)
             expect(getSource(engine.tag('style')[1])).to.equal """"""
             expect(getSource(engine.tag('style')[3])).to.equal """"""
             engine.tag('div')[1].setAttribute('class', 'outer')
-            console.log('should be 0')
             
             engine.then ->
               expect(engine.tag('style').length).to.eql(4)
@@ -977,7 +975,6 @@ describe 'End - to - End', ->
                 """
               expect(getSource(engine.tag('style')[3])).to.equal """"""
               engine.tag('div')[4].setAttribute('class', 'outie')
-              console.log('should be 1')
 
               engine.then ->
                 expect(engine.tag('style').length).to.eql(4)
@@ -987,7 +984,6 @@ describe 'End - to - End', ->
                 expect(getSource(engine.tag('style')[3])).to.equal  """
                   #otherthing .outer button, #otherthing .outie button{z-index:1;}
                   """
-                console.log('should be 2')
                 engine.tag('div')[1].setAttribute('class', '')
                 engine.then ->
                   expect(engine.tag('style').length).to.eql(4)
@@ -1000,7 +996,23 @@ describe 'End - to - End', ->
                     expect(engine.tag('style').length).to.eql(4)
                     expect(getSource(engine.tag('style')[1])).to.equal """"""
                     expect(getSource(engine.tag('style')[3])).to.equal  """"""
-                    done()
+                    for el in engine.tag('div')
+                      el.setAttribute('class', 'outer')
+                    engine.then ->
+                      expect(engine.tag('style').length).to.eql(4)
+                      expect(getSource(engine.tag('style')[1])).to.equal """
+                        #something .outer button, #something .outie button{z-index:1;}
+                        """
+                      expect(getSource(engine.tag('style')[3])).to.equal """
+                        #otherthing .outer button, #otherthing .outie button{z-index:1;}
+                        """
+                      for el in engine.tag('div')
+                        el.setAttribute('class', '')
+                      engine.then ->
+                        expect(engine.tag('style').length).to.eql(4)
+                        expect(getSource(engine.tag('style')[1])).to.equal """"""
+                        expect(getSource(engine.tag('style')[3])).to.equal  """"""
+                        done()
 
 
     describe 'imported and unscoped', ->

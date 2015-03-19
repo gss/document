@@ -8,7 +8,7 @@ remove = (el) ->
 
 fixtures = document.getElementById 'fixtures'
 
-xdescribe 'Conditions', ->
+describe 'Conditions', ->
   describe 'conditions that use', ->
     describe 'single selector', ->
       it 'should initialize condition once', ->
@@ -58,5 +58,24 @@ xdescribe 'Conditions', ->
           d: 2, 
           '$div1[x]': 100
           '$div2[x]': 100
-        solution = engine.solve({A: null})
-        expect(solution).to.eql {A: null, b: null, c: null}
+
+        solution = engine.solve({A: 50})
+        expect(solution).to.eql 
+          A: 50
+          b: null, 
+          c: 2,
+          d: 3, 
+          '$div1[x]': 50
+          '$div2[x]': 50
+
+        solution = engine.solve({A: 100})
+        expect(solution).to.eql 
+          A: 100
+          b: 1, 
+          c: 3,
+          d: 2, 
+          '$div1[x]': 100
+          '$div2[x]': 100
+        
+        #solution = engine.solve({A: null})
+        #expect(solution).to.eql {A: null, b: null, c: null}

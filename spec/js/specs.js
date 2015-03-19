@@ -301,7 +301,7 @@ remove = function(el) {
 
 fixtures = document.getElementById('fixtures');
 
-xdescribe('Conditions', function() {
+describe('Conditions', function() {
   describe('multiple conditions that observe the same condition', function() {
     return it('should reuse observers', function() {
       var engine, solution;
@@ -330,12 +330,20 @@ xdescribe('Conditions', function() {
         c: 3
       });
       solution = engine.solve({
-        A: null
+        A: 50
+      });
+      expect(solution).to.eql({
+        A: 50,
+        b: null,
+        c: 2
+      });
+      solution = engine.solve({
+        A: 100
       });
       return expect(solution).to.eql({
-        A: null,
-        b: null,
-        c: null
+        A: 100,
+        b: 1,
+        c: 3
       });
     });
   });
@@ -345,9 +353,105 @@ xdescribe('Conditions', function() {
       window.engine = engine = new GSS({
         A: 100
       });
-      solution = engine.solve([['if', ['>', ['get', 'A'], 75], ['==', ['get', 'b'], 1]], ['elseif', ['>', ['get', 'A'], 50], ['==', ['get', 'c'], 2]], ['else', ['==', ['get', 'd'], 3]]]);
-      return expect(solution).to.eql({
+      solution = engine.solve([['if', ['>', ['get', 'A'], 75], ['==', ['get', 'b'], 1]], ['elseif', ['>', ['get', 'A'], 50], ['==', ['get', 'c'], 2]], ['elseif', ['>', ['get', 'A'], 25], ['==', ['get', 'd'], 3], ['==', ['get', 'e'], 4]]]);
+      expect(solution).to.eql({
         b: 1
+      });
+      solution = engine.solve({
+        A: 60
+      });
+      expect(solution).to.eql({
+        A: 60,
+        b: null,
+        c: 2
+      });
+      solution = engine.solve({
+        A: 40
+      });
+      expect(solution).to.eql({
+        A: 40,
+        c: null,
+        d: 3
+      });
+      solution = engine.solve({
+        A: 80
+      });
+      expect(solution).to.eql({
+        A: 80,
+        b: 1,
+        d: null
+      });
+      solution = engine.solve({
+        A: 40
+      });
+      expect(solution).to.eql({
+        A: 40,
+        b: null,
+        d: 3
+      });
+      solution = engine.solve({
+        A: 60
+      });
+      expect(solution).to.eql({
+        A: 60,
+        d: null,
+        c: 2
+      });
+      solution = engine.solve({
+        A: 80
+      });
+      expect(solution).to.eql({
+        A: 80,
+        b: 1,
+        c: null
+      });
+      solution = engine.solve({
+        A: 20
+      });
+      expect(solution).to.eql({
+        A: 20,
+        e: 4,
+        b: null
+      });
+      solution = engine.solve({
+        A: 60
+      });
+      expect(solution).to.eql({
+        A: 60,
+        e: null,
+        c: 2
+      });
+      solution = engine.solve({
+        A: 20
+      });
+      expect(solution).to.eql({
+        A: 20,
+        e: 4,
+        c: null
+      });
+      solution = engine.solve({
+        A: 40
+      });
+      expect(solution).to.eql({
+        A: 40,
+        e: null,
+        d: 3
+      });
+      solution = engine.solve({
+        A: 20
+      });
+      expect(solution).to.eql({
+        A: 20,
+        e: 4,
+        d: null
+      });
+      solution = engine.solve({
+        A: 80
+      });
+      return expect(solution).to.eql({
+        A: 80,
+        b: 1,
+        e: null
       });
     });
   });
@@ -3808,7 +3912,7 @@ remove = function(el) {
 
 fixtures = document.getElementById('fixtures');
 
-xdescribe('Conditions', function() {
+describe('Conditions', function() {
   return describe('conditions that use', function() {
     return describe('single selector', function() {
       return it('should initialize condition once', function() {
@@ -3849,12 +3953,26 @@ xdescribe('Conditions', function() {
           '$div2[x]': 100
         });
         solution = engine.solve({
-          A: null
+          A: 50
+        });
+        expect(solution).to.eql({
+          A: 50,
+          b: null,
+          c: 2,
+          d: 3,
+          '$div1[x]': 50,
+          '$div2[x]': 50
+        });
+        solution = engine.solve({
+          A: 100
         });
         return expect(solution).to.eql({
-          A: null,
-          b: null,
-          c: null
+          A: 100,
+          b: 1,
+          c: 3,
+          d: 2,
+          '$div1[x]': 100,
+          '$div2[x]': 100
         });
       });
     });
@@ -4568,24 +4686,20 @@ describe('End - to - End', function() {
             el = ref[i];
             el.setAttribute('class', '');
           }
-          console.log('should be 4');
           return engine.then(function() {
             expect(engine.tag('style').length).to.eql(4);
             expect(getSource(engine.tag('style')[1])).to.equal("");
             expect(getSource(engine.tag('style')[3])).to.equal("");
             engine.tag('div')[1].setAttribute('class', 'outer');
-            console.log('should be 0');
             return engine.then(function() {
               expect(engine.tag('style').length).to.eql(4);
               expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
               expect(getSource(engine.tag('style')[3])).to.equal("");
               engine.tag('div')[4].setAttribute('class', 'outie');
-              console.log('should be 1');
               return engine.then(function() {
                 expect(engine.tag('style').length).to.eql(4);
                 expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
                 expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
-                console.log('should be 2');
                 engine.tag('div')[1].setAttribute('class', '');
                 return engine.then(function() {
                   expect(engine.tag('style').length).to.eql(4);
@@ -4593,10 +4707,32 @@ describe('End - to - End', function() {
                   expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
                   engine.tag('div')[4].setAttribute('class', '');
                   return engine.then(function() {
+                    var j, len1, ref1;
                     expect(engine.tag('style').length).to.eql(4);
                     expect(getSource(engine.tag('style')[1])).to.equal("");
                     expect(getSource(engine.tag('style')[3])).to.equal("");
-                    return done();
+                    ref1 = engine.tag('div');
+                    for (j = 0, len1 = ref1.length; j < len1; j++) {
+                      el = ref1[j];
+                      el.setAttribute('class', 'outer');
+                    }
+                    return engine.then(function() {
+                      var k, len2, ref2;
+                      expect(engine.tag('style').length).to.eql(4);
+                      expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
+                      expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
+                      ref2 = engine.tag('div');
+                      for (k = 0, len2 = ref2.length; k < len2; k++) {
+                        el = ref2[k];
+                        el.setAttribute('class', '');
+                      }
+                      return engine.then(function() {
+                        expect(engine.tag('style').length).to.eql(4);
+                        expect(getSource(engine.tag('style')[1])).to.equal("");
+                        expect(getSource(engine.tag('style')[3])).to.equal("");
+                        return done();
+                      });
+                    });
                   });
                 });
               });

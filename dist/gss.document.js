@@ -1373,7 +1373,7 @@ Domain = (function() {
         stack.push(operation, continuation, value);
       }
     }
-    if (old === value) {
+    if (old === value || ((value == null) && (old == null))) {
       return;
     }
     this.transact();
@@ -2895,9 +2895,6 @@ Query = (function(_super) {
     id = engine.identify(node);
     observers = (_base = engine.engine.observers)[id] || (_base[id] = []);
     if (engine.indexOfTriplet(observers, operation, continuation, scope) === -1) {
-      if (id === '$6') {
-        debugger;
-      }
       if (typeof (_base1 = operation.command).prepare === "function") {
         _base1.prepare(operation);
       }
@@ -3603,7 +3600,7 @@ Query = (function(_super) {
     var index, observers, _base;
     observers = (_base = engine.pairs)[left] || (_base[left] = []);
     if ((index = engine.indexOfTriplet(observers, right, operation, scope)) !== -1) {
-      return observesers.splice(index, 3);
+      return observers.splice(index, 3);
     }
   };
 
@@ -3872,22 +3869,50 @@ Query = (function(_super) {
   };
 
   Query.prototype.branch = function(engine) {
-    var condition, conditions, index, path, queries, removed, snapshots, _base, _base1, _i, _j, _k, _len, _len1, _len2;
+    var condition, conditions, index, next, number, op, path, prefix, queries, rebranches, removed, snapshots, unbranches, _base, _base1, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m;
     if (conditions = engine.updating.branches) {
       engine.console.start('Branches', conditions.slice());
       engine.updating.branches = void 0;
       removed = engine.updating.branching = [];
+      rebranches = [];
+      unbranches = [];
       for (index = _i = 0, _len = conditions.length; _i < _len; index = _i += 3) {
         condition = conditions[index];
-        condition.command.unbranch(engine, condition, conditions[index + 1], conditions[index + 2]);
+        if (condition.command.unbranch(engine, condition, conditions[index + 1], conditions[index + 2])) {
+          op = condition;
+          while (next = op.command.next) {
+            if (prefix = this.getPrefixPath(engine, conditions[index + 1])) {
+              prefix += this.DESCEND;
+            }
+            path = prefix + next.command.key;
+            if (engine.indexOfTriplet(conditions, next, path, conditions[index + 2]) === -1) {
+              if (next.command.getOldValue(engine, path)) {
+                if (next.command.getOldValue(engine, conditions[index + 1])) {
+                  rebranches.push(next, path, conditions[index + 2]);
+                } else {
+                  unbranches.push(next, path, conditions[index + 2]);
+                }
+                break;
+              }
+            }
+            op = next;
+          }
+          engine.queries[conditions[index + 1]] = 0;
+        }
+      }
+      for (index = _j = 0, _len1 = unbranches.length; _j < _len1; index = _j += 3) {
+        condition = unbranches[index];
+        number = engine.queries[unbranches[index + 1]];
+        this.clean(engine, unbranches[index + 1], unbranches[index + 1], unbranches[index], unbranches[index + 2]);
+        engine.queries[unbranches[index + 1]] = 0;
       }
       engine.triggerEvent('branch');
       queries = (_base = engine.updating).queries || (_base.queries = {});
       snapshots = (_base1 = engine.updating).snapshots || (_base1.snapshots = {});
       this.repair(engine, true);
       engine.updating.branching = void 0;
-      for (_j = 0, _len1 = removed.length; _j < _len1; _j++) {
-        path = removed[_j];
+      for (_k = 0, _len2 = removed.length; _k < _len2; _k++) {
+        path = removed[_k];
         if (conditions.indexOf(path) > -1) {
           continue;
         }
@@ -3897,11 +3922,14 @@ Query = (function(_super) {
         if (queries) {
           delete queries[path];
         }
-        delete engine.queries[path];
       }
-      for (index = _k = 0, _len2 = conditions.length; _k < _len2; index = _k += 3) {
+      for (index = _l = 0, _len3 = conditions.length; _l < _len3; index = _l += 3) {
         condition = conditions[index];
         condition.command.rebranch(engine, condition, conditions[index + 1], conditions[index + 2]);
+      }
+      for (index = _m = 0, _len4 = rebranches.length; _m < _len4; index = _m += 3) {
+        condition = rebranches[index];
+        condition.command.branch(engine, condition, rebranches[index + 1], rebranches[index + 2]);
       }
       return engine.console.end();
     }
@@ -4601,6 +4629,7 @@ Condition = (function(_super) {
           if (command.type === 'Condition') {
             command.next = operation;
             this.previous = command;
+            this.key = this.path = this.delimit(this.previous.key, this.ASCEND) + this.key;
           }
         }
       }
@@ -4639,7 +4668,7 @@ Condition = (function(_super) {
     return old > 0 || (old === 0 && 1 / old !== -Infinity);
   };
 
-  Condition.prototype.ascend = function(engine, operation, continuation, scope, result) {
+  Condition.prototype.ascend = function(engine, operation, continuation, scope, result, recursive) {
     var condition, conditions, contd, index, length, _base, _i, _len;
     if (conditions = ((_base = engine.updating).branches || (_base.branches = []))) {
       if (engine.indexOfTriplet(conditions, operation, continuation, scope) === -1) {
@@ -4649,7 +4678,7 @@ Condition = (function(_super) {
           contd = conditions[index + 1];
           if (contd.length >= length) {
             break;
-          } else if (continuation.substring(0, contd.length) === contd) {
+          } else if (continuation.charAt(contd.length) === this.DESCEND && continuation.substring(0, contd.length) === contd) {
             return;
           }
         }
@@ -4659,16 +4688,34 @@ Condition = (function(_super) {
   };
 
   Condition.prototype.rebranch = function(engine, operation, continuation, scope) {
-    var branch, increment, index, inverted, result;
+    var branch, increment, path, prefix;
     increment = this.getOldValue(engine, continuation) ? -1 : 1;
     engine.queries[continuation] = (engine.queries[continuation] || 0) + increment;
+    if (branch = this.previous) {
+      if (prefix = this.getPrefixPath(engine, continuation)) {
+        prefix += this.DESCEND;
+      }
+      while (branch) {
+        path = prefix + branch.key;
+        if (engine.queries[path] > 0) {
+          return;
+        }
+        branch = branch.previous;
+      }
+    }
+    return this.branch(engine, operation, continuation, scope, increment === -1);
+  };
+
+  Condition.prototype.branch = function(engine, operation, continuation, scope, choice) {
+    var branch, index, inverted, result;
     inverted = operation[0] === 'unless';
-    index = this.conditional + 1 + ((increment === -1) ^ inverted);
+    index = this.conditional + 1 + (choice ^ inverted);
     if (branch = operation[index]) {
       engine.console.start(index === 2 && 'if' || 'else', operation[index], continuation);
       result = engine.input.Command(branch).solve(engine.input, branch, this.delimit(continuation, this.DESCEND), scope);
-      return engine.console.end(result);
+      engine.console.end(result);
     }
+    return result;
   };
 
   Condition.prototype.unbranch = function(engine, operation, continuation, scope) {
@@ -4777,7 +4824,7 @@ Condition.define('else', {
   ],
   linked: true,
   conditional: null,
-  domains: null
+  domains: {}
 });
 
 Condition.define('elseif', {
@@ -5234,7 +5281,6 @@ Range = (function(_super) {
     var end, start;
     start = this[0];
     end = this[1];
-    console.log(this[0], this[1], this[2], this[2] * ((end - start) || 1) + start);
     return this[2] * ((end - start) || 1) + start;
   };
 
@@ -5365,7 +5411,6 @@ Range.Modifier = (function(_super) {
       }
       range[1 - reversed] = finish;
     }
-    console.log(range[2]);
     if (range[2] < 0 || range[2] > 1) {
       range.valueOf = this.execute;
     }
