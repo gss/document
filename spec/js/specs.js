@@ -1544,6 +1544,10 @@ require("./matrix");
 
 require("./end-to-end");
 
+require("./vanilla-css");
+
+require("./external-files");
+
 require("./command-nested-rules");
 
 require("./selectors");
@@ -1572,7 +1576,7 @@ require("./poly-test/full");
 
 
 
-},{"./assignments":10,"./command":12,"./command-nested-rules":11,"./conditions":13,"./domain":14,"./end-to-end":15,"./engine":16,"./matrix":17,"./perf":18,"./poly-test/full":19,"./ranges":20,"./selectors":21,"./styles":22,"./stylesheet":23,"./units":24,"./view":25,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/ranges":6,"gss-engine/spec/signatures":7,"gss-engine/spec/thread":8}],10:[function(require,module,exports){
+},{"./assignments":10,"./command":12,"./command-nested-rules":11,"./conditions":13,"./domain":14,"./end-to-end":15,"./engine":16,"./external-files":17,"./matrix":18,"./perf":19,"./poly-test/full":20,"./ranges":21,"./selectors":22,"./styles":23,"./stylesheet":24,"./units":25,"./vanilla-css":26,"./view":27,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/ranges":6,"gss-engine/spec/signatures":7,"gss-engine/spec/thread":8}],10:[function(require,module,exports){
 describe('Assignments', function() {
   return describe('with units', function() {
     return it('should compute', function(done) {
@@ -4116,7 +4120,7 @@ describe('End - to - End', function() {
     return window.$engine = engine = new GSS(container);
   });
   afterEach(function() {
-    remove(container);
+    container.parentNode.removeChild(container);
     return engine.destroy();
   });
   describe('intrinsic properties', function() {
@@ -4180,7 +4184,7 @@ describe('End - to - End', function() {
                     expect(e["$floater[computed-height]"]).to.eql(null);
                     return done();
                   });
-                  return remove(engine.id('floater'));
+                  return engine.id('floater').parentNode.removeChild(engine.id('floater'));
                 });
                 return container.scrollTop = 150;
               });
@@ -4403,385 +4407,6 @@ describe('End - to - End', function() {
         };
         engine.once('solve', listen);
         return container.innerHTML = "<div id=\"nofractional\"></div>\n<style type=\"text/gss\">\n  #nofractional[x] == 99.999999999999;\n  #nofractional[height] == 9.999999999999;\n</style>";
-      });
-    });
-  });
-  describe('Vanilla CSS', function() {
-    var getSource;
-    getSource = function(style) {
-      return Array.prototype.slice.call(style.sheet.cssRules).map(function(rule) {
-        return rule.cssText.replace(/^\s+|\s+$|\n|\t|\s*({|}|:|;)\s*|(\s+)/g, '$1$2').replace(/\='/g, '="').replace(/'\]/g, '"]').replace(/{(.*?)}/, function(m, inside) {
-          var bits;
-          bits = inside.split(/\s*;\s*/g);
-          if (!bits[bits.length - 1]) {
-            bits.pop();
-          }
-          return '{' + bits.sort().join(';') + ';}';
-        });
-      }).join('\n');
-    };
-    describe('just CSS', function() {
-      engine = null;
-      return it('should dump and clean', function(done) {
-        container.innerHTML = "<style type=\"text/gss\" scoped>\n  #css-only-dump {\n    height: 100px;\n  }\n</style>\n<div id=\"css-only-dump\"></div>";
-        return engine.once('solve', function(e) {
-          var dumper;
-          expect(getSource(engine.tag('style')[1])).to.equal("#css-only-dump{height:100px;}");
-          dumper = engine.id('css-only-dump');
-          dumper.parentNode.removeChild(dumper);
-          return engine.once('solve', function(e) {
-            expect(getSource(engine.tag('style')[1])).to.equal("");
-            return done();
-          });
-        });
-      });
-    });
-    describe('just with vendor prefix CSS', function() {
-      engine = null;
-      return it('should dump and clean', function(done) {
-        engine.output.properties['line-height'].property = 'font-size';
-        container.innerHTML = "<style type=\"text/gss\" scoped>\n  #css-only-dump {\n    line-height: 12px;\n  }\n</style>\n<div id=\"css-only-dump\"></div>";
-        return engine.once('solve', function(e) {
-          var dumper;
-          expect(getSource(engine.tag('style')[1])).to.equal("#css-only-dump{font-size:12px;}");
-          dumper = engine.id('css-only-dump');
-          dumper.parentNode.removeChild(dumper);
-          return engine.once('solve', function(e) {
-            expect(getSource(engine.tag('style')[1])).to.equal("");
-            delete engine.output.properties['line-height'].property;
-            return done();
-          });
-        });
-      });
-    });
-    describe('with multiple properties', function() {
-      it('should dump background color before color', function(done) {
-        container.innerHTML = "<style type=\"text/gss\" scoped>\n  #css-only-dump {\n    background-color: green;\n    color: blue;\n  }\n</style>\n<div id=\"css-only-dump\"></div>";
-        return engine.once('solve', function(e) {
-          var dumper;
-          expect(getSource(engine.tag('style')[1])).to.equal("#css-only-dump{background-color:green;color:blue;}");
-          dumper = engine.id('css-only-dump');
-          dumper.parentNode.removeChild(dumper);
-          return engine.once('solve', function(e) {
-            expect(getSource(engine.tag('style')[1])).to.equal("");
-            return done();
-          });
-        });
-      });
-      return it('should dump color before background-color', function(done) {
-        container.innerHTML = "<style type=\"text/gss\" scoped>\n  #css-only-dump {\n    color: blue;\n    background-color: green;\n  }\n</style>\n<div id=\"css-only-dump\"></div>";
-        return engine.once('solve', function(e) {
-          var dumper;
-          expect(getSource(engine.tag('style')[1])).to.equal("#css-only-dump{background-color:green;color:blue;}");
-          dumper = engine.id('css-only-dump');
-          dumper.parentNode.removeChild(dumper);
-          return engine.once('solve', function(e) {
-            expect(getSource(engine.tag('style')[1])).to.equal("");
-            return done();
-          });
-        });
-      });
-    });
-    describe('CSS + CCSS', function() {
-      engine = null;
-      return it('should dump', function(done) {
-        container.innerHTML = "<div class=\"css-simple-dump\"></div>\n<style type=\"text/gss\" scoped>\n  .css-simple-dump {\n    width: == 100;\n    height: 100px;\n  }\n</style>";
-        return engine.once('solve', function(e) {
-          var clone, dump;
-          expect(getSource(engine.tag('style')[1])).to.equal(".css-simple-dump{height:100px;}");
-          dump = engine["class"]('css-simple-dump')[0];
-          clone = dump.cloneNode();
-          dump.parentNode.appendChild(clone);
-          return engine.once('solve', function(e) {
-            expect(getSource(engine.tag('style')[1])).to.equal(".css-simple-dump{height:100px;}");
-            dump.parentNode.removeChild(dump);
-            return engine.once('solve', function(e) {
-              expect(getSource(engine.tag('style')[1])).to.equal(".css-simple-dump{height:100px;}");
-              clone.parentNode.removeChild(clone);
-              return engine.once('solve', function(e) {
-                expect(getSource(engine.tag('style')[1])).to.equal("");
-                return done();
-              });
-            });
-          });
-        });
-      });
-    });
-    describe('nested', function() {
-      engine = null;
-      return it('should dump', function(done) {
-        container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n  .outer, .outie {\n    #css-inner-dump-1 {\n      width: == 100;\n      height: 100px;\n      z-index: 5;\n    }\n    .innie-outie {\n      #css-inner-dump-2 {\n        height: 200px;\n      }\n    }\n  }\n</style>";
-        return engine.once('solve', function() {
-          var el;
-          expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:100px;z-index:5;}\n.outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{height:200px;}");
-          el = engine["class"]("innie-outie")[1];
-          el.setAttribute('class', 'innie-outie-zzz');
-          return engine.once('solve', function() {
-            expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:100px;z-index:5;}");
-            el.setAttribute('class', 'innie-outie');
-            return engine.once('solve', function() {
-              expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:100px;z-index:5;}\n.outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{height:200px;}");
-              return done();
-            });
-          });
-        });
-      });
-    });
-    describe('custom selectors', function() {
-      return it('should dump', function(done) {
-        container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n    .innie-outie {\n      !> * {\n        height: 200px;\n\n        #css-inner-dump-2 {\n          z-index: -1;\n        }\n      }\n    }\n</style>";
-        return engine.once('solve', function() {
-          var A, B;
-          expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}\n[matches~=\".innie-outie↓!>*\"] #css-inner-dump-2{z-index:-1;}");
-          A = engine["class"]("innie-outie")[0];
-          B = engine["class"]("innie-outie")[1];
-          B.setAttribute('class', 'innie-outie-zzz');
-          return engine.once('solve', function() {
-            expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}");
-            B.setAttribute('class', 'innie-outie');
-            return engine.once('solve', function() {
-              expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}\n[matches~=\".innie-outie↓!>*\"] #css-inner-dump-2{z-index:-1;}");
-              A.setAttribute('class', 'innie-outie-zzz');
-              return engine.once('solve', function() {
-                expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}\n[matches~=\".innie-outie↓!>*\"] #css-inner-dump-2{z-index:-1;}");
-                B.setAttribute('class', 'innie-outie-zzz');
-                return engine.once('solve', function() {
-                  expect(getSource(engine.tag('style')[1])).to.equal("");
-                  A.setAttribute('class', 'innie-outie');
-                  return engine.once('solve', function() {
-                    expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}");
-                    B.setAttribute('class', 'innie-outie');
-                    return engine.once('solve', function() {
-                      expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}\n[matches~=\".innie-outie↓!>*\"] #css-inner-dump-2{z-index:-1;}");
-                      return done();
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-    describe('conditional', function() {
-      return it('should dump', function(done) {
-        container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n  .outer, .outie {\n    @if $A > 0 {\n      .innie-outie {\n        #css-inner-dump-2 {\n          width: 100px;\n        }\n      }\n    }\n    \n    #css-inner-dump-1 {\n      z-index: 5;\n\n      @if $B > 0 {\n        height: 200px;\n      }\n    }\n  }\n</style>";
-        return engine.once('solve', function() {
-          expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
-          return engine.solve({
-            A: 1
-          }, function() {
-            expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2\"]{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
-            return engine.solve({
-              B: 1
-            }, function() {
-              expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2\"]{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
-              return engine.solve({
-                A: 0
-              }, function() {
-                expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
-                return engine.solve({
-                  B: 0
-                }, function() {
-                  expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
-                  return engine.solve({
-                    B: 1
-                  }, function() {
-                    expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
-                    return engine.solve({
-                      A: 1
-                    }, function() {
-                      expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2\"]{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
-                      return engine.solve({
-                        B: 0
-                      }, function() {
-                        expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2\"]{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
-                        return done();
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-    describe('conditional inverted', function() {
-      return it('should dump', function(done) {
-        var zIndexAndHeight;
-        container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n  .outer, .outie {\n    #css-inner-dump-1 {\n      @if $B > 0 {\n        height: 200px;\n      }\n      z-index: 5;\n    }\n    @if $A > 0 {\n      .innie-outie {\n        #css-inner-dump-2 {\n          width: 100px;\n        }\n      }\n    }\n  }\n</style>";
-        zIndexAndHeight = (document.all && !window.atob || (document.body.style.msTouchAction != null)) && 'height:200px;z-index:5;' || 'z-index:5;height:200px;';
-        return engine.once('solve', function() {
-          expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
-          return engine.solve({
-            A: 1
-          }, function() {
-            expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}\n[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2\"]{width:100px;}");
-            return engine.solve({
-              B: 1
-            }, function() {
-              expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}\n[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2\"]{width:100px;}");
-              return engine.solve({
-                A: 0
-              }, function() {
-                expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
-                return engine.solve({
-                  B: 0
-                }, function() {
-                  expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
-                  return engine.solve({
-                    B: 1
-                  }, function() {
-                    expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
-                    return engine.solve({
-                      A: 1
-                    }, function() {
-                      expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}\n[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2\"]{width:100px;}");
-                      return engine.solve({
-                        B: 0
-                      }, function() {
-                        expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}\n[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2\"]{width:100px;}");
-                        return done();
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-    describe('scoped + css', function() {
-      return it('should dump', function(done) {
-        container.innerHTML = "<div class=\"outer\" id=\"azaza\">\n  <style scoped src=\"./fixtures/external-file-css1.gss\" type=\"text/gss\"></style>\n  <button></button>\n  <button></button>\n</div>  \n<div class=\"outie\" id=\"outzor\">\n  <style scoped src=\"./fixtures/external-file-css1.gss\" type=\"text/gss\"></style>\n  <button></button>\n  <button></button>\n</div>";
-        return engine.once('solve', function() {
-          var el, i, ref;
-          expect(getSource(engine.tag('style')[1])).to.equal("#azaza button{z-index:1;}");
-          expect(getSource(engine.tag('style')[3])).to.equal("#outzor button{z-index:1;}");
-          ref = engine.scope.querySelectorAll('#azaza button');
-          for (i = ref.length - 1; i >= 0; i += -1) {
-            el = ref[i];
-            el.parentNode.removeChild(el);
-          }
-          return engine.then(function() {
-            expect(getSource(engine.tag('style')[1])).to.equal("");
-            expect(getSource(engine.tag('style')[3])).to.equal("#outzor button{z-index:1;}");
-            return done();
-          });
-        });
-      });
-    });
-    describe('imported and scoped', function() {
-      return it('should dump', function(done) {
-        container.innerHTML = "<div id=\"something\">\n  <div class=\"outer\">\n    <button></button>\n    <button></button>\n  </div>\n  <div class=\"outie\">\n    <button></button>\n    <button></button>\n  </div>\n  <style type=\"text/gss\" scoped>\n    .outer, .outie {\n      @import fixtures/external-file-css1.gss;\n    }\n  </style>\n</div>\n<div id=\"otherthing\">\n  <div class=\"outer\">\n    <button></button>\n    <button></button>\n  </div>\n  <div class=\"outie\">\n    <button></button>\n    <button></button>\n  </div>\n  <style type=\"text/gss\" scoped>\n    .outer, .outie {\n      @import fixtures/external-file-css1.gss;\n    }\n  </style>\n</div>";
-        return engine.once('solve', function() {
-          var el, i, len, ref;
-          expect(engine.tag('style').length).to.eql(4);
-          expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
-          expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
-          ref = engine.tag('div');
-          for (i = 0, len = ref.length; i < len; i++) {
-            el = ref[i];
-            el.setAttribute('class', '');
-          }
-          return engine.then(function() {
-            expect(engine.tag('style').length).to.eql(4);
-            expect(getSource(engine.tag('style')[1])).to.equal("");
-            expect(getSource(engine.tag('style')[3])).to.equal("");
-            engine.tag('div')[1].setAttribute('class', 'outer');
-            return engine.then(function() {
-              expect(engine.tag('style').length).to.eql(4);
-              expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
-              expect(getSource(engine.tag('style')[3])).to.equal("");
-              engine.tag('div')[4].setAttribute('class', 'outie');
-              return engine.then(function() {
-                expect(engine.tag('style').length).to.eql(4);
-                expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
-                expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
-                engine.tag('div')[1].setAttribute('class', '');
-                return engine.then(function() {
-                  expect(engine.tag('style').length).to.eql(4);
-                  expect(getSource(engine.tag('style')[1])).to.equal("");
-                  expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
-                  engine.tag('div')[4].setAttribute('class', '');
-                  return engine.then(function() {
-                    var j, len1, ref1;
-                    expect(engine.tag('style').length).to.eql(4);
-                    expect(getSource(engine.tag('style')[1])).to.equal("");
-                    expect(getSource(engine.tag('style')[3])).to.equal("");
-                    ref1 = engine.tag('div');
-                    for (j = 0, len1 = ref1.length; j < len1; j++) {
-                      el = ref1[j];
-                      el.setAttribute('class', 'outer');
-                    }
-                    return engine.then(function() {
-                      var k, len2, ref2;
-                      expect(engine.tag('style').length).to.eql(4);
-                      expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
-                      expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
-                      ref2 = engine.tag('div');
-                      for (k = 0, len2 = ref2.length; k < len2; k++) {
-                        el = ref2[k];
-                        el.setAttribute('class', '');
-                      }
-                      return engine.then(function() {
-                        expect(engine.tag('style').length).to.eql(4);
-                        expect(getSource(engine.tag('style')[1])).to.equal("");
-                        expect(getSource(engine.tag('style')[3])).to.equal("");
-                        return done();
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-    return describe('imported and unscoped', function() {
-      return it('should dump', function(done) {
-        container.innerHTML = "<div id=\"something\">\n  <div class=\"outer\">\n    <button></button>\n    <button></button>\n  </div>\n  <div class=\"outie\">\n    <button></button>\n    <button></button>\n  </div>\n  <style type=\"text/gss\">\n    .outer, .outie {\n      @import fixtures/external-file-css1.gss;\n\n      opacity: 1;\n    }\n  </style>\n</div>";
-        return engine.once('solve', function() {
-          var el, i, len, ref;
-          expect(getSource(engine.tag('style')[1])).to.equal(".outer button, .outie button{z-index:1;}");
-          expect(getSource(engine.tag('style')[2])).to.equal(".outer, .outie{opacity:1;}");
-          expect(engine.tag('style').length).to.eql(3);
-          ref = engine.tag('div');
-          for (i = 0, len = ref.length; i < len; i++) {
-            el = ref[i];
-            el.className = '';
-          }
-          return engine.then(function() {
-            expect(getSource(engine.tag('style')[1])).to.equal("");
-            expect(getSource(engine.tag('style')[2])).to.equal("");
-            engine.tag('div')[0].className = 'outer';
-            expect(engine.tag('style').length).to.eql(3);
-            return engine.then(function() {
-              expect(getSource(engine.tag('style')[1])).to.equal(".outer button, .outie button{z-index:1;}");
-              expect(getSource(engine.tag('style')[2])).to.equal(".outer, .outie{opacity:1;}");
-              expect(engine.tag('style').length).to.eql(3);
-              engine.tag('div')[2].className = 'outer';
-              return engine.then(function() {
-                var j, len1, ref1;
-                expect(engine.tag('style').length).to.eql(3);
-                expect(getSource(engine.tag('style')[1])).to.equal(".outer button, .outie button{z-index:1;}");
-                ref1 = engine.tag('div');
-                for (j = 0, len1 = ref1.length; j < len1; j++) {
-                  el = ref1[j];
-                  el.className = '';
-                }
-                return engine.then(function() {
-                  expect(getSource(engine.tag('style')[1])).to.equal("");
-                  expect(getSource(engine.tag('style')[2])).to.equal("");
-                  return done();
-                });
-              });
-            });
-          });
-        });
       });
     });
   });
@@ -5764,274 +5389,6 @@ describe('End - to - End', function() {
         });
         return container.innerHTML = "<style type=\"text/gss\" scoped>\n  [top] == ::window[top];\n  [right] == ::window[right];\n  [bottom] == ::window[bottom];\n  [left] == ::window[left];\n</style>";
       });
-    });
-  });
-  describe('External .gss files', function() {
-    this.timeout(40000);
-    describe("single scoped file", function() {
-      return it('should compute', function(done) {
-        var counter, listen;
-        counter = 0;
-        listen = function(e) {
-          counter++;
-          if (counter === 1) {
-            expect(engine.values).to.eql({
-              "$something[external-file]": 1000
-            });
-            return container.innerHTML = "";
-          } else {
-            expect(engine.values).to.eql({});
-            engine.removeEventListener('solve', listen);
-            return done();
-          }
-        };
-        engine.addEventListener('solve', listen);
-        return container.innerHTML = "<div id=\"something\">\n  <link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n</div>";
-      });
-    });
-    return describe("multiple files", function() {
-      return it('should compute', function(done) {
-        var counter, listen;
-        counter = 0;
-        listen = function(e) {
-          counter++;
-          if (counter === 1) {
-            expect(engine.values).to.eql({
-              "external-file": 1000,
-              "external-file-2": 2000,
-              "external-file-3": 3000
-            });
-            return container.innerHTML = "";
-          } else {
-            expect(engine.values).to.eql({});
-            engine.removeEventListener('solve', listen);
-            return done();
-          }
-        };
-        engine.addEventListener('solve', listen);
-        return container.innerHTML = "<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-2.gss\" scoped></link>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-3.gss\" scoped></link>";
-      });
-    });
-  });
-  describe('External .gss files', function() {
-    this.timeout(40000);
-    describe("single scoped file with some selectors", function() {
-      return it('should compute', function(done) {
-        var counter, listen;
-        counter = 0;
-        listen = function(e) {
-          counter++;
-          if (counter === 1) {
-            expect(engine.values['$title1[width]']).to.eql(void 0);
-            expect(engine.values['$title2[width]']).to.eql(300);
-            return container.innerHTML = "";
-          } else {
-            expect(engine.values).to.eql({});
-            engine.removeEventListener('solve', listen);
-            return done();
-          }
-        };
-        engine.addEventListener('solve', listen);
-        return container.innerHTML = "<section id=\"s1\">\n  <article id=\"a1\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b1\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\"  id=\"title1\" >\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n   </article>\n</section>\n<section id=\"s2\">\n  <style type=\"text/gss\" src=\"./fixtures/external-scoped-gss.gss\" scoped></style>\n  <article id=\"a2\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b2\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\" id=\"title2\">\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n  </article>\n</section>\n";
-      });
-    });
-    describe("single imported scoped file with some selectors", function() {
-      return it('should compute', function(done) {
-        var counter, listen;
-        counter = 0;
-        listen = function(e) {
-          counter++;
-          if (counter === 1) {
-            expect(engine.values['$title1[width]']).to.eql(void 0);
-            expect(engine.values['$title2[width]']).to.eql(300);
-            return container.innerHTML = "";
-          } else {
-            expect(engine.values).to.eql({});
-            engine.removeEventListener('solve', listen);
-            return done();
-          }
-        };
-        engine.addEventListener('solve', listen);
-        return container.innerHTML = "<section id=\"s1\">\n  <article id=\"a1\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b1\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\"  id=\"title1\" >\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n   </article>\n</section>\n<section id=\"s2\">\n  <style type=\"text/gss\">\n    #s2 {\n      @import ./fixtures/external-scoped-gss.gss;\n    }\n  </style>\n  <article id=\"a2\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b2\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\" id=\"title2\">\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n  </article>\n</section>\n";
-      });
-    });
-    describe("imported file accessing parent scopes", function() {
-      return it('should compute', function(done) {
-        var counter, listen;
-        counter = 0;
-        listen = function(e) {
-          counter++;
-          if (counter === 1) {
-            expect(engine.values['$s1[width]']).to.eql(100);
-            expect(engine.values['$s2[width]']).to.eql(100);
-            return container.innerHTML = "";
-          } else {
-            expect(engine.values).to.eql({});
-            engine.removeEventListener('solve', listen);
-            return done();
-          }
-        };
-        engine.addEventListener('solve', listen);
-        return container.innerHTML = "<section id=\"s1\">\n  <style type=\"text/gss\" scoped>\n    &width == 100;\n  </style>\n  <article id=\"a1\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b1\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\"  id=\"title1\" >\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n   </article>\n</section>\n<section id=\"s2\">\n  <style type=\"text/gss\">\n    #s2 {\n      $ #s1 {\n        @import ./fixtures/external-ascending-gss.gss;\n      }\n    }\n  </style>\n  <article id=\"a2\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b2\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\" id=\"title2\">\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n  </article>\n</section>\n";
-      });
-    });
-    describe("single scoped file", function() {
-      return it('should compute', function(done) {
-        var counter, listen;
-        counter = 0;
-        listen = function(e) {
-          counter++;
-          if (counter === 1) {
-            expect(engine.values).to.eql({
-              "$something[external-file]": 1000
-            });
-            return container.innerHTML = "";
-          } else {
-            expect(engine.values).to.eql({});
-            engine.removeEventListener('solve', listen);
-            return done();
-          }
-        };
-        engine.addEventListener('solve', listen);
-        return container.innerHTML = "<div id=\"something\">\n  <link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n</div>";
-      });
-    });
-    describe("single imported file", function() {
-      return it('should compute', function(done) {
-        var counter, listen;
-        counter = 0;
-        listen = function(e) {
-          counter++;
-          if (counter === 1) {
-            expect(engine.values).to.eql({
-              "$something[external-file]": 1000
-            });
-            return container.innerHTML = "";
-          } else {
-            expect(engine.values).to.eql({});
-            engine.removeEventListener('solve', listen);
-            return done();
-          }
-        };
-        engine.addEventListener('solve', listen);
-        return container.innerHTML = "<style type=\"text/gss\">\n  #something { \n    @import ./fixtures/external-file.gss; \n  }\n</style>\n<div id=\"something\">\n</div>";
-      });
-    });
-    describe("single file", function() {
-      return it('should compute', function(done) {
-        var counter, listen;
-        counter = 0;
-        listen = function(e) {
-          counter++;
-          if (counter === 1) {
-            expect(engine.values).to.eql({
-              "external-file": 1000
-            });
-            return container.innerHTML = "";
-          } else {
-            expect(engine.values).to.eql({});
-            engine.removeEventListener('solve', listen);
-            return done();
-          }
-        };
-        engine.addEventListener('solve', listen);
-        return container.innerHTML = "<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>";
-      });
-    });
-    describe("multiple files", function() {
-      return it('should compute', function(done) {
-        var counter, listen;
-        counter = 0;
-        listen = function(e) {
-          counter++;
-          if (counter === 1) {
-            expect(engine.values).to.eql({
-              "external-file": 1000,
-              "external-file-2": 2000,
-              "external-file-3": 3000
-            });
-            return container.innerHTML = "";
-          } else {
-            expect(engine.values).to.eql({});
-            engine.removeEventListener('solve', listen);
-            return done();
-          }
-        };
-        engine.addEventListener('solve', listen);
-        return container.innerHTML = "<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-2.gss\" scoped></link>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-3.gss\" scoped></link>";
-      });
-    });
-    return describe("nested files", function() {
-      return it('should compute', function(done) {
-        var counter, external, inline, listen;
-        counter = 0;
-        inline = null;
-        external = null;
-        listen = function(e) {
-          counter++;
-          if (counter === 1) {
-            expect(engine.values).to.eql({
-              "external-file": 1000,
-              "external-file-2": 2000,
-              "external-file-3": 3000
-            });
-            inline = engine.id('inline');
-            return inline.parentNode.removeChild(inline);
-          } else if (counter === 2) {
-            expect(engine.values).to.eql({
-              "external-file-2": 2000,
-              "external-file-3": 3000
-            });
-            return engine.scope.appendChild(inline);
-          } else if (counter === 3) {
-            expect(engine.values).to.eql({
-              "external-file": 1000,
-              "external-file-2": 2000,
-              "external-file-3": 3000
-            });
-            external = engine.id('external');
-            return external.parentNode.removeChild(external);
-          } else if (counter === 4) {
-            expect(engine.values).to.eql({
-              "external-file": 1000
-            });
-            return engine.scope.appendChild(external);
-          } else if (counter === 5) {
-            expect(engine.values).to.eql({
-              "external-file": 1000,
-              "external-file-2": 2000,
-              "external-file-3": 3000
-            });
-            return engine.scope.innerHTML = '';
-          } else {
-            expect(engine.values).to.eql({});
-            engine.removeEventListener('solve', listen);
-            return done();
-          }
-        };
-        engine.addEventListener('solve', listen);
-        return container.innerHTML = "<style type=\"text/gss\" scoped id=\"inline\">\n  @import ./fixtures/external-file.gss;\n</style>\n<link rel=\"stylesheet\" id=\"external\" type=\"text/gss\" href=\"./fixtures/external-file-2-3.gss\" scoped></link>";
-      });
-    });
-  });
-  describe("single file with ^ and id rulesets", function() {
-    return it('should compute', function(done) {
-      var counter, listen;
-      counter = 0;
-      listen = function(e) {
-        counter++;
-        if (counter === 1) {
-          expect(e['$d2[x]']).to.eql(100);
-          return container.innerHTML = "";
-        } else {
-          expect(e['$d2[x]']).to.eql(null);
-          engine.removeEventListener('solve', listen);
-          expect(engine.identity['$d2']).to.eql(void 0);
-          return done();
-        }
-      };
-      engine.addEventListener('solve', listen);
-      return container.innerHTML = "<section id=\"s1\">\n  <div id=\"d1\">123</div>\n  <div id=\"d2\">123</div>\n</section>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-parent.gss\"></link>";
     });
   });
   describe('VGL', function() {
@@ -7635,6 +6992,367 @@ describe('GSS engine', function() {
 
 
 },{}],17:[function(require,module,exports){
+describe('External .gss files', function() {
+  var container, engine;
+  engine = null;
+  container = null;
+  beforeEach(function() {
+    container = document.createElement('div');
+    document.getElementById('fixtures').appendChild(container);
+    return window.$engine = engine = new GSS(container);
+  });
+  afterEach(function() {
+    container.parentNode.removeChild(container);
+    return engine.destroy();
+  });
+  this.timeout(40000);
+  describe("single scoped file", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values).to.eql({
+            "$something[external-file]": 1000
+          });
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<div id=\"something\">\n  <link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n</div>";
+    });
+  });
+  describe("single imported file", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values).to.eql({
+            "$something[external-file]": 1000
+          });
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<div id=\"something\">\n  <style type=\"text/gss\" scoped>\n    @import ./fixtures/external-file.gss;\n  </style>\n</div>";
+    });
+  });
+  describe("single conditional imported file", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values).to.eql({
+            a: 0,
+            "$something[external-file]": 1000
+          });
+          return engine.solve({
+            a: 100
+          });
+        } else if (counter === 2) {
+          expect(engine.values).to.eql({
+            a: 100,
+            "$something[external-file-2]": 2000
+          });
+          return engine.solve({
+            a: 5
+          });
+        } else if (counter === 3) {
+          expect(engine.values).to.eql({
+            a: 5,
+            "$something[external-file]": 1000
+          });
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<div id=\"something\">\n  <style type=\"text/gss\" scoped>\n    $a = 0;\n    @if $a > 10 {\n      @import ./fixtures/external-file-2.gss;\n\n    } @else {\n      @import ./fixtures/external-file.gss;\n\n    }\n  </style>\n</div>";
+    });
+  });
+  describe("single scoped file", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values).to.eql({
+            "$something[external-file]": 1000
+          });
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<div id=\"something\">\n  <link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n</div>";
+    });
+  });
+  describe("multiple files", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values).to.eql({
+            "external-file": 1000,
+            "external-file-2": 2000,
+            "external-file-3": 3000
+          });
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-2.gss\" scoped></link>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-3.gss\" scoped></link>";
+    });
+  });
+  describe("single scoped file with some selectors", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values['$title1[width]']).to.eql(void 0);
+          expect(engine.values['$title2[width]']).to.eql(300);
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<section id=\"s1\">\n  <article id=\"a1\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b1\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\"  id=\"title1\" >\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n   </article>\n</section>\n<section id=\"s2\">\n  <style type=\"text/gss\" src=\"./fixtures/external-scoped-gss.gss\" scoped></style>\n  <article id=\"a2\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b2\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\" id=\"title2\">\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n  </article>\n</section>\n";
+    });
+  });
+  describe("single imported scoped file with some selectors", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values['$title1[width]']).to.eql(void 0);
+          expect(engine.values['$title2[width]']).to.eql(300);
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<section id=\"s1\">\n  <article id=\"a1\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b1\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\"  id=\"title1\" >\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n   </article>\n</section>\n<section id=\"s2\">\n  <style type=\"text/gss\">\n    #s2 {\n      @import ./fixtures/external-scoped-gss.gss;\n    }\n  </style>\n  <article id=\"a2\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b2\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\" id=\"title2\">\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n  </article>\n</section>\n";
+    });
+  });
+  describe("imported file accessing parent scopes", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values['$s1[width]']).to.eql(100);
+          expect(engine.values['$s2[width]']).to.eql(100);
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<section id=\"s1\">\n  <style type=\"text/gss\" scoped>\n    &width == 100;\n  </style>\n  <article id=\"a1\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b1\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\"  id=\"title1\" >\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n   </article>\n</section>\n<section id=\"s2\">\n  <style type=\"text/gss\">\n    #s2 {\n      $ #s1 {\n        @import ./fixtures/external-ascending-gss.gss;\n      }\n    }\n  </style>\n  <article id=\"a2\" class=\"post left repost media image w-cover landscape w-title w-source w-author titleTC imageMC linkBC \"  >\n     <div id=\"b2\" class=\"block media image w-cover landscape w-title w-source from-Twitter w-author\">\n       <div class=\"title\" id=\"title2\">\n          3 min read <br>This Nifty Tool Uses Artificial Intelligence to Build Your Ultimate Website\n       </div>\n     </div>\n  </article>\n</section>\n";
+    });
+  });
+  describe("single scoped file", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values).to.eql({
+            "$something[external-file]": 1000
+          });
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<div id=\"something\">\n  <link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n</div>";
+    });
+  });
+  describe("single imported file", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values).to.eql({
+            "$something[external-file]": 1000
+          });
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<style type=\"text/gss\">\n  #something { \n    @import ./fixtures/external-file.gss; \n  }\n</style>\n<div id=\"something\">\n</div>";
+    });
+  });
+  describe("single file", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values).to.eql({
+            "external-file": 1000
+          });
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>";
+    });
+  });
+  describe("multiple files", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values).to.eql({
+            "external-file": 1000,
+            "external-file-2": 2000,
+            "external-file-3": 3000
+          });
+          return container.innerHTML = "";
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file.gss\" scoped></link>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-2.gss\" scoped></link>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-3.gss\" scoped></link>";
+    });
+  });
+  describe("nested files", function() {
+    return it('should compute', function(done) {
+      var counter, external, inline, listen;
+      counter = 0;
+      inline = null;
+      external = null;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(engine.values).to.eql({
+            "external-file": 1000,
+            "external-file-2": 2000,
+            "external-file-3": 3000
+          });
+          inline = engine.id('inline');
+          return inline.parentNode.removeChild(inline);
+        } else if (counter === 2) {
+          expect(engine.values).to.eql({
+            "external-file-2": 2000,
+            "external-file-3": 3000
+          });
+          return engine.scope.appendChild(inline);
+        } else if (counter === 3) {
+          expect(engine.values).to.eql({
+            "external-file": 1000,
+            "external-file-2": 2000,
+            "external-file-3": 3000
+          });
+          external = engine.id('external');
+          return external.parentNode.removeChild(external);
+        } else if (counter === 4) {
+          expect(engine.values).to.eql({
+            "external-file": 1000
+          });
+          return engine.scope.appendChild(external);
+        } else if (counter === 5) {
+          expect(engine.values).to.eql({
+            "external-file": 1000,
+            "external-file-2": 2000,
+            "external-file-3": 3000
+          });
+          return engine.scope.innerHTML = '';
+        } else {
+          expect(engine.values).to.eql({});
+          engine.removeEventListener('solve', listen);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<style type=\"text/gss\" scoped id=\"inline\">\n  @import ./fixtures/external-file.gss;\n</style>\n<link rel=\"stylesheet\" id=\"external\" type=\"text/gss\" href=\"./fixtures/external-file-2-3.gss\" scoped></link>";
+    });
+  });
+  return describe("single file with ^ and id rulesets", function() {
+    return it('should compute', function(done) {
+      var counter, listen;
+      counter = 0;
+      listen = function(e) {
+        counter++;
+        if (counter === 1) {
+          expect(e['$d2[x]']).to.eql(100);
+          return container.innerHTML = "";
+        } else {
+          expect(e['$d2[x]']).to.eql(null);
+          engine.removeEventListener('solve', listen);
+          expect(engine.identity['$d2']).to.eql(void 0);
+          return done();
+        }
+      };
+      engine.addEventListener('solve', listen);
+      return container.innerHTML = "<section id=\"s1\">\n  <div id=\"d1\">123</div>\n  <div id=\"d2\">123</div>\n</section>\n<link rel=\"stylesheet\" type=\"text/gss\" href=\"./fixtures/external-file-parent.gss\"></link>";
+    });
+  });
+});
+
+
+
+},{}],18:[function(require,module,exports){
 var assert, expect, property;
 
 expect = chai.expect;
@@ -8016,7 +7734,7 @@ describe('Matrix', function() {
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var Engine, assert, expect, remove, stringify;
 
 Engine = GSS.Engine;
@@ -8135,7 +7853,7 @@ describe('Perf', function() {
 
 
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var DEMOS, assert, expect, remove, roughAssert;
 
 DEMOS = {
@@ -8508,7 +8226,7 @@ describe('Full page tests', function() {
 
 
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 describe('Ranges', function() {
   var engine;
   engine = null;
@@ -8809,7 +8527,7 @@ describe('Ranges', function() {
 
 
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -8946,7 +8664,7 @@ describe('Selectors', function() {
 
 
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -9130,7 +8848,7 @@ describe('Styles', function() {
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var IE10, assert, expect;
 
 expect = chai.expect;
@@ -9670,7 +9388,7 @@ describe('Stylesheet', function() {
 
 
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var assert, expect, remove;
 
 expect = chai.expect;
@@ -9803,7 +9521,536 @@ describe('Units', function() {
 
 
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
+describe('Vanilla CSS', function() {
+  var container, engine, getSource;
+  engine = null;
+  container = null;
+  beforeEach(function() {
+    container = document.createElement('div');
+    document.getElementById('fixtures').appendChild(container);
+    return window.$engine = engine = new GSS(container);
+  });
+  afterEach(function() {
+    container.parentNode.removeChild(container);
+    return engine.destroy();
+  });
+  getSource = function(style) {
+    return Array.prototype.slice.call(style.sheet.cssRules).map(function(rule) {
+      return rule.cssText.replace(/^\s+|\s+$|\n|\t|\s*({|}|:|;)\s*|(\s+)/g, '$1$2').replace(/\='/g, '="').replace(/'\]/g, '"]').replace(/{(.*?)}/, function(m, inside) {
+        var bits;
+        bits = inside.split(/\s*;\s*/g);
+        if (!bits[bits.length - 1]) {
+          bits.pop();
+        }
+        return '{' + bits.sort().join(';') + ';}';
+      });
+    }).join('\n');
+  };
+  describe('just CSS', function() {
+    engine = null;
+    return it('should dump and clean', function(done) {
+      container.innerHTML = "<style type=\"text/gss\" scoped>\n  #css-only-dump {\n    height: 100px;\n  }\n</style>\n<div id=\"css-only-dump\"></div>";
+      return engine.once('solve', function(e) {
+        var dumper;
+        expect(getSource(engine.tag('style')[1])).to.equal("#css-only-dump{height:100px;}");
+        dumper = engine.id('css-only-dump');
+        dumper.parentNode.removeChild(dumper);
+        return engine.once('solve', function(e) {
+          expect(getSource(engine.tag('style')[1])).to.equal("");
+          return done();
+        });
+      });
+    });
+  });
+  describe('just with vendor prefix CSS', function() {
+    engine = null;
+    return it('should dump and clean', function(done) {
+      engine.output.properties['line-height'].property = 'font-size';
+      container.innerHTML = "<style type=\"text/gss\" scoped>\n  #css-only-dump {\n    line-height: 12px;\n  }\n</style>\n<div id=\"css-only-dump\"></div>";
+      return engine.once('solve', function(e) {
+        var dumper;
+        expect(getSource(engine.tag('style')[1])).to.equal("#css-only-dump{font-size:12px;}");
+        dumper = engine.id('css-only-dump');
+        dumper.parentNode.removeChild(dumper);
+        return engine.once('solve', function(e) {
+          expect(getSource(engine.tag('style')[1])).to.equal("");
+          delete engine.output.properties['line-height'].property;
+          return done();
+        });
+      });
+    });
+  });
+  describe('with multiple properties', function() {
+    it('should dump background color before color', function(done) {
+      container.innerHTML = "<style type=\"text/gss\" scoped>\n  #css-only-dump {\n    background-color: green;\n    color: blue;\n  }\n</style>\n<div id=\"css-only-dump\"></div>";
+      return engine.once('solve', function(e) {
+        var dumper;
+        expect(getSource(engine.tag('style')[1])).to.equal("#css-only-dump{background-color:green;color:blue;}");
+        dumper = engine.id('css-only-dump');
+        dumper.parentNode.removeChild(dumper);
+        return engine.once('solve', function(e) {
+          expect(getSource(engine.tag('style')[1])).to.equal("");
+          return done();
+        });
+      });
+    });
+    return it('should dump color before background-color', function(done) {
+      container.innerHTML = "<style type=\"text/gss\" scoped>\n  #css-only-dump {\n    color: blue;\n    background-color: green;\n  }\n</style>\n<div id=\"css-only-dump\"></div>";
+      return engine.once('solve', function(e) {
+        var dumper;
+        expect(getSource(engine.tag('style')[1])).to.equal("#css-only-dump{background-color:green;color:blue;}");
+        dumper = engine.id('css-only-dump');
+        dumper.parentNode.removeChild(dumper);
+        return engine.once('solve', function(e) {
+          expect(getSource(engine.tag('style')[1])).to.equal("");
+          return done();
+        });
+      });
+    });
+  });
+  describe('CSS + CCSS', function() {
+    engine = null;
+    return it('should dump', function(done) {
+      container.innerHTML = "<div class=\"css-simple-dump\"></div>\n<style type=\"text/gss\" scoped>\n  .css-simple-dump {\n    width: == 100;\n    height: 100px;\n  }\n</style>";
+      return engine.once('solve', function(e) {
+        var clone, dump;
+        expect(getSource(engine.tag('style')[1])).to.equal(".css-simple-dump{height:100px;}");
+        dump = engine["class"]('css-simple-dump')[0];
+        clone = dump.cloneNode();
+        dump.parentNode.appendChild(clone);
+        return engine.once('solve', function(e) {
+          expect(getSource(engine.tag('style')[1])).to.equal(".css-simple-dump{height:100px;}");
+          dump.parentNode.removeChild(dump);
+          return engine.once('solve', function(e) {
+            expect(getSource(engine.tag('style')[1])).to.equal(".css-simple-dump{height:100px;}");
+            clone.parentNode.removeChild(clone);
+            return engine.once('solve', function(e) {
+              expect(getSource(engine.tag('style')[1])).to.equal("");
+              return done();
+            });
+          });
+        });
+      });
+    });
+  });
+  describe('nested', function() {
+    engine = null;
+    return it('should dump', function(done) {
+      container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n  .outer, .outie {\n    #css-inner-dump-1 {\n      width: == 100;\n      height: 100px;\n      z-index: 5;\n    }\n    .innie-outie {\n      #css-inner-dump-2 {\n        height: 200px;\n      }\n    }\n  }\n</style>";
+      return engine.once('solve', function() {
+        var el;
+        expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:100px;z-index:5;}\n.outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{height:200px;}");
+        el = engine["class"]("innie-outie")[1];
+        el.setAttribute('class', 'innie-outie-zzz');
+        return engine.once('solve', function() {
+          expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:100px;z-index:5;}");
+          el.setAttribute('class', 'innie-outie');
+          return engine.once('solve', function() {
+            expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:100px;z-index:5;}\n.outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{height:200px;}");
+            return done();
+          });
+        });
+      });
+    });
+  });
+  describe('custom selectors', function() {
+    return it('should dump', function(done) {
+      container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n    .innie-outie {\n      !> * {\n        height: 200px;\n\n        #css-inner-dump-2 {\n          z-index: -1;\n        }\n      }\n    }\n</style>";
+      return engine.once('solve', function() {
+        var A, B;
+        expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}\n[matches~=\".innie-outie↓!>*\"] #css-inner-dump-2{z-index:-1;}");
+        A = engine["class"]("innie-outie")[0];
+        B = engine["class"]("innie-outie")[1];
+        B.setAttribute('class', 'innie-outie-zzz');
+        return engine.once('solve', function() {
+          expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}");
+          B.setAttribute('class', 'innie-outie');
+          return engine.once('solve', function() {
+            expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}\n[matches~=\".innie-outie↓!>*\"] #css-inner-dump-2{z-index:-1;}");
+            A.setAttribute('class', 'innie-outie-zzz');
+            return engine.once('solve', function() {
+              expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}\n[matches~=\".innie-outie↓!>*\"] #css-inner-dump-2{z-index:-1;}");
+              B.setAttribute('class', 'innie-outie-zzz');
+              return engine.once('solve', function() {
+                expect(getSource(engine.tag('style')[1])).to.equal("");
+                A.setAttribute('class', 'innie-outie');
+                return engine.once('solve', function() {
+                  expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}");
+                  B.setAttribute('class', 'innie-outie');
+                  return engine.once('solve', function() {
+                    expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".innie-outie↓!>*\"]{height:200px;}\n[matches~=\".innie-outie↓!>*\"] #css-inner-dump-2{z-index:-1;}");
+                    return done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+  describe('conditional', function() {
+    return it('should dump', function(done) {
+      container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n  .outer, .outie {\n    @if $A > 0 {\n      .innie-outie {\n        #css-inner-dump-2 {\n          width: 100px;\n        }\n      }\n    }\n    \n    #css-inner-dump-1 {\n      z-index: 5;\n\n      @if $B > 0 {\n        height: 200px;\n      }\n    }\n  }\n</style>";
+      return engine.once('solve', function() {
+        expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
+        return engine.solve({
+          A: 1
+        }, function() {
+          expect(getSource(engine.tag('style')[1])).to.equal(".outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
+          return engine.solve({
+            B: 1
+          }, function() {
+            expect(getSource(engine.tag('style')[1])).to.equal(".outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
+            return engine.solve({
+              A: 0
+            }, function() {
+              expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
+              return engine.solve({
+                B: 0
+              }, function() {
+                expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
+                return engine.solve({
+                  B: 1
+                }, function() {
+                  expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
+                  return engine.solve({
+                    A: 1
+                  }, function() {
+                    expect(getSource(engine.tag('style')[1])).to.equal(".outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
+                    return engine.solve({
+                      B: 0
+                    }, function() {
+                      expect(getSource(engine.tag('style')[1])).to.equal(".outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
+                      return done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+  describe('conditional inverted', function() {
+    return it('should dump', function(done) {
+      var zIndexAndHeight;
+      container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n  .outer, .outie {\n    #css-inner-dump-1 {\n      @if $B > 0 {\n        height: 200px;\n      }\n      z-index: 5;\n    }\n    @if $A > 0 {\n      .innie-outie {\n        #css-inner-dump-2 {\n          width: 100px;\n        }\n      }\n    }\n  }\n</style>";
+      zIndexAndHeight = (document.all && !window.atob || (document.body.style.msTouchAction != null)) && 'height:200px;z-index:5;' || 'z-index:5;height:200px;';
+      return engine.once('solve', function() {
+        expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
+        return engine.solve({
+          A: 1
+        }, function() {
+          expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}\n.outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{width:100px;}");
+          return engine.solve({
+            B: 1
+          }, function() {
+            expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}\n.outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{width:100px;}");
+            return engine.solve({
+              A: 0
+            }, function() {
+              expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
+              return engine.solve({
+                B: 0
+              }, function() {
+                expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
+                return engine.solve({
+                  B: 1
+                }, function() {
+                  expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
+                  return engine.solve({
+                    A: 1
+                  }, function() {
+                    expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}\n.outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{width:100px;}");
+                    return engine.solve({
+                      B: 0
+                    }, function() {
+                      expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}\n.outer .innie-outie #css-inner-dump-2, .outie .innie-outie #css-inner-dump-2{width:100px;}");
+                      return done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+  describe('conditional with customs electors', function() {
+    return it('should dump', function(done) {
+      container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n  .outie !+ .outer, .outer ++ .outie {\n    @if $A > 0 {\n      .innie-outie {\n        #css-inner-dump-2 {\n          width: 100px;\n        }\n      }\n    }\n    \n    #css-inner-dump-1 {\n      z-index: 5;\n\n      @if $B > 0 {\n        height: 200px;\n      }\n    }\n  }\n</style>";
+      return engine.once('solve', function() {
+        expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{z-index:5;}");
+        return engine.solve({
+          A: 1
+        }, function() {
+          expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] .innie-outie #css-inner-dump-2{width:100px;}\n[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{z-index:5;}");
+          return engine.solve({
+            B: 1
+          }, function() {
+            expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] .innie-outie #css-inner-dump-2{width:100px;}\n[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{height:200px;z-index:5;}");
+            return engine.solve({
+              A: 0
+            }, function() {
+              expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{height:200px;z-index:5;}");
+              return engine.solve({
+                B: 0
+              }, function() {
+                expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{z-index:5;}");
+                return engine.solve({
+                  B: 1
+                }, function() {
+                  expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{height:200px;z-index:5;}");
+                  return engine.solve({
+                    A: 1
+                  }, function() {
+                    expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] .innie-outie #css-inner-dump-2{width:100px;}\n[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{height:200px;z-index:5;}");
+                    return engine.solve({
+                      B: 0
+                    }, function() {
+                      expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] .innie-outie #css-inner-dump-2{width:100px;}\n[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{z-index:5;}");
+                      return done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+  describe('conditional with customs electors inverted', function() {
+    return it('should dump', function(done) {
+      container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n  .outie !+ .outer, .outer ++ .outie {\n    #css-inner-dump-1 {\n      @if $B > 0 {\n        height: 200px;\n      }\n      z-index: 5;\n    }\n    @if $A > 0 {\n      .innie-outie {\n        #css-inner-dump-2 {\n          width: 100px;\n        }\n      }\n    }\n  }\n</style>";
+      return engine.once('solve', function() {
+        expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{z-index:5;}");
+        return engine.solve({
+          A: 1
+        }, function() {
+          expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{z-index:5;}\n[matches~=\".outie!+.outer,.outer++.outie\"] .innie-outie #css-inner-dump-2{width:100px;}");
+          return engine.solve({
+            B: 1
+          }, function() {
+            expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{height:200px;z-index:5;}\n[matches~=\".outie!+.outer,.outer++.outie\"] .innie-outie #css-inner-dump-2{width:100px;}");
+            return engine.solve({
+              A: 0
+            }, function() {
+              expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{height:200px;z-index:5;}");
+              return engine.solve({
+                B: 0
+              }, function() {
+                expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{z-index:5;}");
+                return engine.solve({
+                  B: 1
+                }, function() {
+                  expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{height:200px;z-index:5;}");
+                  return engine.solve({
+                    A: 1
+                  }, function() {
+                    expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{height:200px;z-index:5;}\n[matches~=\".outie!+.outer,.outer++.outie\"] .innie-outie #css-inner-dump-2{width:100px;}");
+                    return engine.solve({
+                      B: 0
+                    }, function() {
+                      expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{z-index:5;}\n[matches~=\".outie!+.outer,.outer++.outie\"] .innie-outie #css-inner-dump-2{width:100px;}");
+                      return done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+  describe('scoped + css', function() {
+    return it('should dump', function(done) {
+      container.innerHTML = "<div class=\"outer\" id=\"azaza\">\n  <style scoped src=\"./fixtures/external-file-css1.gss\" type=\"text/gss\"></style>\n  <button></button>\n  <button></button>\n</div>  \n<div class=\"outie\" id=\"outzor\">\n  <style scoped src=\"./fixtures/external-file-css1.gss\" type=\"text/gss\"></style>\n  <button></button>\n  <button></button>\n</div>";
+      return engine.once('solve', function() {
+        var el, i, ref;
+        expect(getSource(engine.tag('style')[1])).to.equal("#azaza button{z-index:1;}");
+        expect(getSource(engine.tag('style')[3])).to.equal("#outzor button{z-index:1;}");
+        ref = engine.scope.querySelectorAll('#azaza button');
+        for (i = ref.length - 1; i >= 0; i += -1) {
+          el = ref[i];
+          el.parentNode.removeChild(el);
+        }
+        return engine.then(function() {
+          expect(getSource(engine.tag('style')[1])).to.equal("");
+          expect(getSource(engine.tag('style')[3])).to.equal("#outzor button{z-index:1;}");
+          return done();
+        });
+      });
+    });
+  });
+  describe('imported and scoped', function() {
+    return it('should dump', function(done) {
+      container.innerHTML = "<div id=\"something\">\n  <div class=\"outer\">\n    <button></button>\n    <button></button>\n  </div>\n  <div class=\"outie\">\n    <button></button>\n    <button></button>\n  </div>\n  <style type=\"text/gss\" scoped>\n    .outer, .outie {\n      @import fixtures/external-file-css1.gss;\n    }\n  </style>\n</div>\n<div id=\"otherthing\">\n  <div class=\"outer\">\n    <button></button>\n    <button></button>\n  </div>\n  <div class=\"outie\">\n    <button></button>\n    <button></button>\n  </div>\n  <style type=\"text/gss\" scoped>\n    .outer, .outie {\n      @import fixtures/external-file-css1.gss;\n    }\n  </style>\n</div>";
+      return engine.once('solve', function() {
+        var el, i, len, ref;
+        expect(engine.tag('style').length).to.eql(4);
+        expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
+        expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
+        ref = engine.tag('div');
+        for (i = 0, len = ref.length; i < len; i++) {
+          el = ref[i];
+          el.setAttribute('class', '');
+        }
+        return engine.then(function() {
+          expect(engine.tag('style').length).to.eql(4);
+          expect(getSource(engine.tag('style')[1])).to.equal("");
+          expect(getSource(engine.tag('style')[3])).to.equal("");
+          engine.tag('div')[1].setAttribute('class', 'outer');
+          return engine.then(function() {
+            expect(engine.tag('style').length).to.eql(4);
+            expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
+            expect(getSource(engine.tag('style')[3])).to.equal("");
+            engine.tag('div')[4].setAttribute('class', 'outie');
+            return engine.then(function() {
+              expect(engine.tag('style').length).to.eql(4);
+              expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
+              expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
+              engine.tag('div')[1].setAttribute('class', '');
+              return engine.then(function() {
+                expect(engine.tag('style').length).to.eql(4);
+                expect(getSource(engine.tag('style')[1])).to.equal("");
+                expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
+                engine.tag('div')[4].setAttribute('class', '');
+                return engine.then(function() {
+                  var j, len1, ref1;
+                  expect(engine.tag('style').length).to.eql(4);
+                  expect(getSource(engine.tag('style')[1])).to.equal("");
+                  expect(getSource(engine.tag('style')[3])).to.equal("");
+                  ref1 = engine.tag('div');
+                  for (j = 0, len1 = ref1.length; j < len1; j++) {
+                    el = ref1[j];
+                    el.setAttribute('class', 'outer');
+                  }
+                  return engine.then(function() {
+                    var k, len2, ref2;
+                    expect(engine.tag('style').length).to.eql(4);
+                    expect(getSource(engine.tag('style')[1])).to.equal("#something .outer button, #something .outie button{z-index:1;}");
+                    expect(getSource(engine.tag('style')[3])).to.equal("#otherthing .outer button, #otherthing .outie button{z-index:1;}");
+                    ref2 = engine.tag('div');
+                    for (k = 0, len2 = ref2.length; k < len2; k++) {
+                      el = ref2[k];
+                      el.setAttribute('class', '');
+                    }
+                    return engine.then(function() {
+                      expect(engine.tag('style').length).to.eql(4);
+                      expect(getSource(engine.tag('style')[1])).to.equal("");
+                      expect(getSource(engine.tag('style')[3])).to.equal("");
+                      return done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+  describe('conditional with nested custom selectors', function() {
+    return it('should dump', function(done) {
+      container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n  .outer, .outie {\n    @if $A > 0 {\n      .innie-outie {\n        #css-inner-dump-2 !> * > * {\n          width: 100px;\n        }\n      }\n    }\n    \n    #css-inner-dump-1 {\n      z-index: 5;\n\n      @if $B > 0 {\n        height: 200px;\n      }\n    }\n  }\n</style>";
+      return engine.once('solve', function() {
+        expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
+        return engine.solve({
+          A: 1
+        }, function() {
+          expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2!>*>*\"]{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
+          expect(engine.id('css-inner-dump-2').getAttribute('matches')).to.eql('.outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2!>*>*');
+          return engine.solve({
+            B: 1
+          }, function() {
+            expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2!>*>*\"]{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
+            expect(engine.id('css-inner-dump-2').getAttribute('matches')).to.eql('.outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2!>*>*');
+            return engine.solve({
+              A: 0
+            }, function() {
+              expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
+              expect(engine.id('css-inner-dump-2').getAttribute('matches')).to.eql(null);
+              return engine.solve({
+                B: 0
+              }, function() {
+                expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
+                return engine.solve({
+                  B: 1
+                }, function() {
+                  expect(getSource(engine.tag('style')[1])).to.equal(".outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
+                  return engine.solve({
+                    A: 1
+                  }, function() {
+                    expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2!>*>*\"]{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{height:200px;z-index:5;}");
+                    return engine.solve({
+                      B: 0
+                    }, function() {
+                      expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outer,.outie↓@$[A]>0↓.innie-outie↓#css-inner-dump-2!>*>*\"]{width:100px;}\n.outer #css-inner-dump-1, .outie #css-inner-dump-1{z-index:5;}");
+                      return done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+  return describe('imported and unscoped', function() {
+    return it('should dump', function(done) {
+      container.innerHTML = "<div id=\"something\">\n  <div class=\"outer\">\n    <button></button>\n    <button></button>\n  </div>\n  <div class=\"outie\">\n    <button></button>\n    <button></button>\n  </div>\n  <style type=\"text/gss\">\n    .outer, .outie {\n      @import fixtures/external-file-css1.gss;\n\n      opacity: 1;\n    }\n  </style>\n</div>";
+      return engine.once('solve', function() {
+        var el, i, len, ref;
+        expect(getSource(engine.tag('style')[1])).to.equal(".outer button, .outie button{z-index:1;}");
+        expect(getSource(engine.tag('style')[2])).to.equal(".outer, .outie{opacity:1;}");
+        expect(engine.tag('style').length).to.eql(3);
+        ref = engine.tag('div');
+        for (i = 0, len = ref.length; i < len; i++) {
+          el = ref[i];
+          el.className = '';
+        }
+        return engine.then(function() {
+          expect(getSource(engine.tag('style')[1])).to.equal("");
+          expect(getSource(engine.tag('style')[2])).to.equal("");
+          engine.tag('div')[0].className = 'outer';
+          expect(engine.tag('style').length).to.eql(3);
+          return engine.then(function() {
+            expect(getSource(engine.tag('style')[1])).to.equal(".outer button, .outie button{z-index:1;}");
+            expect(getSource(engine.tag('style')[2])).to.equal(".outer, .outie{opacity:1;}");
+            expect(engine.tag('style').length).to.eql(3);
+            engine.tag('div')[2].className = 'outer';
+            return engine.then(function() {
+              var j, len1, ref1;
+              expect(engine.tag('style').length).to.eql(3);
+              expect(getSource(engine.tag('style')[1])).to.equal(".outer button, .outie button{z-index:1;}");
+              ref1 = engine.tag('div');
+              for (j = 0, len1 = ref1.length; j < len1; j++) {
+                el = ref1[j];
+                el.className = '';
+              }
+              return engine.then(function() {
+                expect(getSource(engine.tag('style')[1])).to.equal("");
+                expect(getSource(engine.tag('style')[2])).to.equal("");
+                return done();
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+
+
+
+},{}],27:[function(require,module,exports){
 var assert, expect, remove;
 
 assert = chai.assert;

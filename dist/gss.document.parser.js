@@ -2076,9 +2076,9 @@ Engine = (function() {
     },
     commit: function(update) {
       while (!update.isDocumentDone()) {
-        this.Query.prototype.commit(this);
-        this.Query.prototype.repair(this);
-        this.Query.prototype.branch(this);
+        this.Query.prototype.commit(this.input);
+        this.Query.prototype.repair(this.input);
+        this.Query.prototype.branch(this.input);
         this;
       }
     },
@@ -26184,11 +26184,13 @@ Stylesheet = (function(superClass) {
     parent = operation;
     results = wrapped = custom = void 0;
     while (parent) {
-      if (parent.command.type === 'Condition' && !parent.global) {
-        if (results) {
-          for (index = j = 0, len = results.length; j < len; index = ++j) {
-            result = results[index];
-            results[index] = ' ' + this.getCustomSelector(parent.command.key, result);
+      if (parent.command.type === 'Condition') {
+        if (!parent.command.global || (results != null ? results[0].indexOf('[matches~=') : void 0) > -1) {
+          if (results) {
+            for (index = j = 0, len = results.length; j < len; index = ++j) {
+              result = results[index];
+              results[index] = ' ' + this.getCustomSelector(parent.command.key, result);
+            }
           }
         }
       } else if (parent.command.type === 'Iterator') {
@@ -26204,7 +26206,7 @@ Stylesheet = (function(superClass) {
   Stylesheet.empty = [''];
 
   Stylesheet.prototype.combineSelectors = function(results, operation) {
-    var index, j, k, l, len, len1, ref, ref1, result, selector, update;
+    var index, j, k, l, len, len1, ref, ref1, result, selector, separated, update;
     if (results == null) {
       results = Stylesheet.empty;
     }
@@ -26225,7 +26227,10 @@ Stylesheet = (function(superClass) {
         update.push(' ' + this.getCustomSelector(operation.command.path, result));
       } else if (operation[0] === ',') {
         for (index = l = 1, ref1 = operation.length; l < ref1; index = l += 1) {
-          update.push(this.getRuleSelector(operation[index], operation.command) + result);
+          separated = this.getRuleSelector(operation[index], operation.command) + result;
+          if (update.indexOf(separated) === -1) {
+            update.push(separated);
+          }
         }
       } else {
         update.push(this.getRuleSelector(operation) + result);

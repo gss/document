@@ -213,10 +213,11 @@ class Stylesheet extends Command.List
     while parent
 
       # Append condition id to path
-      if parent.command.type == 'Condition' && !parent.global
-        if results
-          for result, index in results
-            results[index] = ' ' + @getCustomSelector(parent.command.key, result)
+      if parent.command.type == 'Condition'
+        if !parent.command.global || results?[0].indexOf('[matches~=') > -1
+          if results
+            for result, index in results
+              results[index] = ' ' + @getCustomSelector(parent.command.key, result)
       
       # Add rule selector to path
       else if parent.command.type == 'Iterator'
@@ -243,7 +244,9 @@ class Stylesheet extends Command.List
         update.push ' ' + @getCustomSelector(operation.command.path, result)
       else if operation[0] == ','
         for index in [1 ... operation.length] by 1
-          update.push @getRuleSelector(operation[index], operation.command) + result 
+          separated = @getRuleSelector(operation[index], operation.command) + result
+          if update.indexOf(separated) == -1
+            update.push separated
       else 
         update.push @getRuleSelector(operation) + result
     return update
