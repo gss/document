@@ -561,6 +561,9 @@ describe 'Vanilla CSS', ->
         expect(getSource(engine.tag('style')[1])).to.equal """
           [matches~=".outie!+.outer,.outer++.outie"] #css-inner-dump-1{z-index:5;}
           """
+        expect(engine.class('outer')[0].getAttribute('matches')).to.eql('.outie!+.outer,.outer++.outie')
+        expect(engine.class('outie')[0].getAttribute('matches')).to.eql('.outie!+.outer,.outer++.outie')
+        
         engine.solve
           A: 1
         , ->

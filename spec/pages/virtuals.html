@@ -4,31 +4,32 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script src="../../dist/gss.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../dist/gss.document.parser.js" type="text/javascript" charset="utf-8"></script>
 
   </head>
   <body id="body">
 
       <div class="wrap" id="wrap1">
         <div class="thing" id="thing1" style="background-color:red;">
-          <div class="other" id="other2" style="background-color:blue;"></div>
+          <div class="other" id="other1" style="background-color:blue;"></div>
         </div>
       </div>
 
       <div class="wrap" id="wrap2">
         <div class="thing" id="thing2" style="background-color:red;">
-          <div class="other" id="other1" style="background-color:blue;"></div>
+          <div class="other" id="other2" style="background-color:blue;"></div>
         </div>
       </div>
 
     <style type="text/gss">
 
-      @h |-(.wrap)-... in(::window) gap(100);
+      @h |-(.wrap)-... in(::window) gap(50);
 
       .wrap {
         my-size == 100;
+        size: == 100;
 
-        &"target" {
+        "target" {
           width: == &height == my-size;
           center-y: == ::window[center-y];
           center-x: ==        ^[center-x];
@@ -46,11 +47,12 @@
     </style>
 
     <script>
-    document.addEventListener('solve', function(solution) {
-      delete solution.detail.engine
-      window.parent.postMessage(solution.detail, location.origin)
-    })
     window.engine = GSS(document);
+
+    window.engine.addEventListener('solve', function(solution) {
+      window.parent.postMessage(solution, location.origin)
+    })
+
     </script>
 
   </body>

@@ -1574,9 +1574,11 @@ require("./view");
 
 require("./poly-test/full");
 
+require("./pages");
 
 
-},{"./assignments":10,"./command":12,"./command-nested-rules":11,"./conditions":13,"./domain":14,"./end-to-end":15,"./engine":16,"./external-files":17,"./matrix":18,"./perf":19,"./poly-test/full":20,"./ranges":21,"./selectors":22,"./styles":23,"./stylesheet":24,"./units":25,"./vanilla-css":26,"./view":27,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/ranges":6,"gss-engine/spec/signatures":7,"gss-engine/spec/thread":8}],10:[function(require,module,exports){
+
+},{"./assignments":10,"./command":12,"./command-nested-rules":11,"./conditions":13,"./domain":14,"./end-to-end":15,"./engine":16,"./external-files":17,"./matrix":18,"./pages":19,"./perf":20,"./poly-test/full":21,"./ranges":22,"./selectors":23,"./styles":24,"./stylesheet":25,"./units":26,"./vanilla-css":27,"./view":28,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/ranges":6,"gss-engine/spec/signatures":7,"gss-engine/spec/thread":8}],10:[function(require,module,exports){
 describe('Assignments', function() {
   return describe('with units', function() {
     return it('should compute', function(done) {
@@ -7735,6 +7737,193 @@ describe('Matrix', function() {
 
 
 },{}],19:[function(require,module,exports){
+describe('Standalone page tests', function() {
+  var container, engine, iframe, roughAssert;
+  engine = container = iframe = null;
+  afterEach(function() {
+    return iframe.parentNode.removeChild(iframe);
+  });
+  beforeEach(function() {
+    iframe = document.createElement('iframe');
+    return document.body.appendChild(iframe);
+  });
+  this.timeout(100000);
+  roughAssert = function(expected, given, threshold) {
+    if (threshold == null) {
+      threshold = 10;
+    }
+    if ((expected == null) || (given == null)) {
+      return expect(expected).to.eql(given);
+    } else {
+      return expect(Math.abs(expected - given) < threshold).to.eql(true, expected + ' is not ' + given);
+    }
+  };
+  return describe('Grid website', function() {
+    describe('Virtuals demo', function() {
+      return it('should reorient', function(done) {
+        var i, listener;
+        i = 0;
+        listener = function(e) {
+          console.log('msg');
+          if (e.origin === location.origin) {
+            roughAssert(e.data['$wrap2"target"[x]'], 200);
+            roughAssert(e.data['$wrap2"target"[width]'], 100);
+            roughAssert(e.data['$wrap2"target"[height]'], 100);
+            roughAssert(e.data['$wrap1"target"[x]'], 50);
+            roughAssert(e.data['$wrap1"target"[width]'], 100);
+            roughAssert(e.data['$wrap1"target"[height]'], 100);
+            roughAssert(e.data['$other1[x]'], 75);
+            roughAssert(e.data['$other1[width]'], 50);
+            roughAssert(e.data['$other1[height]'], 50);
+            roughAssert(e.data['$other2[x]'], 225);
+            roughAssert(e.data['$other2[width]'], 50);
+            roughAssert(e.data['$other2[height]'], 50);
+            window.removeEventListener('message', listener);
+            return done();
+          }
+        };
+        window.addEventListener('message', listener);
+        iframe.width = 1024;
+        iframe.height = 768;
+        return iframe.src = './pages/virtuals.html?log=0.5';
+      });
+    });
+    describe('Simple post', function() {
+      return it('should reorient', function(done) {
+        var i, listener;
+        i = 0;
+        listener = function(e) {
+          console.log('msg', e.data);
+          if (e.origin === location.origin) {
+            if (i === 9) {
+              window.removeEventListener('message', listener);
+              return done();
+            } else if (++i % 3 === 1) {
+              roughAssert(e.data['$content1[width]'], 624);
+              roughAssert(e.data['$content1[x]'], 0);
+              roughAssert(e.data['$content1[y]'], 72);
+              expect(e.data['$title1[width]'] != null).to.eql(false);
+              expect(e.data['$title1[x]'] != null).to.eql(false);
+              expect(e.data['$title1[y]'] != null).to.eql(false);
+              expect(e.data['$subtitle1[width]'] != null).to.eql(false);
+              expect(e.data['$subtitle1[x]'] != null).to.eql(false);
+              expect(e.data['$subtitle1[y]'] != null).to.eql(false);
+              return iframe.width = 500;
+            } else if (i % 3 === 2) {
+              roughAssert(e.data['$content1[width]'], 226);
+              roughAssert(e.data['$content1[x]'], 234);
+              roughAssert(e.data['$content1[y]'], 32);
+              roughAssert(e.data['$title1[width]'], 154);
+              roughAssert(e.data['$title1[x]'], 270);
+              roughAssert(e.data['$title1[y]'], 259);
+              roughAssert(e.data['$subtitle1[width]'], 154);
+              roughAssert(e.data['$subtitle1[x]'], 270);
+              roughAssert(e.data['$subtitle1[y]'], 460);
+              return iframe.width = 320;
+            } else {
+              roughAssert(e.data['$content1[width]'], 288);
+              roughAssert(e.data['$content1[x]'], 16);
+              roughAssert(e.data['$content1[y]'], 384);
+              roughAssert(e.data['$title1[width]'], 248);
+              roughAssert(e.data['$title1[x]'], 36);
+              roughAssert(e.data['$title1[y]'], 456);
+              roughAssert(e.data['$subtitle1[width]'], 248);
+              roughAssert(e.data['$subtitle1[x]'], 36);
+              roughAssert(e.data['$subtitle1[y]'], 583);
+              return iframe.width = 1024;
+            }
+          }
+        };
+        window.addEventListener('message', listener);
+        iframe.width = 1024;
+        iframe.height = 768;
+        return iframe.src = './pages/grid_post_simple.html?log=0.5&z' + Math.random();
+      });
+    });
+    xdescribe('Head cta section', function() {
+      return it('should reorient', function(done) {
+        var i;
+        i = 0;
+        window.addEventListener('message', function(e) {
+          if (e.origin === location.origin) {
+            return expect();
+          }
+        });
+        iframe.width = 1024;
+        iframe.height = 768;
+        return iframe.src = './pages/grid_head_cta.html?log=0.5';
+      });
+    });
+    return describe('Team section', function() {
+      return it('should reorient', function(done) {
+        var i;
+        i = 0;
+        window.addEventListener('message', function(e) {
+          return setTimeout(function() {
+            if (e.origin === location.origin) {
+              i++;
+              if (i === 8) {
+                return done();
+              }
+              if (i % 4 === 1) {
+                roughAssert(e.data['$dan_tocchini[y]'], 235);
+                roughAssert(e.data['$dan_tocchini[x]'], 368);
+                roughAssert(e.data['$dan_tocchini[width]'], 288);
+                expect(Math.floor(e.data['$yaroslaff_fedin[y]'])).to.eql(1577);
+                expect(Math.floor(e.data['$yaroslaff_fedin[x]'])).to.eql(523);
+                expect(Math.floor(e.data['$yaroslaff_fedin[width]'])).to.eql(216);
+                roughAssert(e.data['$lost_cosmonaut[y]'], 2171);
+                roughAssert(e.data['$lost_cosmonaut[x]'], 762);
+                roughAssert(e.data['$lost_cosmonaut[width]'], 216);
+                return iframe.width = 768;
+              } else if (i % 4 === 2) {
+                roughAssert(e.data['$dan_tocchini[y]'], 0);
+                roughAssert(e.data['$dan_tocchini[x]'], 768);
+                roughAssert(e.data['$dan_tocchini[width]'], 768);
+                expect(Math.floor(e.data['$yaroslaff_fedin[y]'])).to.eql(0);
+                expect(Math.floor(e.data['$yaroslaff_fedin[x]'])).to.eql(6912);
+                expect(Math.floor(e.data['$yaroslaff_fedin[width]'])).to.eql(768);
+                roughAssert(e.data['$lost_cosmonaut[y]'], 0);
+                roughAssert(e.data['$lost_cosmonaut[x]'], 10752);
+                roughAssert(e.data['$lost_cosmonaut[width]'], 768);
+                return iframe.width = 1024;
+              } else if (i % 4 === 3) {
+                roughAssert(e.data['$dan_tocchini[y]'], 235);
+                roughAssert(e.data['$dan_tocchini[x]'], 368);
+                roughAssert(e.data['$dan_tocchini[width]'], 288);
+                expect(Math.floor(e.data['$yaroslaff_fedin[y]'])).to.eql(1577);
+                expect(Math.floor(e.data['$yaroslaff_fedin[x]'])).to.eql(523);
+                expect(Math.floor(e.data['$yaroslaff_fedin[width]'])).to.eql(216);
+                roughAssert(e.data['$lost_cosmonaut[y]'], 2171);
+                roughAssert(e.data['$lost_cosmonaut[x]'], 762);
+                roughAssert(e.data['$lost_cosmonaut[width]'], 216);
+                return iframe.width = 320;
+              } else {
+                roughAssert(e.data['$dan_tocchini[y]'], 224);
+                roughAssert(e.data['$dan_tocchini[x]'], 320);
+                roughAssert(e.data['$dan_tocchini[width]'], 320);
+                expect(Math.floor(e.data['$yaroslaff_fedin[y]'])).to.eql(223);
+                expect(Math.floor(e.data['$yaroslaff_fedin[x]'])).to.eql(2880);
+                expect(Math.floor(e.data['$yaroslaff_fedin[width]'])).to.eql(320);
+                roughAssert(e.data['$lost_cosmonaut[y]'], 240);
+                roughAssert(e.data['$lost_cosmonaut[x]'], 4480);
+                roughAssert(e.data['$lost_cosmonaut[width]'], 320);
+                return iframe.width = 1024;
+              }
+            }
+          }, 10);
+        });
+        iframe.width = 1024;
+        iframe.height = 768;
+        return iframe.src = './pages/grid_team.html?log=0.5&' + Math.random();
+      });
+    });
+  });
+});
+
+
+
+},{}],20:[function(require,module,exports){
 var Engine, assert, expect, remove, stringify;
 
 Engine = GSS.Engine;
@@ -7853,7 +8042,7 @@ describe('Perf', function() {
 
 
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var DEMOS, assert, expect, remove, roughAssert;
 
 DEMOS = {
@@ -8226,7 +8415,7 @@ describe('Full page tests', function() {
 
 
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 describe('Ranges', function() {
   var engine;
   engine = null;
@@ -8527,7 +8716,7 @@ describe('Ranges', function() {
 
 
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -8664,7 +8853,7 @@ describe('Selectors', function() {
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -8848,7 +9037,7 @@ describe('Styles', function() {
 
 
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var IE10, assert, expect;
 
 expect = chai.expect;
@@ -9388,7 +9577,7 @@ describe('Stylesheet', function() {
 
 
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var assert, expect, remove;
 
 expect = chai.expect;
@@ -9521,7 +9710,7 @@ describe('Units', function() {
 
 
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 describe('Vanilla CSS', function() {
   var container, engine, getSource;
   engine = null;
@@ -9829,6 +10018,8 @@ describe('Vanilla CSS', function() {
       container.innerHTML = "<div class=\"outer\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-1\"></div>\n  </div>\n</div>\n<div class=\"outie\">\n  <div class=\"innie-outie\">\n    <div id=\"css-inner-dump-2\"></div>\n  </div>\n</div>\n<style type=\"text/gss\" scoped>\n  .outie !+ .outer, .outer ++ .outie {\n    #css-inner-dump-1 {\n      @if $B > 0 {\n        height: 200px;\n      }\n      z-index: 5;\n    }\n    @if $A > 0 {\n      .innie-outie {\n        #css-inner-dump-2 {\n          width: 100px;\n        }\n      }\n    }\n  }\n</style>";
       return engine.once('solve', function() {
         expect(getSource(engine.tag('style')[1])).to.equal("[matches~=\".outie!+.outer,.outer++.outie\"] #css-inner-dump-1{z-index:5;}");
+        expect(engine["class"]('outer')[0].getAttribute('matches')).to.eql('.outie!+.outer,.outer++.outie');
+        expect(engine["class"]('outie')[0].getAttribute('matches')).to.eql('.outie!+.outer,.outer++.outie');
         return engine.solve({
           A: 1
         }, function() {
@@ -10050,7 +10241,7 @@ describe('Vanilla CSS', function() {
 
 
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var assert, expect, remove;
 
 assert = chai.assert;
