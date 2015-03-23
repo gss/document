@@ -102,6 +102,45 @@ describe 'Standalone page tests', ->
 
 
 
+
+    describe 'Reposts', ->
+
+      it 'should reorient', (done) ->
+        i = 0
+        listener = (e) ->
+          console.log('msg', e.data)
+          if (e.origin == location.origin)
+            if i == 9
+              window.removeEventListener('message', listener)
+              done()
+            else if ++i % 6 == 1
+              expect(e.data['$quote2[x]']).to.eql(72)
+
+              iframe.width = 500
+            else if i % 6 == 2
+              expect(e.data['$quote2[x]']).to.eql(24)
+              iframe.width = 320
+            else if i % 6 == 3
+              expect(e.data['$quote2[x]']).to.eql(undefined)
+              iframe.width = 1500
+            else if i % 6 == 4
+              expect(e.data['$quote2[x]']).to.eql(72)
+              iframe.width = 550
+            else if i % 6 == 5
+              expect(e.data['$quote2[x]']).to.eql(undefined)
+              iframe.width = 400
+            else
+              expect(e.data['$quote2[x]']).to.eql(24)
+              iframe.width = 1024
+
+        window.addEventListener('message', listener)
+
+        iframe.width = 1024
+        iframe.height = 768
+        iframe.src = './pages/grid_reposts.html?log=0.5&z' + Math.random()
+
+
+
     xdescribe 'Head cta section', ->
 
       it 'should reorient', (done) ->

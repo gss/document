@@ -1594,7 +1594,6 @@ Domain = (function() {
   };
 
   Domain.prototype.transfer = function(update, parent) {
-    var prop, solution;
     if (parent) {
       parent.perform(this);
     }
@@ -1607,11 +1606,7 @@ Domain = (function() {
       this.register();
     }
     if (this.nullified) {
-      solution = {};
-      for (prop in this.nullified) {
-        (solution || (solution = {}))[prop] = null;
-      }
-      return this.updating.apply(solution);
+      return this.updating.apply(this.transform());
     }
   };
 
@@ -3205,7 +3200,7 @@ Query = (function(_super) {
   };
 
   Query.prototype.clean = function(engine, path, continuation, operation, scope, contd) {
-    var command, key, removed, result;
+    var command, key, result;
     if (contd == null) {
       contd = continuation;
     }
@@ -3217,7 +3212,6 @@ Query = (function(_super) {
       }
     }
     if ((result = this.get(engine, path)) !== void 0) {
-      removed = true;
       this.each(this.remove, engine, result, path, operation, scope, operation, false, contd);
     }
     this.set(engine, path, void 0);
@@ -3225,7 +3219,7 @@ Query = (function(_super) {
       this.unobserve(engine, engine.updating.mutations, path);
     }
     this.unobserve(engine, engine.identify(scope || engine.scope), path);
-    if ((!result && this.restore(engine, path)) || !this.isCollection(result)) {
+    if (!result || !this.isCollection(result)) {
       engine.triggerEvent('remove', path);
     }
     return true;
@@ -5063,8 +5057,8 @@ Constraint = Command.extend({
       }
     }
   },
-  group: function(constraints, engine) {
-    var constraint, group, groupped, groups, other, others, path, variable, vars, _i, _j, _k, _len, _len1;
+  group: function(constraints) {
+    var constraint, group, groupped, groups, other, others, path, vars, _i, _j, _k, _len, _len1;
     groups = [];
     for (_i = 0, _len = constraints.length; _i < _len; _i++) {
       constraint = constraints[_i];
@@ -5076,7 +5070,6 @@ Constraint = Command.extend({
           other = group[_k];
           others = other.variables;
           for (path in vars) {
-            variable = vars[path];
             if (others[path]) {
               if (groupped && groupped !== group) {
                 groupped.push.apply(groupped, group);
@@ -5101,7 +5094,7 @@ Constraint = Command.extend({
   },
   split: function(engine) {
     var arg, args, commands, constraint, equal, group, groups, i, index, operation, separated, shift, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref;
-    groups = this.group(engine.constraints, engine).sort(function(a, b) {
+    groups = this.group(engine.constraints).sort(function(a, b) {
       var al, bl;
       al = a.length;
       bl = b.length;
@@ -5443,15 +5436,40 @@ Range.Modifier = (function(_super) {
         return from;
       }
     },
-    '<=': function(from, to, progress) {},
     '<': function(from, to, progress) {},
-    '>=': function(from, to, progress) {},
     '>': function(from, to, progress) {}
   });
 
   return Modifier;
 
 })(Range);
+
+Range.Modifier.Including = (function(_super) {
+  __extends(Including, _super);
+
+  function Including() {
+    return Including.__super__.constructor.apply(this, arguments);
+  }
+
+  Including.prototype.valueOf = function() {
+    var end, start, value;
+    if ((value = this[2]) != null) {
+      if ((start = this[0]) === false || value >= 0) {
+        if ((end = this[1]) === false || value <= 1) {
+          return value * ((end - start) || 1) + start;
+        }
+      }
+    }
+  };
+
+  Including.define({
+    '<=': function(from, to, progress) {},
+    '>=': function(from, to, progress) {}
+  });
+
+  return Including;
+
+})(Range.Modifier);
 
 Range.Progress = (function(_super) {
   __extends(Progress, _super);

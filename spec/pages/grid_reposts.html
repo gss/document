@@ -1,0 +1,921 @@
+<style>body, html { padding: 0; margin: 0; font: 16px Arial;}
+* {
+  /*-webkit-backface-visibility: hidden;*/
+  margin: 0px;
+  padding: 0px;
+  outline: none;
+  box-sizing: border-box;
+}</style>
+<script src="../../dist/gss.document.parser.js"></script>
+<style>
+
+
+section.reposts .repost {
+  z-index: 2;
+}
+
+section.reposts {
+  border-right: 1px solid hsl(0, 100%, 100%);
+  border-left: 1px solid hsl(0, 100%, 100%);
+}
+.repost .play-btn {
+  border-radius: 50%;
+  opacity: 1;
+  text-decoration: none;
+}
+.repost .play-btn i {
+  margin-left: 0.1em; /* b/c center aint center */
+  font-size: 22px;
+  width: 100%;
+  text-align: center;
+}
+.repost .cover {
+  background-position: 50% 50%;
+}
+.repost .from  {
+  float: left;
+}
+.repost .from .avatar {
+  float: left;
+}
+.repost .from .author {
+  float: left;
+}
+.repost .text {
+  background-color: hsl(0, 0%, 99%);
+}
+
+
+.smaller-text .repost .text {
+  padding:  72px 36px;
+}
+.smaller-text .repost .meta {
+  bottom: 24px;
+  left:  36px;
+  right: 36px;
+}
+.smaller-text .repost .meta.top {
+  top: 24px;
+}
+
+.hide-author .author {
+  display: none;
+}
+
+.reposts article .title {
+  font-size: 32px;
+  line-height: 32px;
+  text-align: left;
+}
+
+.reposts article .desc {
+  font-size: 16px;
+  line-height: 24px;
+  text-align: left;
+}
+
+.repost .text .desc {
+  margin-top: 24px;
+}
+
+.repost .text .desc:first-child {
+  margin-top: 0px !important;
+}
+
+.repost.wo-cover .quote .desc {
+  text-align: center;
+  font-family: 'National Medium';
+}
+.repost.wo-cover .quote .meta {
+  text-align: center;
+}
+.repost.w-cover .quote .desc {
+  text-align: left;
+  font-family: 'National Medium';
+}
+
+.repost.wo-cover .meta {
+  font-size: 16px;
+  line-height: 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+.repost.w-cover .meta {
+  font-size: 16px;
+  line-height: 24px;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+.repost a.white {
+  color: #ffffff;
+}
+.repost a.black {
+  color: #000000;
+}
+.repost a {
+  text-decoration: none;
+}
+</style>
+
+<style type="text/gss">
+
+
+section {
+  width: 100%;
+  width: == ::window[width] !require;
+  top: == 0 !require;
+  left: == 0 !require;
+  z-index: 1;
+  overflow-x: hidden;
+  margin: auto;
+  width: 100%;
+
+  height: <= ::window[height] !weak100;
+  height: >= &[width] / 2.4 !require;
+}
+
+.modal {
+  @h |(&)| in(::window);
+  @v |(&)| in(::window);
+}
+
+section.footer {
+  width: == ::window[width];
+  height: == 144;
+
+  (& .content)[center] == &[center];
+
+  .content {
+    size: == &[intrinsic-size];
+  }
+}
+/*
+
+## Reposts: Shared Rules
+
+====================================================== */
+
+section.reposts {
+
+
+  height: >= ::window[height] / 2;
+
+  .repost.w-cover .quote .desc {
+    font-size: 30px;
+    line-height: 36px;
+  }
+  .repost.wo-cover .quote .desc {
+    font-size: 30px;
+    line-height: 36px;
+  }
+
+  .repost {
+
+    .from .author {
+      padding:  0 24px;
+    }
+    .text {
+      padding: 108px 72px;
+    }
+    .meta {
+      position: absolute;
+      bottom: 72px;
+      left:  72px;
+      right: 72px;
+    }
+
+    /* text */
+    .text {
+      height: == &[intrinsic-height] !require;
+    }
+
+    /* author block */
+    .from {
+      height: == $md;
+      width: == &[intrinsic-width];
+      .avatar {
+        height: == $md;
+        width: == $md;
+      }
+      .author {
+        height: == $md;
+        line-height: == $md;
+      }
+    }
+
+    /* media block */
+    .media {
+      center: == (& .play-btn)[center] !weak;
+      .play-btn {
+        &[width] == $md == &[height];
+        (& i)[line-height] == $md;
+      }
+    }
+
+    /* play */
+    .play-btn {
+      z-index: 10;
+    }
+
+  }
+
+
+
+
+  /*
+
+  mobile
+  -------------------------------------------------- */
+  @if ::window[width] <= 500 {
+
+    height: >= ::window[height];
+    @v |(& .repost)...| in(&);
+    @h |(& .repost)| in(&);
+
+    .repost  {
+
+      @v |(& .media)| in(&);
+      @h |(& .media)| in(&);
+
+      @v |~48~(& .from)(& .text)-| gap(24) in(&);
+
+      @h |-(& .from)   gap(36) in(&);
+
+      @h |-(& .text)-| gap(24) in(&);
+
+      .text {
+        padding:    36px 36px 60px;
+      }
+      .meta {
+        opacity: 1;
+        right:      36px;
+        left:       36px;
+        bottom:     24px;
+        font-size:  12px;
+      }
+      &.wo-cover {
+        @v |~$md~(& .text)~$md~| in(&);
+      }
+    }
+  }
+
+}
+
+
+@if ::window[width] > 500 {
+
+  /*
+
+  ## Reposts: Singular Squarish
+
+  ====================================================== */
+
+  section.reposts.singular.large-portrait {
+
+    @h |(& .repost)| in(&);
+    @v |(& .repost)| in(&) !strong  ;
+
+
+    @h |(& .media)| in(&"zone1");
+
+    .repost {
+
+      opacity: 1;
+
+      &[--text-gap] >= $md;
+
+      @v |-(& .media)-|
+        gap($md) in(&)
+        {
+          height: == 700;
+        }
+
+      (& .text)[width] <= $md * 8;
+      (& .text)[width] >= $md * 4 !require;
+
+    }
+
+    @if ::window[width] > 900 {
+      @v |(&"zone1")| in(&) !require;
+      @v |(&"zone2")| in(&) !require;
+
+      (& .text)[center-y] == &[center-y];
+      &.right {
+        @h |(&"zone2")<&[center-x]>(&"zone1")| in(&) !require;
+
+        .repost {
+          (& .text)[right] == (&)[center-x] + $md;
+          (& .from)[left] + $[md-2] == (& .text)[left];
+        }
+      }
+      &.left {
+        @h |(&"zone1")<&[center-x]>(&"zone2")| in(&) !require;
+
+        .repost {
+          (& .text)[left] == (&)[center-x] - $md;
+          (& .from)[right] + $[md-2] == (& .text)[right];
+        }
+      }
+    } @else {
+      @h |(&"zone1")| in(&) !require;
+      @h |-[md1]-(& .text)| in(&) !require;
+      &.left .repost {
+        (& .from)[left] + $[md-2] == (& .text)[left];
+      }
+      &.right .repost {
+        (& .from)[right] + $[md-2] == (& .text)[right];
+      }
+    }
+
+    &.left {
+
+
+      .repost {
+
+        /* play */
+        (& .play-btn)[center-y] == (& .text)[center-y];
+        (& .play-btn)[center-x] == (& .text)[left];
+
+        @h (& .text)~$md~| in(&) !strong;
+
+        (& .from)[top] == (& .text)[top];
+      }
+    }
+    &.right {
+
+
+      .repost {
+
+        /* play */
+        (& .play-btn)[center-x] == (& .text)[right];
+        (& .play-btn)[center-y] == (& .text)[center-y];
+
+        (& .from)[top] == (& .text)[top];
+      }
+    }
+  }
+
+
+
+
+
+  /*
+
+  ## Reposts: Singular Wide
+
+  - Fullscreen media
+  - Post overlapped on bottom of media
+
+  ====================================================== */
+
+  section.reposts.singular.large.landscape.box-beneath {
+
+    @h |(& .repost)| in(&);
+    @v |(& .repost)| in(&);
+
+    @h |(&"zone1")| in(&) !require;
+    @h |(&"zone2")| in(&) !require;
+
+    @v |-$md2-(&"zone1") -$[-md]- (&"zone2")-$md2-| in(&) !require;
+
+    &"zone1"[height] * (16/9) == &"zone1"[width];
+    &"zone2"[height] >= 200;
+
+    @h |(& .media)| in(&"zone1");
+    @v |(& .media)| in(&"zone1");
+
+
+    // text
+
+    @h <&[center-x]> (& .text) -$md- | in(&);
+
+    @v |(& .text) in(&"zone2")
+
+    @v (& .from) | in(&"zone2");
+
+
+    .repost {
+
+      opacity: 1;
+
+      (& .from)[center-y] == (& .text)[bottom];
+      (& .from)[right] - $[md-2] == (& .text)[right];
+
+      /* play */
+      (& .play-btn)[center-x] == (& .text)[left];
+      (& .play-btn)[center-y] == (& .text)[top];
+    }
+
+  }
+
+
+  /*
+
+  ## Reposts: Singular Wide Thing
+
+  - Fullscreen media
+  - Post overlayed w/in media
+
+  ====================================================== */
+
+  section.reposts.singular.large.landscape.box-atop {
+
+    @h |(& .repost)| in(&);
+    @v |(& .repost)| in(&);
+
+    @h |(&"zone1")| in(&) !require;
+    @v |(&"zone1")| in(&) !require;
+
+    &.left {
+      .repost {
+        /* play */
+        (& .play-btn)[center-x] == (& .text)[right];
+        (& .play-btn)[center-y] == (& .text)[center-y];
+
+        (& .from)[top] == (& .text)[top];
+        (& .from)[left] + $[md-2] == (& .text)[left];
+      }
+    }
+    &.right {
+      .repost {
+        /* play */
+        (& .play-btn)[center-x] == (& .text)[left];
+        (& .play-btn)[center-y] == (& .text)[center-y];
+
+        (& .from)[top] == (& .text)[top];
+        (& .from)[right] + $[md-2] == (& .text)[right];
+      }
+    }
+    @if ::window[width] > 1100 {
+      &.left {
+        @h |-$md2-(&"zone2")-$md2-<&"zone1"[center-x]> in(&"zone1");
+      }
+      &.right {
+        @h <&"zone1"[center-x]>-$md2-(&"zone2")-$md2-| in(&"zone1");
+      }
+    } @else {
+      &.left {
+        &[-column-gap] >= $md;
+        @h |-$md-(&"zone2")-&[-column-gap]-| in(&"zone1");
+
+      }
+      &.right {
+        &[-column-gap] >= $md;
+        @h |-&[-column-gap]-(&"zone2")-$md-| in(&"zone1");
+      }
+    }
+    @v |-$md-(&"zone2")-$md-| in(&"zone1");
+
+    @h |(& .media)| in(&"zone1");
+    @v |(& .media)| in(&"zone1");
+
+    @v |(& .text)| in(&"zone2");
+    @h |(& .text)| in(&"zone2");
+
+    .repost {
+
+      opacity: 1;
+
+    }
+
+  }
+
+
+  /*
+
+  ## Reposts: Duality
+
+  - 1 repost w/o cover
+  - 1 repost w/ mcoveredia (landscape)
+
+  ====================================================== */
+
+  section.reposts.dual.w-wo-cover {
+
+    /*
+
+    1 landscape cover
+
+    ----------------------------------------- */
+
+    &.w-landscape {
+
+      @h |(& .repost.wo-cover)| in(&"zone1");
+      @v |(& .repost.wo-cover)| in(&"zone1");
+
+      @h |(& .repost.w-cover)| in(&"zone2");
+      @v |(& .repost.w-cover)| in(&"zone2");
+
+      &"zone2"[width] == &"zone1"[width] !strong;
+
+      @if ::window[width] > 1000 {
+
+        @v |(&"zone2")| in(&) {
+        }
+        @v |(&"zone1")| in(&) {
+        }
+
+        &[-zone-gap-h] == 0;
+
+        &.v-zone-1 {
+          @h |(&"zone1")(&"zone2")| in(&) gap(&[-zone-gap-h]);
+
+        }
+        &.v-zone-2 {
+          @h |(&"zone2")(&"zone1")| in(&) gap(&[-zone-gap-h]);
+        }
+
+      }
+
+      @else {
+
+        @h |(&"zone2")| in(&);
+        @h |(&"zone1")| in(&);
+
+        &[-zone-gap-h] >= 0;
+
+        &.v-zone-1 {
+          @v |~-~(&"zone1")(&"zone2")~-~| in(&) gap(&[-zone-gap-h]);
+        }
+        &.v-zone-2 {
+          @v |~-~(&"zone2")(&"zone1")~-~| in(&) gap(&[-zone-gap-h]);
+        }
+      }
+
+      &.variation-layout-1 {
+
+        .repost.wo-cover {
+
+          opacity: == 1; /* BUG: CSS Dumping */
+
+          // text
+
+          &[--text-gap] >= $md;
+
+          @v |-
+              (& .text)
+              -|
+              gap(&[--text-gap])
+              in(&);
+
+
+          $md <= &[left-text-pad];
+
+          @h |~&[left-text-pad]~(& .text)-$md-|
+              in(&);
+
+          // author
+
+          @h |-(& .from) in(& .text) gap(-$[md-2]);
+
+          (& .from)[center-y] == (& .text)[y];
+        }
+
+        .repost.w-cover {
+
+          opacity: == 1; /* BUG: CSS Dumping */
+
+          &[--text-gap] >= $md;
+
+          @h |(& .media)| in(&);
+          @v |-$md-(& .media)  in(&) {
+            height: == ::[width] / 1.6;
+          }
+
+          // .from positioned to .media
+
+          @h |-(& .from) in(& .media) gap($[md-2]);
+          (& .from)[top] == (& .text)[top];
+
+          @v  (& .media)
+              -$[-md]-
+              (& .text)
+              ~-~|
+              gap(&[--text-gap])
+              in(&);
+
+          &[--text-left] == (& .from)[left] + $[md-2];
+          // just in case .from is missing
+          &[--text-left] >= (& .media)[left] + $md;
+
+          @h  <&[--text-left]>
+               (& .text)
+               -$md-|
+              in(&);
+
+          /* play */
+          (& .play-btn)[center-x] == (& .text)[center-x];
+          (& .play-btn)[center-y] == (& .text)[top];
+
+        }
+      }
+    }
+
+    /*
+
+    1 non-landscape cover
+
+    ----------------------------------------- */
+
+    &.w-squarish {
+
+      @h |(& .repost.wo-cover)| in(&"zone1");
+      @v |(& .repost.wo-cover)| in(&"zone1");
+
+      @h |(& .repost.w-cover)| in(&"zone2");
+      @v |(& .repost.w-cover)| in(&"zone2");
+
+      //&"zone2"[width] == &"zone1"[width] !strong;
+
+      @if ::window[width] > 1200 {
+
+
+        &[-zone-gap-v] >= $md;
+
+        @v |-(&"zone2")-| in(&) gap(&[-zone-gap-v]);
+        @v |-(&"zone1")-| in(&) gap(&[-zone-gap-v]);
+
+        &"zone1"[height] == &"zone2"[height];
+        &"zone1"[width] == &"zone2"[width];
+
+        &[-zone-gap-h] == 0;
+
+        &.v-zone-1 {
+          @h |-(&"zone1")<&[center-x]>(&"zone2")-| in(&) gap(&[-zone-gap-h]);
+        }
+        &.v-zone-2 {
+          @h |-(&"zone2")<&[center-x]>(&"zone1")-| in(&) gap(&[-zone-gap-h]);
+        }
+
+      }
+
+      @else {
+
+        @h |(&"zone2")| in(&);
+        @h |(&"zone1")| in(&);
+
+        &[-zone-gap-v] >= 0;
+
+        &.v-zone-1 {
+          @v |~-~(&"zone1")-$md-(&"zone2")~-~| in(&) gap(&[-zone-gap-v]);
+        }
+        &.v-zone-2 {
+          // bigger gap when cover is on top
+          @v |~-~(&"zone2")-$md2-(&"zone1")~-~| in(&) gap(&[-zone-gap-v]);
+        }
+
+      }
+
+      .repost.wo-cover {
+
+        opacity: == 1; /* BUG: CSS Dumping */
+
+        /* GSS  */
+        &[--text-gap] >= 72;
+        @v |-
+            (& .text)
+            -|
+            gap(&[--text-gap])
+            in(&);
+
+        @h |-$md2-(& .text)-$md-|
+            in(&);
+
+        (& .from)[center-y] == (& .text)[top];
+
+      }
+      &.v-zone-1 {
+        .repost.wo-cover {
+          @h   (& .from)-| in(& .text) gap(-$[md-2]);
+        }
+        .repost.w-cover {
+          (& .from)[center-x] == (& .media)[right];
+          @h |(& .media) in(&) !weak;
+        }
+      }
+      &.v-zone-2 {
+        .repost.wo-cover {
+          @h |-(& .from)   in(& .text) gap(-$[md-2]);
+        }
+        .repost.w-cover {
+          (& .from)[center-x] == (& .media)[left];
+          @h (& .media)| in(&) !weak;
+        }
+      }
+
+      .repost.w-cover {
+
+        @h |-$md-(& .text)-$md-| in(&) !strong;
+        @v |-$md-(& .text)        in(&);
+
+        (& .from)[center-y] == (& .text)[bottom];
+        (& .from)[center-x] == (& .text)[center-x] - $md !weak;
+
+        &[overlap-gap] == $md;
+
+        @v  (& .text)
+            -$[-md]-
+            (& .media)
+            ~&[overlap-gap]~|
+            in(&);
+
+
+        .text {
+          z-index: == 1;
+          .meta {
+            position: absolute;
+            top: 72px;
+            bottom: initial;
+          }
+        }
+        .from {
+          z-index: == 3;
+        }
+        .media {
+          z-index: == 2;
+          height: >= 350;
+          height: >= &[width] !weak;
+        }
+      }
+
+
+    }
+
+  }
+
+
+
+  /*
+
+  ## Reposts: Duality Media
+
+  - 1 repost w/ media
+  - 1 repost w/ media
+
+  ====================================================== */
+
+  //section.reposts.dual.w-w-cover {
+  //
+  //  @h |(& .repost-1)| in(&"zone1");
+  //  @v |(& .repost-1)| in(&"zone1");
+  //
+  //  @h |(& .repost-2)| in(&"zone2");
+  //  @v |(& .repost-2)| in(&"zone2");
+  //
+  //  &.v-aspect-1 {
+  //
+  //    @v |-(&"zone2")-| in(&) gap($md2);
+  //    @v |-(&"zone1")-| in(&) gap($md2);
+  //
+  //    &.v-zone-1 {
+  //
+  //      @h | (&"zone1") <&[center-x]> (&"zone2") | in(&);
+  //
+  //      .repost-1 {
+  //
+  //        /* play */
+  //        (& .play-btn)[center-x] == (& .text)[left];
+  //        (& .play-btn)[center-y] == (& .media)[top];
+  //
+  //        /* meta */
+  //        .meta {
+  //          bottom: initial;
+  //          top:72px;
+  //        }
+  //      }
+  //      .repost-2 {
+  //
+  //        /* play */
+  //        (& .play-btn)[center-x] == (& .text)[right];
+  //        (& .play-btn)[center-y] == (& .media)[bottom];
+  //
+  //      }
+  //
+  //    }
+  //    &.v-zone-2 {
+  //      @h | (&"zone2") <&[center-x]> (&"zone1") | in(&);
+  //
+  //      .repost-1 {
+  //
+  //        /* play */
+  //        (& .play-btn)[center-x] == (& .text)[right];
+  //        (& .play-btn)[center-y] == (& .media)[top];
+  //
+  //        /* meta */
+  //        .meta {
+  //          bottom: initial;
+  //          top:72px;
+  //        }
+  //      }
+  //      .repost-2 {
+  //
+  //        /* play */
+  //        (& .play-btn)[center-x] == (& .text)[right];
+  //        (& .play-btn)[center-y] == (& .media)[bottom];
+  //
+  //      }
+  //    }
+  //  }
+  //
+  //  &.variation-layout-1 {
+  //
+  //    .repost.w-cover {
+  //
+  //      opacity: == 1; /* BUG: CSS Dumping */
+  //
+  //      @h | (& .media) | in(&);
+  //
+  //    }
+  //
+  //
+  //    // equal media height
+  //    (& .media)[height] == &[--media-height];
+  //
+  //    (& .media)[height]  >= ::window[height] / 3 !strong;
+  //
+  //    (& .media)[height]  <= ::window[height] / 2 !strong;
+  //
+  //    .repost-1 {
+  //      @v |
+  //          (& .text)
+  //          < &[center-y] >
+  //          in(&);
+  //
+  //      @h  <&[center-x] - $md > (& .text) -$md- |
+  //          in(&);
+  //
+  //      @v |
+  //          ~$md~
+  //          (& .media)
+  //          ~$md2~
+  //         | in(&);
+  //
+  //      (& .from)[center-x] == (& .text)[center-x];
+  //      (& .from)[center-y] == (& .text)[bottom];
+  //    }
+  //    .repost-2 {
+  //      @v  < &[center-y] >
+  //          (& .text)
+  //          |
+  //          in(&);
+  //
+  //      @h  | -$md- (& .text) <&[center-x]  + $md>
+  //          in(&);
+  //
+  //      @v |
+  //          ~$md2~
+  //          (& .media)
+  //          ~$md~
+  //         | in(&);
+  //
+  //     (& .from)[center-x] == (& .text)[center-x];
+  //     (& .from)[center-y] == (& .text)[top];
+  //
+  //    }
+  //  }
+  //}
+
+}
+</style>
+<section class="reposts dual w-wo-cover w-landscape v-aspect-1 variation-layout-1 v-zone-1" style="position:relative;"><article id="article1" class="repost repost-1 w-cover"><div class="media cover w-faces" style="background-image:url(https://imgflo.herokuapp.com/graph/vahj1ThiexotieMo/d9df9a41dd09c63b3b92e2d36ea3364c/passthrough?input=https%3A%2F%2Fpbs.twimg.com%2Fmedia%2FBzeBH1rCYAA8D5F.jpg%3Alarge); background-size:cover;"></div><div class="text quote" id="quote1" style="background-color:hsl(0, 50%, 20%);"><style type="text/css" scoped="scoped">.linker-39d2ca1d-bdf0-4efa-a488-59d8f58f5894 {
+  color: hsl(0, 52%, 60%) !important;
+}</style><p class="meta" style="color:hsl(0, 12%, 60%);">from <a class="meta-source" style="color:hsl(0, 52%, 60%);" href="https://twitter.com/TimSchraeder/status/520026254175518720" target="_blank">Twitter</a></p><p class="desc" style="color:hsl(0, 0%, 100%);">Now she can even design your website. <a href="http://bit.ly/1sfQtUV" class="linker-39d2ca1d-bdf0-4efa-a488-59d8f58f5894 linker-39d2ca1d-bdf0-4efa-a488-59d8f58f5894-url" target="_blank">bit.ly/1sf..</a> #TheGrid</p></div><div class="from" style="background-color:hsl(0, 12%, 60%);"><div class="avatar" style="background-image:url(https://imgflo.herokuapp.com/graph/vahj1ThiexotieMo/ac2dd79b02e4af1ec409a778fbaf3ae5/passthrough?input=https%3A%2F%2Fpbs.twimg.com%2Fprofile_images%2F500703912295682048%2FnAReO-U1_bigger.jpeg); background-size:cover;"></div><div class="author" style="color:white;"><a href="http://twitter.com/TimSchraeder" target="_blank" style="color:white;">TimSchraeder</a></div></div></article><article id="article2" class="repost repost-2 wo-cover"><div class="text quote" id="quote2" style="background-color:hsl(0, 50%, 95%);"><style type="text/css" scoped="scoped">.linker-9c3c65f7-b95c-47e8-bd9a-6132583a4b67 {
+  color: hsl(0, 45%, 75%) !important;
+}</style><p class="meta" style="color:hsl(0, 15%, 75%);">from <a class="meta-source" style="color:hsl(0, 45%, 75%);" href="https://twitter.com/jimneuner/status/520018240169189376" target="_blank">Twitter</a></p><p class="desc" style="color:hsl(0, 0%, 0%);">Your message should shape the medium. Now it does with #TheGrid. Join the evolution. <a href="https://thegrid.io/#455" class="linker-9c3c65f7-b95c-47e8-bd9a-6132583a4b67 linker-9c3c65f7-b95c-47e8-bd9a-6132583a4b67-url" target="_blank">thegrid.io..</a></p></div><div class="from" style="background-color:hsl(0, 15%, 75%);"><div class="avatar" style="background-image:url(https://imgflo.herokuapp.com/graph/vahj1ThiexotieMo/cc59e5112814beea1d2e1b3818e8e009/passthrough?input=https%3A%2F%2Fpbs.twimg.com%2Fprofile_images%2F502152729997742080%2FyLBS5hiJ_bigger.jpeg); background-size:cover;"></div><div class="author" style="color:black;"><a href="http://twitter.com/jimneuner" target="_blank" style="color:black;">jimneuner</a></div></div></article></section>
+
+<section class="reposts dual w-wo-cover w-squarish v-aspect-1 variation-layout-1 v-zone-1" style="position:relative;"><article class="repost repost-1 w-cover"><div class="media cover" style="background-image:url(https://imgflo.herokuapp.com/graph/vahj1ThiexotieMo/6a2d60000077ecd3f876ad000fe3ba4b/passthrough?input=https%3A%2F%2Fpbs.twimg.com%2Fmedia%2FBzd09cECYAAQz47.png%3Alarge); background-size:cover;"></div><div class="text quote" style="background-color:hsla(0, 80%, 60%, 0.95);"><style type="text/css" scoped="scoped">.linker-8b46ea4d-aec2-4998-b25d-ec43e93516b4 {
+  color: hsl(0, 80%, 90%) !important;
+}</style><p class="meta" style="color:hsl(0, 60%, 80%);">from <a class="meta-source" style="color:hsl(0, 80%, 90%);" href="https://twitter.com/royabear/status/520012881497059328" target="_blank">Twitter</a></p><p class="desc" style="color:hsl(0, 0%, 100%);">No more building Zuck's website #thegrid #ownnotrent <a href="http://thegrid.io" class="linker-8b46ea4d-aec2-4998-b25d-ec43e93516b4 linker-8b46ea4d-aec2-4998-b25d-ec43e93516b4-url" target="_blank">thegrid.io</a></p></div><div class="from" style="background-color:hsl(0, 60%, 80%);"><div class="avatar" style="background-image:url(https://imgflo.herokuapp.com/graph/vahj1ThiexotieMo/8c918f77ac518a8c430d46cc3b155743/passthrough?input=https%3A%2F%2Fpbs.twimg.com%2Fprofile_images%2F1435037110%2FScreen_shot_2011-07-08_at_4.12.46_PM_bigger.png); background-size:cover;"></div><div class="author" style="color:black;"><a href="http://twitter.com/royabear" target="_blank" style="color:black;">royabear</a></div></div></article><article class="repost repost-2 wo-cover"><div class="text quote" style="background-color:hsl(0, 50%, 20%);"><style type="text/css" scoped="scoped">.linker-bb4af510-a73f-4f07-a6d0-56d94f50c3ea {
+  color: hsl(0, 51%, 60%) !important;
+}</style><p class="meta" style="color:hsl(0, 11%, 60%);">from <a class="meta-source" style="color:hsl(0, 51%, 60%);" href="https://twitter.com/stshank/status/519932455688888320" target="_blank">Twitter</a></p><p class="desc" style="color:hsl(0, 0%, 100%);">Who says the era of making your own Web site is over? <a href="https://twitter.com/thegridio" class="linker-bb4af510-a73f-4f07-a6d0-56d94f50c3ea linker-bb4af510-a73f-4f07-a6d0-56d94f50c3ea-twitter" target="_blank">@thegridio</a>'s offers tools to help you escape the walled gardens <a href="http://cnet.co/1qjg8Gu" class="linker-bb4af510-a73f-4f07-a6d0-56d94f50c3ea linker-bb4af510-a73f-4f07-a6d0-56d94f50c3ea-url" target="_blank">cnet.co/1q..</a></p></div><div class="from" style="background-color:hsl(0, 11%, 60%);"><div class="avatar" style="background-image:url(https://imgflo.herokuapp.com/graph/vahj1ThiexotieMo/57c9fd4bc38949c59de56b4854e9f4dc/passthrough?input=https%3A%2F%2Fpbs.twimg.com%2Fprofile_images%2F2998714640%2Fa78201b223e8ac8accba172b6154344d_bigger.jpeg); background-size:cover;"></div><div class="author" style="color:white;"><a href="http://twitter.com/stshank" target="_blank" style="color:white;">stshank</a></div></div></article></section>
+
+<script>
+if (window.parent != window) {
+  window.addEventListener('message', function(e) {
+    window.engine.merge(e.data)
+  })
+}
+
+function boot(values) {
+  var data = {
+    "md": 72,
+    "-md": -72,
+    "-md-2": -36,
+    "md-2": 36,
+    "md2": 144,
+    "md-gap": 36,
+    "md-gap2": 18,
+    "base": 8,
+  }
+  for (var property in values)
+    data[property] = values[property];
+  window.engine = GSS(document, data);
+  window.engine.addEventListener('solve', function(solution) {
+    window.parent.postMessage(solution, location.origin)
+  })
+  
+} 
+
+boot()
+</script>
