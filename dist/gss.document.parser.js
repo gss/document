@@ -2049,6 +2049,9 @@ Engine = (function() {
   };
 
   Engine.prototype.$events = {
+    cleanup: function() {
+      return this.updated = void 0;
+    },
     perform: function(update) {
       var _ref;
       if (update.domains.length) {
@@ -2064,6 +2067,12 @@ Engine = (function() {
     finish: function(update) {
       this.console.end(update != null ? update.solution : void 0);
       this.updating = void 0;
+      clearTimeout(this.gc);
+      this.gc = setTimeout((function(_this) {
+        return function() {
+          return _this.triggerEvent('cleanup');
+        };
+      })(this), 3000);
       if (update) {
         this.inspector.update();
         return this.updated = update;
@@ -2335,6 +2344,8 @@ Engine = (function() {
   };
 
   Engine.prototype.destroy = function() {
+    clearTimeout(this.gc);
+    this.triggerEvent('cleanup');
     this.triggerEvent('destroy');
     if (this.events) {
       return this.removeListeners(this.events);
@@ -3972,7 +3983,7 @@ var Update, Updater,
 Updater = function(engine) {
   var Update, property, value, _ref;
   Update = function(problem, domain, parent, Domain, Auto) {
-    var arg, index, object, result, update, vardomain, _i, _len;
+    var arg, index, object, result, update, vardomain, _i, _len, _ref;
     if (this instanceof Update) {
       this.problems = problem && (domain.push && problem || [problem]) || [];
       this.domains = domain && (domain.push && domain || [domain]) || [];
@@ -3990,7 +4001,9 @@ Updater = function(engine) {
         continue;
       }
       if (!(arg[0] instanceof Array)) {
-        arg.parent || (arg.parent = problem);
+        if (!((_ref = problem[0]) != null ? _ref.push : void 0)) {
+          arg.parent || (arg.parent = problem);
+        }
         if (arg[0] === 'get') {
           vardomain = arg.domain || (arg.domain = this.getVariableDomain(arg, Domain));
           (update || (update = new this.update)).push([arg], vardomain);
@@ -4396,6 +4409,7 @@ Update.prototype = {
         }
       }
       result = (this.solutions || (this.solutions = []))[this.index] = callback.call(bind || this, domain, this.problems[this.index], this.index, this);
+      this.problems[this.index].variables = void 0;
       if (((_ref1 = this.busy) != null ? _ref1.length : void 0) && this.busy.indexOf((_ref2 = this.domains[this.index + 1]) != null ? _ref2.url : void 0) === -1) {
         this.terminate();
         return result;
@@ -4492,9 +4506,11 @@ Update.prototype = {
     return result.variables;
   },
   reify: function(operation, domain, from) {
-    var arg, _i, _len;
+    var arg, _i, _len, _ref;
     if (operation.domain === from) {
-      operation.domain = domain;
+      if (!((_ref = operation[0]) != null ? _ref.push : void 0)) {
+        operation.domain = domain;
+      }
     }
     for (_i = 0, _len = operation.length; _i < _len; _i++) {
       arg = operation[_i];
@@ -5717,6 +5733,25 @@ Variable = (function(_super) {
     return engine.unedit(variable);
   };
 
+  Variable.prototype.cleanup = function(engine) {
+    var constraints, name, variable, _ref, _results;
+    _ref = engine.variables;
+    _results = [];
+    for (name in _ref) {
+      variable = _ref[name];
+      if (constraints = variable.constraints) {
+        if (!constraints.length) {
+          _results.push(delete engine.variables[name]);
+        } else {
+          _results.push(void 0);
+        }
+      } else {
+        _results.push(void 0);
+      }
+    }
+    return _results;
+  };
+
   return Variable;
 
 })(Command);
@@ -6229,6 +6264,20 @@ Linear = (function(_super) {
 
   function Linear() {
     this.operations = {};
+    this.addEventListener('cleanup', (function(_this) {
+      return function() {
+        var domain, _i, _len, _ref, _results;
+        _this.Constraint.prototype.cleanup(_this);
+        _this.Variable.prototype.cleanup(_this);
+        _ref = _this.domains;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          domain = _ref[_i];
+          _results.push(domain.cleanup(_this));
+        }
+        return _results;
+      };
+    })(this));
     Linear.__super__.constructor.apply(this, arguments);
   }
 
@@ -6269,7 +6318,7 @@ Linear = (function(_super) {
   Linear.prototype.edit = function(variable, strength, weight, continuation) {
     var constraint, _ref;
     if (!((_ref = this.editing) != null ? _ref[variable.name] : void 0)) {
-      constraint = new c.EditConstraint(variable, this.strength(strength, 'strong'), this.weight(weight));
+      constraint = variable.editor || (variable.editor = new c.EditConstraint(variable, this.strength(strength, 'strong'), this.weight(weight)));
       constraint.variable = variable;
       this.Constraint.prototype.inject(this, constraint);
       (this.editing || (this.editing = {}))[variable.name] = constraint;
@@ -6313,6 +6362,35 @@ Linear = (function(_super) {
 
   Linear.prototype.weight = function(weight, operation) {
     return weight;
+  };
+
+  Linear.prototype.cleanup = function() {
+    var instance, property, value;
+    instance = this.instance;
+    for (property in instance) {
+      value = instance[property];
+      if (value != null ? value._keyStrMap : void 0) {
+        this.cleanupHashSet(value);
+      }
+    }
+  };
+
+  Linear.prototype.cleanupHashSet = function(object) {
+    var property, stored, value, _ref;
+    _ref = object._keyStrMap;
+    for (property in _ref) {
+      value = _ref[property];
+      if (stored = object._store[property]) {
+        if (stored.terms) {
+          this.cleanupHashSet(stored.terms);
+        }
+        if (value.expression) {
+          this.cleanupHashSet(value.expression.terms);
+        }
+      } else {
+        delete object._keyStrMap[property];
+      }
+    }
   };
 
   return Linear;
