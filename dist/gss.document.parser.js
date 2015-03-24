@@ -5010,8 +5010,8 @@ Constraint = Command.extend({
       }
     }
   },
-  unset: function(engine, constraint) {
-    var index, operation, path, _i, _len, _ref, _ref1;
+  unset: function(engine, constraint, quick) {
+    var index, operation, path, _i, _ref, _ref1;
     if ((index = engine.constraints.indexOf(constraint)) > -1) {
       engine.constraints.splice(index, 1);
       if ((index = (_ref = engine.constrained) != null ? _ref.indexOf(constraint) : void 0) > -1) {
@@ -5021,10 +5021,13 @@ Constraint = Command.extend({
       }
     }
     _ref1 = constraint.operations;
-    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-      operation = _ref1[_i];
+    for (index = _i = _ref1.length - 1; _i >= 0; index = _i += -1) {
+      operation = _ref1[index];
       if ((path = operation.parent[0].key) != null) {
         this.unwatch(engine, operation, path);
+        if (!quick) {
+          constraint.operations.splice(index, 1);
+        }
       }
     }
   },
@@ -5041,6 +5044,22 @@ Constraint = Command.extend({
   },
   watch: function(engine, operation, continuation) {
     return engine.add(continuation, operation);
+  },
+  cleanup: function(engine) {
+    var constraint, hash, operations, signature, _ref;
+    _ref = engine.operations;
+    for (hash in _ref) {
+      operations = _ref[hash];
+      for (signature in operations) {
+        constraint = operations[signature];
+        if (!constraint.operations.length) {
+          delete operations[signature];
+          if (!Object.keys(operations).length) {
+            delete engine.operations[hash];
+          }
+        }
+      }
+    }
   },
   remove: function(engine, operation, continuation) {
     var constraint, index, operations;
@@ -5119,7 +5138,7 @@ Constraint = Command.extend({
         group = separated[index];
         for (index = _j = 0, _len1 = group.length; _j < _len1; index = ++_j) {
           constraint = group[index];
-          this.unset(engine, constraint);
+          this.unset(engine, constraint, true);
           _ref = constraint.operations;
           for (_k = 0, _len2 = _ref.length; _k < _len2; _k++) {
             operation = _ref[_k];
@@ -6202,15 +6221,16 @@ c.Strength.require = c.Strength.required;
 Linear = (function(_super) {
   __extends(Linear, _super);
 
-  function Linear() {
-    return Linear.__super__.constructor.apply(this, arguments);
-  }
-
   Linear.prototype.displayName = 'Linear';
 
   Linear.prototype.priority = 0;
 
   Linear.prototype.Engine = c;
+
+  function Linear() {
+    this.operations = {};
+    Linear.__super__.constructor.apply(this, arguments);
+  }
 
   Linear.prototype.construct = function() {
     if (this.paths == null) {

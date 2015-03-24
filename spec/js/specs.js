@@ -7851,21 +7851,35 @@ describe('Standalone page tests', function() {
               window.removeEventListener('message', listener);
               return done();
             } else if (++i % 6 === 1) {
+              roughAssert(e.data['$quote1[x]'], 584);
               expect(e.data['$quote2[x]']).to.eql(72);
+              expect(e.data['$quote3[x]']).to.eql(72);
+              expect(e.data['$quote4[x]']).to.eql(144);
               return iframe.width = 500;
             } else if (i % 6 === 2) {
+              expect(e.data['$quote1[x]']).to.eql(24);
               expect(e.data['$quote2[x]']).to.eql(24);
               return iframe.width = 320;
             } else if (i % 6 === 3) {
+              expect(e.data['$quote1[x]']).to.eql(void 0);
               expect(e.data['$quote2[x]']).to.eql(void 0);
               return iframe.width = 1500;
             } else if (i % 6 === 4) {
+              roughAssert(e.data['$quote1[x]'], 750 + 72);
               expect(e.data['$quote2[x]']).to.eql(72);
+              expect(e.data['$quote3[x]']).to.eql(750 + 72);
+              expect(e.data['$quote4[x]']).to.eql(144);
               return iframe.width = 550;
             } else if (i % 6 === 5) {
-              expect(e.data['$quote2[x]']).to.eql(void 0);
+              if (e.data['$quote1[x]'] != null) {
+                roughAssert(e.data['$quote1[x]'], 72);
+              }
+              if (e.data['$quote2[x]'] != null) {
+                roughAssert(e.data['$quote1[x]'], 72);
+              }
               return iframe.width = 400;
             } else {
+              expect(e.data['$quote1[x]']).to.eql(24);
               expect(e.data['$quote2[x]']).to.eql(24);
               return iframe.width = 1024;
             }

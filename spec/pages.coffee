@@ -114,22 +114,35 @@ describe 'Standalone page tests', ->
               window.removeEventListener('message', listener)
               done()
             else if ++i % 6 == 1
+              roughAssert(e.data['$quote1[x]'], 584)
               expect(e.data['$quote2[x]']).to.eql(72)
+              expect(e.data['$quote3[x]']).to.eql(72)
+              expect(e.data['$quote4[x]']).to.eql(144)
 
               iframe.width = 500
             else if i % 6 == 2
+              expect(e.data['$quote1[x]']).to.eql(24)
               expect(e.data['$quote2[x]']).to.eql(24)
               iframe.width = 320
             else if i % 6 == 3
+              expect(e.data['$quote1[x]']).to.eql(undefined)
               expect(e.data['$quote2[x]']).to.eql(undefined)
               iframe.width = 1500
             else if i % 6 == 4
+              roughAssert(e.data['$quote1[x]'], 750 + 72)
               expect(e.data['$quote2[x]']).to.eql(72)
+              expect(e.data['$quote3[x]']).to.eql(750 + 72)
+              expect(e.data['$quote4[x]']).to.eql(144)
+
               iframe.width = 550
             else if i % 6 == 5
-              expect(e.data['$quote2[x]']).to.eql(undefined)
+              if e.data['$quote1[x]']?
+                roughAssert(e.data['$quote1[x]'], 72)
+              if e.data['$quote2[x]']?
+                roughAssert(e.data['$quote1[x]'], 72)
               iframe.width = 400
             else
+              expect(e.data['$quote1[x]']).to.eql(24)
               expect(e.data['$quote2[x]']).to.eql(24)
               iframe.width = 1024
 
