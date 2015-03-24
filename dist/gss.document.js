@@ -4931,7 +4931,7 @@ Constraint = Command.extend({
     this.watch(engine, operation, continuation);
     if (other !== constraint) {
       if (other) {
-        this.unset(engine, other);
+        this.unset(engine, other, true);
       }
       this.set(engine, constraint);
     }
