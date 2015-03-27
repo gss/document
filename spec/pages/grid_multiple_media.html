@@ -67,7 +67,7 @@ function boot(values) {
     delete solution.detail.engine
     window.parent.postMessage(solution.detail, location.origin)
   })
-  window.engine = GSS(document, data);
+  window.engine = GSS(document, data, !!unescape(location.search).match(/with worker/i));
 } 
 
 boot()

@@ -11,7 +11,7 @@ module.exports = global.GSS = GSS;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../src/Document":33,"gss-engine/src/GSS.coffee":7}],2:[function(require,module,exports){
+},{"../src/Document":34,"gss-engine/src/GSS.coffee":7}],2:[function(require,module,exports){
 var GSS;
 
 GSS = require('./gss.document');
@@ -22,7 +22,7 @@ module.exports = GSS;
 
 
 
-},{"./gss.document":1,"gss-parser":23}],3:[function(require,module,exports){
+},{"./gss.document":1,"gss-parser":24}],3:[function(require,module,exports){
 /**
  * Parts Copyright (C) 2011-2012, Alex Russell (slightlyoff@chromium.org)
  * Parts Copyright (C) Copyright (C) 1998-2000 Greg J. Badros
@@ -43,6 +43,8 @@ var l=this.rows.get(this._objective);a.trace&&console.log(l);var m=b.strength.sy
   (typeof module != "undefined") ?
       (module.compiled = true && module) : this
 );
+
+
 
 },{}],4:[function(require,module,exports){
 var Command,
@@ -203,8 +205,10 @@ Command = (function() {
       typed = typeof argument;
       if (typed === 'object') {
         if (argument.push) {
-          if (argument.parent == null) {
-            argument.parent = operation;
+          if (!engine.Engine || typeof operation[0] === 'string') {
+            if (argument.parent == null) {
+              argument.parent = operation;
+            }
           }
           command = (argument.domain || engine).Command(argument, operation, i, implicit);
           type = command.type;
@@ -1100,7 +1104,6 @@ Command.List = (function(_super) {
     for (index = _i = 0, _len = operation.length; _i < _len; index = ++_i) {
       argument = operation[index];
       if (argument != null ? argument.push : void 0) {
-        argument.parent || (argument.parent = operation);
         if (command = argument.command || engine.Command(argument)) {
           command.solve(engine, argument, continuation, scope);
         }
@@ -2070,7 +2073,7 @@ Engine = (function() {
       clearTimeout(this.gc);
       this.gc = setTimeout((function(_this) {
         return function() {
-          return _this.triggerEvent('cleanup');
+          return _this.cleanup();
         };
       })(this), 3000);
       if (update) {
@@ -2343,9 +2346,13 @@ Engine = (function() {
     return -1;
   };
 
+  Engine.prototype.cleanup = function() {
+    return this.triggerEvent('cleanup');
+  };
+
   Engine.prototype.destroy = function() {
     clearTimeout(this.gc);
-    this.triggerEvent('cleanup');
+    this.cleanup();
     this.triggerEvent('destroy');
     if (this.events) {
       return this.removeListeners(this.events);
@@ -3983,7 +3990,7 @@ var Update, Updater,
 Updater = function(engine) {
   var Update, property, value, _ref;
   Update = function(problem, domain, parent, Domain, Auto) {
-    var arg, index, object, result, update, vardomain, _i, _len, _ref;
+    var arg, index, object, result, update, vardomain, _i, _len;
     if (this instanceof Update) {
       this.problems = problem && (domain.push && problem || [problem]) || [];
       this.domains = domain && (domain.push && domain || [domain]) || [];
@@ -4001,7 +4008,7 @@ Updater = function(engine) {
         continue;
       }
       if (!(arg[0] instanceof Array)) {
-        if (!((_ref = problem[0]) != null ? _ref.push : void 0)) {
+        if (typeof problem[0] === 'string') {
           arg.parent || (arg.parent = problem);
         }
         if (arg[0] === 'get') {
@@ -6251,6 +6258,8 @@ Constraint = require('../commands/Constraint');
 
 c = require('cassowary');
 
+c.HashTable = require('../../vendor/HashTable');
+
 c.Strength.require = c.Strength.required;
 
 Linear = (function(_super) {
@@ -6309,9 +6318,12 @@ Linear = (function(_super) {
 
   Linear.prototype.unedit = function(variable) {
     var constraint, _ref;
-    if (constraint = (_ref = this.editing) != null ? _ref['%' + (variable.name || variable)] : void 0) {
+    if (constraint = (_ref = this.editing) != null ? _ref['%' + variable.name] : void 0) {
       this.instance.removeConstraint(constraint);
-      return delete this.editing[variable.name || variable];
+      if (!--variable.editing) {
+        delete this.variables['%' + variable.name];
+      }
+      return delete this.editing[variable.name];
     }
   };
 
@@ -6320,6 +6332,7 @@ Linear = (function(_super) {
     if (!((_ref = this.editing) != null ? _ref[variable.name] : void 0)) {
       constraint = variable.editor || (variable.editor = new c.EditConstraint(variable, this.strength(strength, 'strong'), this.weight(weight)));
       constraint.variable = variable;
+      variable.editing = (variable.editing || 0) + 1;
       this.Constraint.prototype.inject(this, constraint);
       (this.editing || (this.editing = {}))[variable.name] = constraint;
     }
@@ -6512,38 +6525,11 @@ Linear.prototype.Remove = Command.extend({
   }
 });
 
-(function() {
-  var obj, property, set;
-  if (c.isUnordered == null) {
-    obj = {
-      '10': 1,
-      '9': 1
-    };
-    for (property in obj) {
-      break;
-    }
-    if (c.isUnordered = property > 9) {
-      set = c.HashTable.prototype.set;
-      return c.HashTable.prototype.set = function() {
-        var store;
-        if (!this._store.push) {
-          store = this._store;
-          this._store = [];
-          for (property in store) {
-            this._store[property] = store[property];
-          }
-        }
-        return set.apply(this, arguments);
-      };
-    }
-  }
-})();
-
 module.exports = Linear;
 
 
 
-},{"../Command":4,"../Domain":5,"../commands/Constraint":11,"../commands/Variable":14,"cassowary":3}],18:[function(require,module,exports){
+},{"../../vendor/HashTable":22,"../Command":4,"../Domain":5,"../commands/Constraint":11,"../commands/Variable":14,"cassowary":3}],18:[function(require,module,exports){
 var Constraint, Data, Output,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __hasProp = {}.hasOwnProperty;
@@ -7659,6 +7645,183 @@ module.exports = Inspector;
 
 
 },{}],22:[function(require,module,exports){
+if (self.Map) {
+  var HashTable = function() {
+    this.size = 0;
+    this._store = new Map();
+    this._keys = [];
+    // this.get = this._store.get.bind(this._store);
+  }
+
+  HashTable.prototype = {
+
+    set: function(key, value) {
+      this._store.set(key.hashCode, value);
+      if (this._keys.indexOf(key) == -1) {
+        this.size++;
+        for (var i = this._keys.length; i--;)
+          if (this._keys[i].hashCode < key.hashCode)
+            break
+        this._keys.splice(i + 1, 0, key)
+      }
+    },
+
+    get: function(key) {
+      return this._store.get(key.hashCode);
+    },
+
+    clear: function() {
+      this.size = 0;
+      this._store = new Map();
+      this._keys = [];
+    },
+
+    delete: function(key) {
+      if (this._store.delete(key.hashCode) && this.size > 0) {
+        this._keys.splice(this._keys.indexOf(key), 1);
+        this.size--;
+      }
+    },
+
+
+    each: function(callback, scope) {
+      if (!this.size) { return; }
+      this._keys.forEach(function(k){
+        if (typeof k == "undefined") { return; }
+        var v = this._store.get(k.hashCode);
+        if (typeof v != "undefined") {
+          callback.call(scope||null, k, v);
+        }
+      }, this);
+    },
+
+    escapingEach: function(callback, scope) {
+      if (!this.size) { return; }
+
+      var that = this;
+      var kl = this._keys.length;
+      var context;
+      for (var x = 0; x < kl; x++) {
+        var k = this._keys[x];
+        var v = that._store.get(k.hashCode);
+        if (typeof v != "undefined") {
+          context = callback.call(scope||null, k, v);
+        }
+
+        if (context) {
+          if (context.retval !== undefined) {
+            return context;
+          }
+          if (context.brk) {
+            break;
+          }
+        }
+      }
+    },
+
+    clone: function() {
+      var n = new HashTable();
+      if (this.size) {
+        this.each(function(k, v) {
+          n.set(k, v);
+        });
+      }
+      return n;
+    }
+  };
+} else {
+
+  var HashTable = function() {
+    this.size = 0;
+    this._store = {};
+    this._keys = [];
+    // this.get = this._store.get.bind(this._store);
+  }
+
+
+  HashTable.prototype = {
+    set: function(key, value) {
+      this._store[key.hashCode] = value
+      if (this._keys.indexOf(key) == -1) {
+        this.size++;
+        // delete this._keys[this._keys.indexOf(key)];
+        for (var i = this._keys.length; i--;)
+          if (this._keys[i].hashCode < key.hashCode)
+            break
+        this._keys.splice(i + 1, 0, key)
+      } /* else {
+        delete this._keys[this._keys.indexOf(key)];
+        this._keys.push(key);
+      }
+      */
+    },
+
+    get: function(key) {
+      return this._store[key.hashCode];
+    },
+
+    clear: function() {
+      this.size = 0;
+      this._store = {}
+      this._keys = [];
+    },
+
+    delete: function(key) {
+      if (this._store[key.hashCode] != undefined && this.size > 0) {
+        this._store[key.hashCode] = undefined
+        this._keys.splice(this._keys.indexOf(key), 1);
+        this.size--;
+      }
+    },
+
+    each: function(callback, scope) {
+      if (!this.size) { return; }
+      this._keys.forEach(function(k){
+        var v = this._store[k.hashCode];
+        if (typeof v != "undefined") {
+          callback.call(scope||null, k, v);
+        }
+      }, this);
+    },
+
+    escapingEach: function(callback, scope) {
+      if (!this.size) { return; }
+
+      var that = this;
+      var kl = this._keys.length;
+      var context;
+      for (var x = 0; x < kl; x++) {
+          var k = this._keys[x]
+          var v = that._store[k.hashCode];
+          if (typeof v != "undefined") {
+            context = callback.call(scope||null, k, v);
+          }
+
+          if (context) {
+            if (context.retval !== undefined) {
+              return context;
+            }
+            if (context.brk) {
+              break;
+            }
+          }
+      }
+    },
+
+    clone: function() {
+      var n = new HashTable();
+      if (this.size) {
+        this.each(function(k, v) {
+          n.set(k, v);
+        });
+      }
+      return n;
+    }
+  };
+}
+
+module.exports = HashTable
+},{}],23:[function(require,module,exports){
 var Grammar, cloneCommand;
 
 cloneCommand = function(command) {
@@ -8049,7 +8212,7 @@ Grammar = (function() {
 
 module.exports = Grammar;
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var ErrorReporter, parse, pegparser, scoper, twoDimensionUnpacker, vfl, vflHook, vgl, vglHook;
 
 if (typeof window !== "undefined" && window !== null) {
@@ -8166,7 +8329,7 @@ module.exports = {
   twoDimensionUnpack: twoDimensionUnpacker
 };
 
-},{"../lib/peg-parser":24,"../lib/scoper":25,"../lib/twodunpacker":26,"./peg-parser":24,"./scoper":25,"./twodunpacker":26,"error-reporter":27,"vfl-compiler":30,"vgl-compiler":28}],24:[function(require,module,exports){
+},{"../lib/peg-parser":25,"../lib/scoper":26,"../lib/twodunpacker":27,"./peg-parser":25,"./scoper":26,"./twodunpacker":27,"error-reporter":28,"vfl-compiler":31,"vgl-compiler":29}],25:[function(require,module,exports){
 module.exports = (function() {
   /*
    * Generated by PEG.js 0.8.0.
@@ -15090,7 +15253,7 @@ module.exports = (function() {
     parse:       parse
   };
 })();
-},{"./grammar":22}],25:[function(require,module,exports){
+},{"./grammar":23}],26:[function(require,module,exports){
 var analyze, mutate, _analyze, _mutate,
   _this = this;
 
@@ -15241,7 +15404,7 @@ _mutate = function(node) {
   }
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var buffer2dExpansion, expandConstraintsWith2dProperties, propertyMapping, _buffer2dExpansion, _clone, _rename2dTo1dProperty, _traverseAstFor2DProperties, _unpackRuleset2dConstraints,
   _this = this;
 
@@ -15362,7 +15525,7 @@ propertyMapping = {
   'top-right': ['right', 'top']
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var ErrorReporter,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
@@ -15457,7 +15620,7 @@ ErrorReporter = (function() {
 
 module.exports = ErrorReporter;
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var ErrorReporter, parse;
 
 if (typeof window !== "undefined" && window !== null) {
@@ -15484,7 +15647,7 @@ module.exports = {
   }
 };
 
-},{"../lib/parser":29,"./parser":29,"error-reporter":27}],29:[function(require,module,exports){
+},{"../lib/parser":30,"./parser":30,"error-reporter":28}],30:[function(require,module,exports){
 module.exports = (function() {
   /*
    * Generated by PEG.js 0.8.0.
@@ -19604,9 +19767,9 @@ module.exports = (function() {
     parse:       parse
   };
 })();
-},{}],30:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"../lib/parser":31,"./parser":31,"dup":28,"error-reporter":32}],31:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
+arguments[4][29][0].apply(exports,arguments)
+},{"../lib/parser":32,"./parser":32,"dup":29,"error-reporter":33}],32:[function(require,module,exports){
 module.exports = (function() {
   /*
    * Generated by PEG.js 0.8.0.
@@ -23593,9 +23756,9 @@ module.exports = (function() {
     parse:       parse
   };
 })();
-},{}],32:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],33:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
+arguments[4][28][0].apply(exports,arguments)
+},{"dup":28}],34:[function(require,module,exports){
 var Document, Engine,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -24392,7 +24555,7 @@ module.exports = Document;
 
 
 
-},{"./Style":34,"./commands/Selector":35,"./commands/Stylesheet":36,"./commands/Transition":37,"./commands/Unit":38,"./properties/Getters":39,"./properties/Styles":40,"./types/Color":41,"./types/Gradient":42,"./types/Matrix":43,"./types/Measurement":44,"./types/Primitive":45,"./types/URL":46,"gss-engine/src/Engine":6}],34:[function(require,module,exports){
+},{"./Style":35,"./commands/Selector":36,"./commands/Stylesheet":37,"./commands/Transition":38,"./commands/Unit":39,"./properties/Getters":40,"./properties/Styles":41,"./types/Color":42,"./types/Gradient":43,"./types/Matrix":44,"./types/Measurement":45,"./types/Primitive":46,"./types/URL":47,"gss-engine/src/Engine":6}],35:[function(require,module,exports){
 var Matcher, Shorthand, Style;
 
 Style = function(definition, name, styles, options, keywords, types, keys, properties, required, optional) {
@@ -24748,7 +24911,7 @@ module.exports = Style;
 
 
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 
 /* Selectors with custom combinators 
 inspired by Slick of mootools fame (shout-out & credits)
@@ -26007,7 +26170,7 @@ module.exports = Selector;
 
 
 
-},{"../../vendor/MutationObserver.js":47,"../../vendor/weakmap.js":49,"gss-engine/src/Query":8}],36:[function(require,module,exports){
+},{"../../vendor/MutationObserver.js":48,"../../vendor/weakmap.js":50,"gss-engine/src/Query":8}],37:[function(require,module,exports){
 var Command, Query, Stylesheet,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -26687,7 +26850,7 @@ module.exports = Stylesheet;
 
 
 
-},{"gss-engine/src/Command":4,"gss-engine/src/Query":8}],37:[function(require,module,exports){
+},{"gss-engine/src/Command":4,"gss-engine/src/Query":8}],38:[function(require,module,exports){
 var Range, Transition,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -26895,7 +27058,7 @@ module.exports = Transition;
 
 
 
-},{"gss-engine/src/commands/Range":13}],38:[function(require,module,exports){
+},{"gss-engine/src/commands/Range":13}],39:[function(require,module,exports){
 var Unit, Variable,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -27037,7 +27200,7 @@ module.exports = Unit;
 
 
 
-},{"gss-engine/src/commands/Variable":14}],39:[function(require,module,exports){
+},{"gss-engine/src/commands/Variable":14}],40:[function(require,module,exports){
 var Getters;
 
 Getters = (function() {
@@ -27139,7 +27302,7 @@ module.exports = Getters;
 
 
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var Styles;
 
 Styles = (function() {
@@ -27473,7 +27636,7 @@ module.exports = Styles;
 
 
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var Color, Command,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -27586,7 +27749,7 @@ module.exports = Color;
 
 
 
-},{"gss-engine/src/Command":4}],42:[function(require,module,exports){
+},{"gss-engine/src/Command":4}],43:[function(require,module,exports){
 var Command, Gradient,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -27622,7 +27785,7 @@ module.exports = Gradient;
 
 
 
-},{"gss-engine/src/Command":4}],43:[function(require,module,exports){
+},{"gss-engine/src/Command":4}],44:[function(require,module,exports){
 var Command, Matrix,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -27902,7 +28065,7 @@ module.exports = Matrix;
 
 
 
-},{"../../vendor/gl-matrix":48,"gss-engine/src/Command":4}],44:[function(require,module,exports){
+},{"../../vendor/gl-matrix":49,"gss-engine/src/Command":4}],45:[function(require,module,exports){
 var Measurement, Unit,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -28097,7 +28260,7 @@ module.exports = Measurement;
 
 
 
-},{"../commands/Unit":38}],45:[function(require,module,exports){
+},{"../commands/Unit":39}],46:[function(require,module,exports){
 var Command, Primitive,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -28257,7 +28420,7 @@ module.exports = Primitive;
 
 
 
-},{"gss-engine/src/Command":4}],46:[function(require,module,exports){
+},{"gss-engine/src/Command":4}],47:[function(require,module,exports){
 var Command, URL,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
@@ -28292,7 +28455,7 @@ module.exports = URL;
 
 
 
-},{"gss-engine/src/Command":4}],47:[function(require,module,exports){
+},{"gss-engine/src/Command":4}],48:[function(require,module,exports){
 (function (global){
 /*
  * Copyright 2012 The Polymer Authors. All rights reserved.
@@ -28839,7 +29002,7 @@ if (typeof window != 'undefined') {
     global.MutationObserver = JsMutationObserver;
 }
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 /**
  * @fileoverview gl-matrix - High performance matrix and vector operations
  * @author Brandon Jones
@@ -32958,7 +33121,7 @@ if(typeof(exports) !== 'undefined') {
   })(shim.exports);
 })(this);
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /*
  * Copyright 2012 The Polymer Authors. All rights reserved.
  * Use of this source code is governed by a BSD-style

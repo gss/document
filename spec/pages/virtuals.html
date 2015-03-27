@@ -47,7 +47,7 @@
     </style>
 
     <script>
-    window.engine = GSS(document);
+    window.engine = GSS(document, !!unescape(location.search).match(/with worker/i));
 
     window.engine.addEventListener('solve', function(solution) {
       window.parent.postMessage(solution, location.origin)

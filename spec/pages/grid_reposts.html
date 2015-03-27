@@ -910,7 +910,7 @@ function boot(values) {
   }
   for (var property in values)
     data[property] = values[property];
-  window.engine = GSS(document, data);
+  window.engine = GSS(document, data, !!unescape(location.search).match(/with worker/i));
   window.engine.addEventListener('solve', function(solution) {
     scrollTo(0, 10000)
     window.parent.postMessage(solution, location.origin)
