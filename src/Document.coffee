@@ -199,16 +199,20 @@ class Document extends Engine
     compile: ->
       scope = @scope.documentElement || @scope
       for property, value of @output.properties
+        camelized = @camelize(property)
         unless scope.style[property]?
-          prop = @camelize(property)
-          prop = prop.charAt(0).toUpperCase() + prop.slice(1)
+          prop = camelized.charAt(0).toUpperCase() + camelized.slice(1)
           for prefix in @prefixes
             prefixed = prefix + prop
             if scope.style[prefixed]?
               value.property = '-' + prefix + '-' + property
               value.camelized = prefixed
+              break
+        unless value.camelized
+          value.property = property
+          value.camelized = camelized
               
-      @solve @input.Stylesheet.operations
+      @solve @input.StylesheetOperations || @input.Stylesheet.operations
       @input.Selector.connect(@, true)
 
 
@@ -273,7 +277,7 @@ class Document extends Engine
       id = e.target && @identify(e.target) || e
       @solve 'Scroll', id, ->
         if @transitioning
-          cancelAnimationFrame(@transitioning)
+          #cancelAnimationFrame(@transitioning)
           @updating.ranges = true
         if id == '::window'
           @data.verify('::document', "scroll-top")
@@ -572,7 +576,6 @@ class Document extends Engine
             @output.set(null, path, value)
 
       if !styles && !positions && !restyles
-        @console.end(changes)
         return
 
     # Apply styles that don't affect layout
@@ -583,7 +586,6 @@ class Document extends Engine
           for prop, value of properties
             @setStyle(element, prop, value)
       if !styles && !positions
-        @console.end(changes)
         return
 
     if styles
