@@ -4168,9 +4168,9 @@ describe('Domain', function() {
 
 
 },{}],15:[function(require,module,exports){
-var assert, expect, remove, stringify;
+var aesert, expect, remove, stringify;
 
-assert = chai.assert;
+aesert = chai.assert;
 
 expect = chai.expect;
 
@@ -4235,7 +4235,7 @@ describe('End - to - End', function() {
         expect(e[id + "[computed-height]"]).to.eql(50);
         expect(e["$floater[y]"]).to.eql(100);
         expect(e["$floater[height]"]).to.eql(25);
-        expect(e["$floater[computed-y]"]).to.eql(100);
+        expect(e["$floater[absolute-y]"]).to.eql(100);
         expect(e["$floater[computed-height]"]).to.eql(25);
         engine.once('solve', function(e) {
           expect(e[id + "[scroll-top]"]).to.eql(50);
@@ -4254,7 +4254,7 @@ describe('End - to - End', function() {
                   engine.once('solve', function(e) {
                     expect(e["$floater[y]"]).to.eql(null);
                     expect(e["$floater[height]"]).to.eql(null);
-                    expect(e["$floater[computed-y]"]).to.eql(null);
+                    expect(e["$floater[absolute-y]"]).to.eql(null);
                     expect(e["$floater[computed-height]"]).to.eql(null);
                     return done();
                   });

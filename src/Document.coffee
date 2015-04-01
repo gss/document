@@ -197,7 +197,7 @@ class Document extends Engine
       @data.remove(path)
 
     compile: ->
-      scope = @scope.body || @scope
+      scope = @scope.documentElement || @scope
       for property, value of @output.properties
         unless scope.style[property]?
           prop = @camelize(property)
@@ -410,14 +410,18 @@ class Document extends Engine
     while child
       if child.nodeType == 1
         # Elements with explicitly set position: relative 
-        # lay yout their children as if the parent was at 0,0
+        # lay out their children as if the parent was at 0,0
+        if measure && child.offsetParent == parent
+          x += parent.offsetLeft + parent.clientLeft
+          y += parent.offsetTop + parent.clientTop
+          measure = false
         if child.style.position == 'relative'
+          @offsetLeft += x
+          @offsetTop  += y
           @each(child, callback, 0, 0, a,r,g,s)
+          @offsetLeft -= x
+          @offsetTop  -= y
         else
-          if measure && child.offsetParent == parent
-            x += parent.offsetLeft + parent.clientLeft
-            y += parent.offsetTop + parent.clientTop
-            measure = false
           @each(child, callback, x, y, a,r,g,s)
         
       child = child.nextSibling
@@ -440,6 +444,10 @@ class Document extends Engine
 
         for prop of properties
           switch prop
+            when "absolute-x", "absolute-left"
+              @set id, prop, x + node.offsetLeft + @offsetLeft 
+            when "absolute-y", "absolute-top"
+              @set id, prop, y + node.offsetTop + @offsetTop
             when "intrinsic-x", "computed-x", "intrinsic-left", "computed-left"
               @set id, prop, x + node.offsetLeft
             when "intrinsic-y", "computed-y", "intrinsic-top", "computed-top"
@@ -493,7 +501,10 @@ class Document extends Engine
       if (property == 'x' || property == 'y') 
         key = 'positions'
       else if prop = @output.properties[property]
-        key = 'styles'
+        if property == 'opacity' || property == 'color'
+          key = 'restyles'
+        else
+          key = 'styles'
         if prop.task
           (@updating[prop.task] ||= {})[id] ||= true
           if prop.task == 'pretransform'
@@ -545,7 +556,8 @@ class Document extends Engine
 
     @console.start('Apply', changes)
     styles = changes.styles
-    positions = changes.positions    
+    positions = changes.positions
+    restyles = changes.restyles    
 
     if transforms = changes.transforms
       prop = @output.properties.transform
@@ -559,10 +571,20 @@ class Document extends Engine
           if value? || @output.values[path]?
             @output.set(null, path, value)
 
-      if !styles && !positions
+      if !styles && !positions && !restyles
         @console.end(changes)
         return
 
+    # Apply styles that don't affect layout
+    if restyles
+      for id, properties of restyles
+        element = @identity[id] || document.getElementById(id.substring(1))
+        if element.nodeType == 1
+          for prop, value of properties
+            @setStyle(element, prop, value)
+      if !styles && !positions
+        @console.end(changes)
+        return
 
     if styles
       for id, properties of styles
@@ -613,5 +635,8 @@ class Document extends Engine
 
 
     return offsets
+
+  offsetTop: 0
+  offsetLeft: 0
 
 module.exports = Document

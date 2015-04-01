@@ -6275,16 +6275,8 @@ Linear = (function(_super) {
     this.operations = {};
     this.addEventListener('cleanup', (function(_this) {
       return function() {
-        var domain, _i, _len, _ref, _results;
         _this.Constraint.prototype.cleanup(_this);
-        _this.Variable.prototype.cleanup(_this);
-        _ref = _this.domains;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          domain = _ref[_i];
-          _results.push(domain.cleanup(_this));
-        }
-        return _results;
+        return _this.Variable.prototype.cleanup(_this);
       };
     })(this));
     Linear.__super__.constructor.apply(this, arguments);
@@ -6318,7 +6310,7 @@ Linear = (function(_super) {
 
   Linear.prototype.unedit = function(variable) {
     var constraint, _ref;
-    if (constraint = (_ref = this.editing) != null ? _ref['%' + variable.name] : void 0) {
+    if (constraint = (_ref = this.editing) != null ? _ref[variable.name] : void 0) {
       this.instance.removeConstraint(constraint);
       if (!--variable.editing) {
         delete this.variables['%' + variable.name];
@@ -6377,35 +6369,6 @@ Linear = (function(_super) {
     return weight;
   };
 
-  Linear.prototype.cleanup = function() {
-    var instance, property, value;
-    instance = this.instance;
-    for (property in instance) {
-      value = instance[property];
-      if (value != null ? value._keyStrMap : void 0) {
-        this.cleanupHashSet(value);
-      }
-    }
-  };
-
-  Linear.prototype.cleanupHashSet = function(object) {
-    var property, stored, value, _ref;
-    _ref = object._keyStrMap;
-    for (property in _ref) {
-      value = _ref[property];
-      if (stored = object._store[property]) {
-        if (stored.terms) {
-          this.cleanupHashSet(stored.terms);
-        }
-        if (value.expression) {
-          this.cleanupHashSet(value.expression.terms);
-        }
-      } else {
-        delete object._keyStrMap[property];
-      }
-    }
-  };
-
   return Linear;
 
 })(Domain);
@@ -6462,7 +6425,6 @@ Linear.prototype.Variable = Variable.extend(Linear.Mixin, {
   get: function(path, engine, operation) {
     var variable;
     variable = this.declare(engine, path);
-    engine.unedit(variable);
     return variable;
   }
 });
@@ -24081,7 +24043,7 @@ Document = (function(superClass) {
     },
     compile: function() {
       var i, len, prefix, prefixed, prop, property, ref, ref1, scope, value;
-      scope = this.scope.body || this.scope;
+      scope = this.scope.documentElement || this.scope;
       ref = this.output.properties;
       for (property in ref) {
         value = ref[property];
@@ -24352,14 +24314,18 @@ Document = (function(superClass) {
     child = parent.firstChild;
     while (child) {
       if (child.nodeType === 1) {
+        if (measure && child.offsetParent === parent) {
+          x += parent.offsetLeft + parent.clientLeft;
+          y += parent.offsetTop + parent.clientTop;
+          measure = false;
+        }
         if (child.style.position === 'relative') {
+          this.offsetLeft += x;
+          this.offsetTop += y;
           this.each(child, callback, 0, 0, a, r, g, s);
+          this.offsetLeft -= x;
+          this.offsetTop -= y;
         } else {
-          if (measure && child.offsetParent === parent) {
-            x += parent.offsetLeft + parent.clientLeft;
-            y += parent.offsetTop + parent.clientTop;
-            measure = false;
-          }
           this.each(child, callback, x, y, a, r, g, s);
         }
       }
@@ -24390,6 +24356,14 @@ Document = (function(superClass) {
         }
         for (prop in properties) {
           switch (prop) {
+            case "absolute-x":
+            case "absolute-left":
+              this.set(id, prop, x + node.offsetLeft + this.offsetLeft);
+              break;
+            case "absolute-y":
+            case "absolute-top":
+              this.set(id, prop, y + node.offsetTop + this.offsetTop);
+              break;
             case "intrinsic-x":
             case "computed-x":
             case "intrinsic-left":
@@ -24461,7 +24435,11 @@ Document = (function(superClass) {
       if (property === 'x' || property === 'y') {
         key = 'positions';
       } else if (prop = this.output.properties[property]) {
-        key = 'styles';
+        if (property === 'opacity' || property === 'color') {
+          key = 'restyles';
+        } else {
+          key = 'styles';
+        }
         if (prop.task) {
           (base = ((base1 = this.updating)[name = prop.task] || (base1[name] = {})))[id] || (base[id] = true);
           if (prop.task === 'pretransform') {
@@ -24505,13 +24483,14 @@ Document = (function(superClass) {
    */
 
   Document.prototype.assign = function(data) {
-    var camel, changes, element, id, path, positions, prop, properties, styles, transforms, value;
+    var camel, changes, element, id, path, positions, prop, properties, restyles, styles, transforms, value;
     if (!(changes = this.group(data))) {
       return;
     }
     this.console.start('Apply', changes);
     styles = changes.styles;
     positions = changes.positions;
+    restyles = changes.restyles;
     if (transforms = changes.transforms) {
       prop = this.output.properties.transform;
       camel = prop.camelized || 'transform';
@@ -24524,6 +24503,22 @@ Document = (function(superClass) {
           path = this.output.getPath(id, 'final-transform');
           if ((value != null) || (this.output.values[path] != null)) {
             this.output.set(null, path, value);
+          }
+        }
+      }
+      if (!styles && !positions && !restyles) {
+        this.console.end(changes);
+        return;
+      }
+    }
+    if (restyles) {
+      for (id in restyles) {
+        properties = restyles[id];
+        element = this.identity[id] || document.getElementById(id.substring(1));
+        if (element.nodeType === 1) {
+          for (prop in properties) {
+            value = properties[prop];
+            this.setStyle(element, prop, value);
           }
         }
       }
@@ -24597,6 +24592,10 @@ Document = (function(superClass) {
     }
     return offsets;
   };
+
+  Document.prototype.offsetTop = 0;
+
+  Document.prototype.offsetLeft = 0;
 
   return Document;
 
@@ -26008,7 +26007,7 @@ Selector.define({
         node = scope;
       }
       property = engine.scope.nodeType === 1 && 'computed-height' || 'height';
-      ey = engine.data.watch(node, 'computed-y', operation, continuation, scope);
+      ey = engine.data.watch(node, 'absolute-y', operation, continuation, scope);
       eh = engine.data.watch(node, 'computed-height', operation, continuation, scope);
       sy = engine.data.watch(engine.scope, 'scroll-top', operation, continuation, scope) - (offset || 0);
       sh = engine.data.watch(engine.scope, property, operation, continuation, scope) + (offset || 0) * 2;
@@ -26026,7 +26025,7 @@ Selector.define({
         node = scope;
       }
       property = engine.scope.nodeType === 1 && 'computed-width' || 'width';
-      ex = engine.data.watch(node, 'computed-x', operation, continuation, scope);
+      ex = engine.data.watch(node, 'absolute-x', operation, continuation, scope);
       ew = engine.data.watch(node, 'computed-width', operation, continuation, scope);
       sx = engine.data.watch(engine.scope, 'scroll-left', operation, continuation, scope) - (offset || 0);
       sw = engine.data.watch(engine.scope, property, operation, continuation, scope) + (offset || 0);
@@ -26999,7 +26998,7 @@ Transition.Spring = (function(superClass) {
       if (friction == null) {
         friction = 7;
       }
-      return this.wrap([0, 1, null, 1, 0, 0, 0, 0, 0, 0, 0, 0, this.getTension(tension), this.getFriction(friction), 0]);
+      return this.wrap([0, 1, null, 1, 0, 0, 0, 0, 0, 0, 0, 0, this.getTension(tension), this.getFriction(friction), 0, 0]);
     }
   });
 
@@ -27021,7 +27020,7 @@ Transition.Spring = (function(superClass) {
   };
 
   Spring.prototype.compute = function(range, now, from) {
-    var Aa, Av, Ba, Bv, Ca, Cv, Da, Dv, HALF, Pp, Pv, STEP, Tp, Tv, dvdt, dxdt, end, friction, goal, interpolation, old, position, ref, start, tension, velocity;
+    var Aa, Av, Ba, Bv, Ca, Cv, Da, Dv, HALF, Pp, Pv, STEP, Tp, Tv, diff, dvdt, dxdt, end, friction, goal, interpolation, old, position, ref, start, tension, velocity;
     start = range[0] || 0;
     end = range[1] || 0;
     goal = (ref = range[3]) != null ? ref : 1;
@@ -27078,15 +27077,22 @@ Transition.Spring = (function(superClass) {
       }
     }
     range[2] = position;
-    if (Math.abs(old - position) > this.DISPLACEMENT_THRESHOLD) {
+    diff = position - old;
+    if (Math.abs(diff + range[15]) > this.DISPLACEMENT_THRESHOLD) {
       range[7] = 1;
+      range[15] = 0;
       return position;
+    } else {
+      range[15] += diff;
     }
   };
 
   Spring.prototype.complete = function(range, value) {
     if (range[7] && Math.abs(range[6]) < this.REST_THRESHOLD) {
       range[7] = 0;
+      range[15] = 0;
+      return true;
+    } else if (range[2] === range[3]) {
       return true;
     }
   };
@@ -27097,9 +27103,9 @@ Transition.Spring = (function(superClass) {
 
   Spring.prototype.MAX = 0.064;
 
-  Spring.prototype.DISPLACEMENT_THRESHOLD = 0.0001;
+  Spring.prototype.DISPLACEMENT_THRESHOLD = 0.001;
 
-  Spring.prototype.REST_THRESHOLD = 0.0001;
+  Spring.prototype.REST_THRESHOLD = 0.001;
 
   return Spring;
 
@@ -27285,10 +27291,10 @@ Getters = (function() {
         return document.body.scrollWidth;
       },
       left: function() {
-        return window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft;
+        return window.pageXOffset || window.scrollX || document.body.scrollLeft;
       },
       top: function() {
-        return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+        return window.pageYOffset || window.scrollY || document.body.scrollTop;
       }
     }
   };
@@ -27370,6 +27376,8 @@ Styles = (function() {
       content: ['String', 'Variable']
     }
   ];
+
+  Styles.prototype['backface-visibility'] = ['visible', 'hidden'];
 
   Styles.prototype.rotate = [
     {

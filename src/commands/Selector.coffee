@@ -818,7 +818,7 @@ Selector.define
     deferred: true
     Pseudo: (node = scope, offset, engine, operation, continuation, scope) ->
       property = engine.scope.nodeType == 1 && 'computed-height' || 'height'
-      ey = engine.data.watch(node,         'computed-y',      operation, continuation, scope)
+      ey = engine.data.watch(node,         'absolute-y',      operation, continuation, scope)
       eh = engine.data.watch(node,         'computed-height', operation, continuation, scope)
       sy = engine.data.watch(engine.scope, 'scroll-top',      operation, continuation, scope) - (offset || 0)
       sh = engine.data.watch(engine.scope, property,          operation, continuation, scope) + (offset || 0) * 2
@@ -833,11 +833,11 @@ Selector.define
     deferred: true
     Pseudo: (node = scope, offset, engine, operation, continuation, scope) ->
       property = engine.scope.nodeType == 1 && 'computed-width' || 'width'
-      ex = engine.data.watch(node,         'computed-x',     operation, continuation, scope)
+      ex = engine.data.watch(node,         'absolute-x',     operation, continuation, scope)
       ew = engine.data.watch(node,         'computed-width', operation, continuation, scope)
       sx = engine.data.watch(engine.scope, 'scroll-left',    operation, continuation, scope) - (offset || 0)
       sw = engine.data.watch(engine.scope, property,         operation, continuation, scope) + (offset || 0)
-
+      
       if (ex <= sx && ex + ew > sx + sw)  || # mid
          (ex > sx && ex < sx + sw)        || # left
          (ex + ew > sx && ex + ew < sx + sw) # right

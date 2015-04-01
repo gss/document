@@ -69,7 +69,8 @@ class Transition.Spring extends Transition
                     0, 0,       # time, accumulator 
                     0, 0,       # velocity, position (fixme)
                     0, 0, 0, 0, # temp, previous states 
-                    @getTension(tension), @getFriction(friction), 0]
+                    @getTension(tension), @getFriction(friction), 
+                    0, 0]       # from, displacement
 
   valueOf: ->
     if (value = @[2])?
@@ -159,20 +160,29 @@ class Transition.Spring extends Transition
 
     range[2] = position
 
-    if Math.abs(old - position) > @DISPLACEMENT_THRESHOLD
+    diff = position - old
+    if Math.abs(diff + range[15]) > @DISPLACEMENT_THRESHOLD
       range[7] = 1
+      range[15] = 0
       return position
+    else
+      range[15] += diff
+      return
 
   complete: (range, value) ->
+
     if range[7] && Math.abs(range[6]) < @REST_THRESHOLD
       range[7] = 0
+      range[15] = 0
+      return true
+    else if range[2] == range[3]
       return true
 
   STEP: 0.001
   HALF: 0.0005
   MAX: 0.064
-  DISPLACEMENT_THRESHOLD: 0.0001
-  REST_THRESHOLD: 0.0001
+  DISPLACEMENT_THRESHOLD: 0.001
+  REST_THRESHOLD: 0.001
 
 
 module.exports = Transition

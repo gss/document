@@ -1,4 +1,4 @@
-assert = chai.assert
+aesert = chai.assert
 expect = chai.expect
 
 stringify = (o) ->
@@ -89,7 +89,7 @@ describe 'End - to - End', ->
         expect(e["#{id}[computed-height]"]).to.eql 50
         expect(e["$floater[y]"]).to.eql 100
         expect(e["$floater[height]"]).to.eql 25
-        expect(e["$floater[computed-y]"]).to.eql 100
+        expect(e["$floater[absolute-y]"]).to.eql 100
         expect(e["$floater[computed-height]"]).to.eql 25
 
         engine.once 'solve', (e) -> # Still not visible
@@ -109,7 +109,7 @@ describe 'End - to - End', ->
                   engine.once 'solve', (e) -> # Unsbubscribed
                     expect(e["$floater[y]"]).to.eql null
                     expect(e["$floater[height]"]).to.eql null
-                    expect(e["$floater[computed-y]"]).to.eql null
+                    expect(e["$floater[absolute-y]"]).to.eql null
                     expect(e["$floater[computed-height]"]).to.eql null
                     done()
                   engine.id('floater').parentNode.removeChild(engine.id('floater'))

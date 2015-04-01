@@ -8,6 +8,8 @@ class Styles
     content: ['String', 'Variable']
   ]
 
+  'backface-visibility': ['visible', 'hidden']
+
   # Transforms L2-like individual properties
   rotate: [
     task:    'pretransform'

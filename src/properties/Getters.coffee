@@ -31,10 +31,10 @@ class Getters
         return document.body.scrollWidth
 
       left: ->
-        return window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft 
+        return window.pageXOffset || window.scrollX || document.body.scrollLeft 
 
       top: ->
-        return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop 
+        return window.pageYOffset || window.scrollY || document.body.scrollTop 
 
 
   intrinsic:
