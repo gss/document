@@ -24074,7 +24074,7 @@ Document = (function(superClass) {
           }
         }
         if (!value.camelized) {
-          value.property = property;
+          value.property || (value.property = property);
           value.camelized = camelized;
         }
       }
@@ -26680,11 +26680,11 @@ Stylesheet = (function(superClass) {
               bits.splice(index, 1);
             }
           }
-        }
-        if (bits.length) {
-          element.setAttribute('matches', bits.join(' '));
-        } else {
-          element.removeAttribute('matches');
+          if (bits.length) {
+            element.setAttribute('matches', bits.join(' '));
+          } else {
+            element.removeAttribute('matches');
+          }
         }
       }
       return engine.updating.unmatches = void 0;

@@ -209,7 +209,7 @@ class Document extends Engine
               value.camelized = prefixed
               break
         unless value.camelized
-          value.property = property
+          value.property ||= property
           value.camelized = camelized
               
       @solve @input.StylesheetOperations || @input.Stylesheet.operations

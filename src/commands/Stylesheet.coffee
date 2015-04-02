@@ -333,10 +333,11 @@ class Stylesheet extends Command.List
           for value in values
             if (index = bits.indexOf(value)) > -1
               bits.splice(index, 1)
-        if bits.length
-          element.setAttribute('matches', bits.join(' '))
-        else
-          element.removeAttribute('matches')
+          
+          if bits.length
+            element.setAttribute('matches', bits.join(' '))
+          else
+            element.removeAttribute('matches')
 
       engine.updating.unmatches = undefined
   # Dont add @import() to the path for global level stylesheets
