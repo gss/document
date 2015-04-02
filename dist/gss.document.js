@@ -2393,12 +2393,13 @@ Engine = (function() {
       index = 0;
       j = group.length;
       while (index < j) {
-        fn = group[index];
-        if (fn.once) {
-          group.splice(index--, 1);
-          j--;
+        if (fn = group[index]) {
+          if (fn.once) {
+            group.splice(index--, 1);
+            j--;
+          }
+          fn.call(this, a, b, c);
         }
-        fn.call(this, a, b, c);
         index++;
       }
     }
@@ -3164,7 +3165,7 @@ Query = (function(_super) {
   };
 
   Query.prototype.remove = function(engine, id, continuation, operation, scope, needle, recursion, contd) {
-    var collection, node, parent, ref, removed, _base, _base1;
+    var collection, node, parent, ref, removed, _base, _base1, _ref;
     if (needle == null) {
       needle = operation;
     }
@@ -3198,6 +3199,17 @@ Query = (function(_super) {
       if (parent = operation != null ? operation.parent : void 0) {
         if (typeof (_base1 = parent.command).release === "function") {
           _base1.release(node, engine, operation, ref, scope);
+        }
+        while (parent) {
+          if (!(parent.command.sequence && parent[parent.length - 1] === operation)) {
+            break;
+          }
+          parent = parent.parent;
+        }
+        if (parent[0] === 'rule') {
+          if ((_ref = engine.Stylesheet) != null) {
+            _ref.match(engine, node, continuation, false);
+          }
         }
       }
       this.unobserve(engine, id, ref, ref);
@@ -8094,14 +8106,14 @@ Document = (function(superClass) {
       return this.data.remove(path);
     },
     compile: function() {
-      var i, len, prefix, prefixed, prop, property, ref, ref1, scope, value;
+      var camelized, i, len, prefix, prefixed, prop, property, ref, ref1, scope, value;
       scope = this.scope.documentElement || this.scope;
       ref = this.output.properties;
       for (property in ref) {
         value = ref[property];
+        camelized = this.camelize(property);
         if (scope.style[property] == null) {
-          prop = this.camelize(property);
-          prop = prop.charAt(0).toUpperCase() + prop.slice(1);
+          prop = camelized.charAt(0).toUpperCase() + camelized.slice(1);
           ref1 = this.prefixes;
           for (i = 0, len = ref1.length; i < len; i++) {
             prefix = ref1[i];
@@ -8109,11 +8121,16 @@ Document = (function(superClass) {
             if (scope.style[prefixed] != null) {
               value.property = '-' + prefix + '-' + property;
               value.camelized = prefixed;
+              break;
             }
           }
         }
+        if (!value.camelized) {
+          value.property = property;
+          value.camelized = camelized;
+        }
       }
-      this.solve(this.input.Stylesheet.operations);
+      this.solve(this.input.StylesheetOperations || this.input.Stylesheet.operations);
       return this.input.Selector.connect(this, true);
     },
     solve: function() {
@@ -8205,7 +8222,6 @@ Document = (function(superClass) {
       id = e.target && this.identify(e.target) || e;
       return this.solve('Scroll', id, function() {
         if (this.transitioning) {
-          cancelAnimationFrame(this.transitioning);
           this.updating.ranges = true;
         }
         if (id === '::window') {
@@ -8559,7 +8575,6 @@ Document = (function(superClass) {
         }
       }
       if (!styles && !positions && !restyles) {
-        this.console.end(changes);
         return;
       }
     }
@@ -8575,7 +8590,6 @@ Document = (function(superClass) {
         }
       }
       if (!styles && !positions) {
-        this.console.end(changes);
         return;
       }
     }
@@ -10916,10 +10930,6 @@ Stylesheet.Import = (function(superClass) {
   };
 
   Import.prototype.formatId = function(id) {
-    var i;
-    if ((i = id.lastIndexOf('/')) > -1) {
-      id = id.substring(i + 1);
-    }
     return id;
   };
 
@@ -11430,6 +11440,8 @@ Styles = (function() {
   ];
 
   Styles.prototype['backface-visibility'] = ['visible', 'hidden'];
+
+  Styles.prototype['will-change'] = ['properties'];
 
   Styles.prototype.rotate = [
     {

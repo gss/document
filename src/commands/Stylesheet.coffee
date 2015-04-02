@@ -499,8 +499,8 @@ class Stylesheet.Import extends Query
     return @getUrl(node) || node._gss_id
 
   formatId: (id) ->
-    if (i = id.lastIndexOf('/')) > -1
-      id = id.substring(i + 1)
+    #if (i = id.lastIndexOf('/')) > -1
+    #  id = id.substring(i + 1)
     return id
 
   getLocalPath: (engine, operation, continuation, node) ->
