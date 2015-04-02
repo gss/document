@@ -10,6 +10,8 @@ class Styles
 
   'backface-visibility': ['visible', 'hidden']
 
+  'will-change': ['properties']
+
   # Transforms L2-like individual properties
   rotate: [
     task:    'pretransform'
