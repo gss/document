@@ -6850,7 +6850,7 @@ Exporter = (function() {
     if (this.command.indexOf('x') > -1) {
       this.sizes = this.command.split(',');
     }
-    this.engine.once('compile', (function(_this) {
+    window.addEventListener('load', (function(_this) {
       return function() {
         return _this.next();
       };
@@ -6895,64 +6895,109 @@ Exporter = (function() {
     return i;
   };
 
-  Exporter.prototype["export"] = function(element, parent, fontSize, unit) {
-    var child, childFontSize, selector, style, styles, text, _i, _len, _ref;
+  Exporter.prototype["export"] = function(element, parent, fontSize, unit, baseFontSize, linebreaks) {
+    var breaking, char, child, childFontSize, content, counter, exported, range, rect, selector, style, styles, text, top, _i, _len, _ref;
     if (element == null) {
       element = document.body.parentNode;
     }
     if (fontSize == null) {
-      fontSize = 100;
+      fontSize = 16;
     }
     if (unit == null) {
-      unit = 'em';
+      unit = 'rem';
+    }
+    if (baseFontSize == null) {
+      baseFontSize = 100;
     }
     text = "";
-    _ref = element.children;
+    _ref = element.childNodes;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       child = _ref[_i];
-      if (child.tagName === 'STYLE') {
-        if (child.type.indexOf('gss') === -1) {
-          if (child.getAttribute('scoped') !== null && !element.id) {
-            selector = getSelector(element) + ' ';
-          } else {
-            selector = '';
-          }
-          text += Array.prototype.map.call(child.sheet.cssRules, function(rule) {
-            return selector + rule.cssText + '\n';
-          }).join('\n');
-        }
-      } else {
-        styles = window.getComputedStyle(child, null);
-        childFontSize = parseFloat(styles['font-size']);
-        if (style = child.getAttribute('style')) {
-          style = style.replace(/\d+(?:.?\d*?)px/g, function(m) {
-            if (m === '1px') {
-              return m;
-            } else if (unit === 'em') {
-              return parseFloat(m) / childFontSize + 'em';
+      if (child.nodeType === 1) {
+        if (child.tagName === 'STYLE') {
+          if (child.type.indexOf('gss') === -1) {
+            if (child.getAttribute('scoped') !== null && !element.id) {
+              selector = getSelector(element) + ' ';
             } else {
-              return parseFloat(m) / 16 + 'rem';
+              selector = '';
             }
-          });
+            text += Array.prototype.map.call(child.sheet.cssRules, function(rule) {
+              return selector + rule.cssText + '\n';
+            }).join('\n');
+          }
         } else {
-          style = '';
-        }
-        if (fontSize !== childFontSize) {
+          if (fontSize === null) {
+            styles = window.getComputedStyle(element, null);
+            fontSize = parseFloat(styles['font-size']);
+          }
+          styles = window.getComputedStyle(child, null);
+          childFontSize = parseFloat(styles['font-size']);
+          if (style = child.getAttribute('style')) {
+            style = style.replace(/\d+(?:.?\d*?)px/g, function(m) {
+              if (m === '1px') {
+                return m;
+              } else if (unit === 'em') {
+                return parseFloat(m) / childFontSize + 'em';
+              } else {
+                return parseFloat(m) / baseFontSize + 'rem';
+              }
+            });
+          } else {
+            style = '';
+          }
+          if (fontSize !== childFontSize) {
+            if (unit === 'em') {
+              style += 'font-size: ' + childFontSize / fontSize + unit + ';';
+            } else {
+              style += 'font-size: ' + childFontSize / baseFontSize + unit + ';';
+            }
+          }
+          if (!linebreaks && child.className.indexOf('layout-system') > -1) {
+            breaking = true;
+            linebreaks = [];
+            linebreaks.counter = 0;
+          }
           if (unit === 'em') {
-            style += 'font-size: ' + (childFontSize / fontSize) + 'em;';
+            exported = this["export"](child, element, childFontSize, unit, baseFontSize, linebreaks);
           } else {
-            style += 'font-size: ' + childFontSize / 16 + 'rem;';
+            exported = this["export"](child, element, baseFontSize, unit, baseFontSize, linebreaks);
           }
-        }
-        if (style) {
-          if (child.id) {
-            selector = '#' + child.id;
-          } else {
-            selector = getSelector(child);
+          if (style) {
+            if (child.id) {
+              selector = '#' + child.id;
+            } else {
+              selector = getSelector(child);
+            }
+            text += selector + '{' + style + '}\n';
+            if (breaking) {
+              text += selector + ':before{content: "' + linebreaks.join(',') + '"; display: none;}';
+            }
           }
-          text += selector + '{' + style + '}\n';
+          if (breaking) {
+            console.log(linebreaks);
+            linebreaks = breaking = void 0;
+          }
+          text += exported;
         }
-        text += this["export"](child, element, childFontSize, unit);
+      } else if (linebreaks && child.nodeType === 3 && child.tagName !== 'STYLE' && child.tagName !== 'SCRIPT') {
+        counter = 0;
+        content = child.textContent;
+        top = 0;
+        while (counter < content.length) {
+          char = content.charAt(counter);
+          range = document.createRange();
+          range.setStart(child, counter);
+          range.setEnd(child, counter + 1);
+          rect = range.getBoundingClientRect();
+          if (rect.width && rect.top && rect.top !== top) {
+            if (top) {
+              linebreaks.push(linebreaks.counter);
+            }
+            top = rect.top;
+          }
+          counter++;
+          linebreaks.counter++;
+        }
       }
     }
     return text;
@@ -6964,7 +7009,6 @@ Exporter = (function() {
       _ref = size.split('x'), width = _ref[0], height = _ref[1];
       this.engine.then((function(_this) {
         return function() {
-          debugger;
           if (_this.previous) {
             if (_this.sizes.length) {
               _this.text += '@media (max-width: ' + width + 'px) and (min-width: ' + (_this.previous + 1) + 'px) {';
@@ -26265,6 +26309,9 @@ Stylesheet = (function(superClass) {
     if (type == null) {
       type = 'text/gss';
     }
+    if (type === 'text/gss' && source.match(/^\s*\[/) && source.match(/\]\s*$/)) {
+      type = 'text/gss-ast';
+    }
     engine.console.push(type.split('/')[1], [source]);
     operations = engine.clone(this.mimes[type](source));
     if (typeof operations[0] === 'string') {
@@ -26806,13 +26853,23 @@ Stylesheet.Import = (function(superClass) {
               }
             };
           })(this);
-          this.resolve(src, method, command.resolver);
+          if (!this.read(src, method, command.resolver)) {
+            this.resolve(src, method, command.resolver);
+          }
           async = true;
         }
       }
       return stylesheet;
     }
   });
+
+  Import.prototype.read = function(url, method, callback) {
+    var script;
+    if (script = document.querySelectorAll('script[type*=gss][href*="' + url + '"]')[0]) {
+      callback(script.textContent);
+      return true;
+    }
+  };
 
   Import.prototype.resolve = function(url, method, callback) {
     var xhr;
