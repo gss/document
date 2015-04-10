@@ -1415,13 +1415,14 @@ Domain = (function() {
         if (!watcher) {
           break;
         }
-        command = watcher.command;
-        if (command.deferred) {
-          this.Query.prototype.defer(this, watcher, watchers[index + 1], watchers[index + 2]);
-        } else if (value != null) {
-          watcher.command.solve(this, watcher, watchers[index + 1], watchers[index + 2], true);
-        } else {
-          watcher.command.patch(this, watcher, watchers[index + 1], watchers[index + 2]);
+        if (command = watcher.command) {
+          if (command.deferred) {
+            this.Query.prototype.defer(this, watcher, watchers[index + 1], watchers[index + 2]);
+          } else if (value != null) {
+            watcher.command.solve(this, watcher, watchers[index + 1], watchers[index + 2], true);
+          } else {
+            watcher.command.patch(this, watcher, watchers[index + 1], watchers[index + 2]);
+          }
         }
       }
     }
@@ -3650,7 +3651,7 @@ Query = (function(_super) {
               if ((parent = engine.getScopeElement(scope.parentNode)) === engine.scope) {
                 return;
               }
-              return parent;
+              return parent._gss_id;
             }
             return scope._gss_id;
           }
@@ -6842,25 +6843,30 @@ Exporter = (function() {
   var getIndex, getSelector;
 
   function Exporter(_at_engine) {
-    var _ref;
+    var states, _ref, _ref1;
     this.engine = _at_engine;
     if (!(this.command = typeof location !== "undefined" && location !== null ? (_ref = location.search.match(/export=([a-z0-9,]+)/)) != null ? _ref[1] : void 0 : void 0)) {
       return;
+    }
+    if (states = typeof location !== "undefined" && location !== null ? (_ref1 = location.search.match(/export-states=([a-z0-9,_-]+)/)) != null ? _ref1[1].split(',') : void 0 : void 0) {
+      this.states = states;
     }
     if (this.command.indexOf('x') > -1) {
       this.sizes = this.command.split(',');
     }
     window.addEventListener('load', (function(_this) {
       return function() {
-        return _this.next();
+        return _this.nextSize();
       };
     })(this));
   }
 
   Exporter.prototype.text = '';
 
+  Exporter.prototype.states = [];
+
   getSelector = function(_context) {
-    var index, localName, node, pathSelector, that;
+    var index, localName, node, pathSelector, tag, that;
     index = void 0;
     localName = void 0;
     pathSelector = void 0;
@@ -6875,7 +6881,11 @@ Exporter = (function() {
         pathSelector = '#' + that.id + (pathSelector ? '>' + pathSelector : '');
         break;
       } else {
-        pathSelector = that.localName + ':nth-of-type(' + getIndex(that) + ')' + (pathSelector ? '>' + pathSelector : '');
+        tag = that.localName;
+        if (tag !== 'body' && tag !== 'html') {
+          tag += ':nth-of-type(' + getIndex(that) + ')';
+        }
+        pathSelector = tag + (pathSelector ? '>' + pathSelector : '');
         that = that.parentNode;
       }
     }
@@ -6895,13 +6905,13 @@ Exporter = (function() {
     return i;
   };
 
-  Exporter.prototype["export"] = function(element, parent, fontSize, unit, baseFontSize, linebreaks) {
+  Exporter.prototype.serialize = function(element, prefix, fontSize, unit, baseFontSize, linebreaks) {
     var breaking, char, child, childFontSize, content, counter, exported, range, rect, selector, style, styles, text, top, _i, _len, _ref;
     if (element == null) {
-      element = document.body.parentNode;
+      element = this.engine.scope;
     }
-    if (fontSize == null) {
-      fontSize = 16;
+    if (prefix == null) {
+      prefix = '';
     }
     if (unit == null) {
       unit = 'rem';
@@ -6909,13 +6919,16 @@ Exporter = (function() {
     if (baseFontSize == null) {
       baseFontSize = 100;
     }
+    if (element.nodeType === 9) {
+      element = element.documentElement;
+    }
     text = "";
     _ref = element.childNodes;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       child = _ref[_i];
       if (child.nodeType === 1) {
         if (child.tagName === 'STYLE') {
-          if (child.type.indexOf('gss') === -1) {
+          if (child.assignments) {
             if (child.getAttribute('scoped') !== null && !element.id) {
               selector = getSelector(element) + ' ';
             } else {
@@ -6925,31 +6938,36 @@ Exporter = (function() {
               return selector + rule.cssText + '\n';
             }).join('\n');
           }
-        } else {
-          if (fontSize === null) {
-            styles = window.getComputedStyle(element, null);
-            fontSize = parseFloat(styles['font-size']);
-          }
-          styles = window.getComputedStyle(child, null);
-          childFontSize = parseFloat(styles['font-size']);
-          if (style = child.getAttribute('style')) {
-            style = style.replace(/\d+(?:.?\d*?)px/g, function(m) {
-              if (m === '1px') {
-                return m;
-              } else if (unit === 'em') {
-                return parseFloat(m) / childFontSize + 'em';
-              } else {
-                return parseFloat(m) / baseFontSize + 'rem';
-              }
-            });
+        } else if (child.tagName !== 'SCRIPT') {
+          if (child.offsetParent) {
+            if (fontSize == null) {
+              styles = window.getComputedStyle(element, null);
+              fontSize = parseFloat(styles['font-size']);
+            }
+            styles = window.getComputedStyle(child, null);
+            childFontSize = parseFloat(styles['font-size']);
+            if (style = child.getAttribute('style')) {
+              style = style.replace(/\d+(?:.?\d*?)px/g, function(m) {
+                if (m === '1px') {
+                  return m;
+                } else if (unit === 'em') {
+                  return (parseFloat(m) / childFontSize).toFixed(4) + unit;
+                } else {
+                  return (parseFloat(m) / baseFontSize).toFixed(4) + unit;
+                }
+              });
+              style += ';';
+            } else {
+              style = '';
+            }
           } else {
-            style = '';
+            childFontSize = fontSize;
           }
           if (fontSize !== childFontSize) {
             if (unit === 'em') {
-              style += 'font-size: ' + childFontSize / fontSize + unit + ';';
+              style += 'font-size: ' + (childFontSize / fontSize).toFixed(4) + unit + ';';
             } else {
-              style += 'font-size: ' + childFontSize / baseFontSize + unit + ';';
+              style += 'font-size: ' + (childFontSize / baseFontSize).toFixed(4) + unit + ';';
             }
           }
           if (!linebreaks && child.className.indexOf('layout-system') > -1) {
@@ -6958,28 +6976,30 @@ Exporter = (function() {
             linebreaks.counter = 0;
           }
           if (unit === 'em') {
-            exported = this["export"](child, element, childFontSize, unit, baseFontSize, linebreaks);
+            exported = this.serialize(child, prefix, childFontSize, unit, baseFontSize, linebreaks);
           } else {
-            exported = this["export"](child, element, baseFontSize, unit, baseFontSize, linebreaks);
+            exported = this.serialize(child, prefix, baseFontSize, unit, baseFontSize, linebreaks);
           }
           if (style) {
             if (child.id) {
-              selector = '#' + child.id;
+              selector = prefix + '#' + child.id;
             } else {
-              selector = getSelector(child);
+              selector = prefix + getSelector(child);
+            }
+            if (text) {
+              text += '\n';
             }
             text += selector + '{' + style + '}\n';
             if (breaking) {
-              text += selector + ':before{content: "' + linebreaks.join(',') + '"; display: none;}';
+              text += selector + ':before{content: "' + linebreaks.join(',') + '"; display: none;}\n';
             }
           }
           if (breaking) {
-            console.log(linebreaks);
             linebreaks = breaking = void 0;
           }
           text += exported;
         }
-      } else if (linebreaks && child.nodeType === 3 && child.tagName !== 'STYLE' && child.tagName !== 'SCRIPT') {
+      } else if (linebreaks && child.nodeType === 3 && child.parentNode.tagName !== 'STYLE' && child.parentNode.tagName !== 'SCRIPT') {
         counter = 0;
         content = child.textContent;
         top = 0;
@@ -7003,30 +7023,163 @@ Exporter = (function() {
     return text;
   };
 
-  Exporter.prototype.next = function() {
+  Exporter.prototype.output = function(text) {
+    return document.write(text.split(/\n/g).join('<br>'));
+  };
+
+  Exporter.prototype.nextSize = function() {
     var height, size, width, _ref;
     if (size = this.sizes.pop()) {
       _ref = size.split('x'), width = _ref[0], height = _ref[1];
       this.engine.then((function(_this) {
         return function() {
+          var text;
+          text = '';
           if (_this.previous) {
             if (_this.sizes.length) {
-              _this.text += '@media (max-width: ' + width + 'px) and (min-width: ' + (_this.previous + 1) + 'px) {';
+              text += '\n@media (max-width: ' + width + 'px) and (min-width: ' + (_this.previous + 1) + 'px) {\n';
             } else {
-              _this.text += '@media (min-width: ' + (_this.previous + 1) + 'px) {';
+              text += '\n@media (min-width: ' + (_this.previous + 1) + 'px) {\n';
             }
           } else {
-            _this.text += '@media (max-width: ' + width + 'px) {';
+            text += '\n@media (max-width: ' + width + 'px) {\n';
           }
-          _this.text += _this["export"]();
-          _this.text += '}';
+          _this.base = _this.serialize();
+          console.error('BASIS', width, height);
+          text += _this.base;
           _this.previous = parseInt(width);
+          _this.text += text;
+          if (_this.states.length) {
+            _this.uncomputed = _this.states.slice();
+          }
           return _this.next();
         };
       })(this));
-      return this.resize(parseInt(width), parseInt(height));
+      this.resize(parseInt(width), parseInt(height));
+      return true;
+    }
+  };
+
+  Exporter.prototype.endRule = function(rule, text) {
+    var curly, last, semicolon;
+    semicolon = text.indexOf(';');
+    curly = text.indexOf('}');
+    if (semicolon > -1 && curly > -1) {
+      rule += text.substring(0, Math.min(semicolon, curly));
+    } else if (semicolon > -1) {
+      last = text.lastIndexOf(';');
+      if (last !== semicolon) {
+        rule += text.substring(0, semicolon);
+        rule += text.substring(last);
+      } else {
+        rule += text;
+      }
+    } else if (curly > -1) {
+      rule += text.substring(0, curly);
     } else {
-      return document.write(this.text.split(/\n/g).join('<br>'));
+      rule += text;
+    }
+    if (curly > -1) {
+      rule += '}\n';
+    }
+    return rule;
+  };
+
+  Exporter.prototype.next = function() {
+    if (!this.nextState()) {
+      this.text += '\n}';
+      if (!this.nextSize()) {
+        return this.output(this.text);
+      }
+    }
+  };
+
+  Exporter.prototype.nextState = function() {
+    var script, state;
+    if (!this.uncomputed) {
+      return;
+    }
+    if (!this.differ) {
+      script = document.createElement('script');
+      script.onload = (function(_this) {
+        return function() {
+          _this.differ = new diff_match_patch();
+          return _this.nextState();
+        };
+      })(this);
+      script.src = 'http://cdn.rawgit.com/tanaka-de-silva/google-diff-match-patch-js/master/diff_match_patch.js';
+      document.body.appendChild(script);
+      return true;
+    }
+    if (state = this.uncomputed.pop()) {
+      setTimeout((function(_this) {
+        return function() {
+          document.documentElement.classList.add(state);
+          return _this.engine.then(function() {
+            var change, diff, end, match, overlay, prefix, property, rest, result, rule, selector, start, text, value, z, _i, _len;
+            result = _this.serialize();
+            prefix = 'html.' + state + ' ';
+            diff = _this.differ.diff_main(_this.base, result);
+            _this.differ.diff_cleanupSemantic(diff);
+            console.log(diff);
+            selector = void 0;
+            property = void 0;
+            value = void 0;
+            rule = '';
+            overlay = '';
+            z = 0;
+            for (_i = 0, _len = diff.length; _i < _len; _i++) {
+              change = diff[_i];
+              text = change[1];
+              if (change[0] === 0) {
+                if (rule) {
+                  rule = _this.endRule(rule, text);
+                  if (text.indexOf('}') > -1) {
+                    overlay += rule;
+                    rule = '';
+                    z++;
+                  }
+                }
+                if ((end = text.lastIndexOf('{')) > -1) {
+                  start = text.lastIndexOf('}');
+                  selector = text.substring(start + 1, end).trim();
+                  rest = text.substring(end + 1);
+                  if (match = rest.match(/(?:;|^)\s*([^;{]+):\s*([^;}]+)$/)) {
+                    property = match[1];
+                    value = match[2];
+                  }
+                  start = end = void 0;
+                }
+              } else if (change[0] === 1) {
+                if (selector) {
+                  rule = prefix + selector + '{';
+                  selector = void 0;
+                }
+                if (property) {
+                  rule += property + ':';
+                  property = void 0;
+                }
+                if (value != null) {
+                  rule += value;
+                  value = void 0;
+                }
+                rule += change[1].trim();
+                if (rule.charAt(rule.length - 1) === '}') {
+                  rule = '';
+                }
+              }
+            }
+            _this.text += overlay;
+            return setTimeout(function() {
+              document.documentElement.classList.remove(state);
+              return _this.engine.then(function() {
+                return _this.next();
+              });
+            }, 100);
+          });
+        };
+      })(this), 100);
+      return true;
     }
   };
 
@@ -26866,7 +27019,7 @@ Stylesheet.Import = (function(superClass) {
   Import.prototype.read = function(url, method, callback) {
     var script;
     if (script = document.querySelectorAll('script[type*=gss][href*="' + url + '"]')[0]) {
-      callback(script.textContent);
+      callback(script.textContent.trim());
       return true;
     }
   };
@@ -27136,13 +27289,6 @@ Transition.Spring = (function(superClass) {
     range[8] = Tv;
     range[9] = Tp;
     range[14] = now;
-    if (range[7] && Math.abs(range[6]) < this.REST_THRESHOLD) {
-      if (position !== goal) {
-        return goal;
-      } else {
-        return;
-      }
-    }
     range[2] = position;
     diff = position - old;
     if (Math.abs(diff + range[15]) > this.DISPLACEMENT_THRESHOLD) {
@@ -27151,6 +27297,13 @@ Transition.Spring = (function(superClass) {
       return position;
     } else {
       range[15] += diff;
+      if (range[7] && Math.abs(range[6]) < this.REST_THRESHOLD) {
+        if (position !== goal) {
+          return goal;
+        } else {
+          return;
+        }
+      }
     }
   };
 
@@ -27159,7 +27312,7 @@ Transition.Spring = (function(superClass) {
       range[7] = 0;
       range[15] = 0;
       return true;
-    } else if (range[2] === range[3]) {
+    } else if (range[2] === range[3] && Math.abs(range[6]) < this.REST_THRESHOLD) {
       return true;
     }
   };
@@ -27698,6 +27851,8 @@ Styles = (function() {
   Styles.prototype.cursor = ['auto', 'crosshair', 'default', 'hand', 'move', 'e-resize', 'ne-resize', 'nw-resize', 'n-resize', 'se-resize', 'sw-resize', 's-resize', 'w-resize', 'text', 'wait', 'help'];
 
   Styles.prototype.color = ['color'];
+
+  Styles.prototype['white-space'] = ['nowrap', 'ellipsis'];
 
   Styles.prototype.columns = ['Length'];
 

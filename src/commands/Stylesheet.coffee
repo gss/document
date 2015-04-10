@@ -13,9 +13,9 @@ class Stylesheet extends Command.List
     
   # Parse stylesheet, provide root operation if needed
   parse: (engine, type = 'text/gss', source) ->
-    if type == 'text/gss' && source.match(/^\s*\[/)
+    if type == 'text/gss' && source.match(/^\s*\[/) && source.match(/\]\s*$/)
       type = 'text/gss-ast'
-      
+
     engine.console.push(type.split('/')[1], [source])
     operations = engine.clone(@mimes[type](source))
     if typeof operations[0] == 'string'
@@ -446,7 +446,7 @@ class Stylesheet.Import extends Query
 
   read: (url, method, callback) ->
     if script = document.querySelectorAll('script[type*=gss][href*="' + url + '"]')[0]
-      callback(script.textContent)
+      callback(script.textContent.trim())
       return true
     return
 

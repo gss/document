@@ -152,21 +152,21 @@ class Transition.Spring extends Transition
 
     range[14] = now
 
-    if range[7] && Math.abs(range[6]) < @REST_THRESHOLD
-      if position != goal
-        return goal
-      else
-        return
-
     range[2] = position
 
     diff = position - old
+
     if Math.abs(diff + range[15]) > @DISPLACEMENT_THRESHOLD
       range[7] = 1
       range[15] = 0
       return position
     else
       range[15] += diff
+      if range[7] && Math.abs(range[6]) < @REST_THRESHOLD
+        if position != goal
+          return goal
+        else
+          return
       return
 
   complete: (range, value) ->
@@ -175,7 +175,7 @@ class Transition.Spring extends Transition
       range[7] = 0
       range[15] = 0
       return true
-    else if range[2] == range[3]
+    else if range[2] == range[3] && Math.abs(range[6]) < @REST_THRESHOLD
       return true
 
   STEP: 0.001

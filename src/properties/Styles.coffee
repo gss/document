@@ -173,6 +173,8 @@ class Styles
                        'n-resize', 'se-resize', 'sw-resize', 's-resize', 'w-resize', 'text', 'wait', 'help']
   color:               ['color']
 
+  'white-space':       ['nowrap', 'ellipsis']
+
   columns:             ['Length']
   'column-gap':        ['Length']
   'column-width':      ['Length']

@@ -1648,9 +1648,11 @@ require("./poly-test/full");
 
 require("./pages");
 
+require("./exporter");
 
 
-},{"./assignments":10,"./command":12,"./command-nested-rules":11,"./conditions":13,"./domain":14,"./end-to-end":15,"./engine":16,"./external-files":17,"./matrix":18,"./pages":19,"./perf":20,"./poly-test/full":21,"./ranges":22,"./selectors":23,"./styles":24,"./stylesheet":25,"./units":26,"./vanilla-css":27,"./view":28,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/ranges":6,"gss-engine/spec/signatures":7,"gss-engine/spec/thread":8}],10:[function(require,module,exports){
+
+},{"./assignments":10,"./command":12,"./command-nested-rules":11,"./conditions":13,"./domain":14,"./end-to-end":15,"./engine":16,"./exporter":17,"./external-files":18,"./matrix":19,"./pages":20,"./perf":21,"./poly-test/full":22,"./ranges":23,"./selectors":24,"./styles":25,"./stylesheet":26,"./units":27,"./vanilla-css":28,"./view":29,"gss-engine/spec/assignments":1,"gss-engine/spec/cassowary":2,"gss-engine/spec/conditions":3,"gss-engine/spec/domain":4,"gss-engine/spec/engine":5,"gss-engine/spec/ranges":6,"gss-engine/spec/signatures":7,"gss-engine/spec/thread":8}],10:[function(require,module,exports){
 describe('Assignments', function() {
   return describe('with units', function() {
     return it('should compute', function(done) {
@@ -7066,6 +7068,38 @@ describe('GSS engine', function() {
 
 
 },{}],17:[function(require,module,exports){
+var Engine, assert, expect, fixtures;
+
+Engine = GSS;
+
+assert = chai.assert;
+
+expect = chai.expect;
+
+fixtures = document.getElementById('fixtures');
+
+describe('Exporter', function() {
+  var container, engine;
+  container = engine = null;
+  beforeEach(function() {
+    container = document.createElement('div');
+    fixtures.appendChild(container);
+    return window.engine = engine = new GSS(container);
+  });
+  afterEach(function() {
+    var ref;
+    return (ref = container.parentNode) != null ? ref.removeChild(container) : void 0;
+  });
+  return it('should export regular styles', function() {
+    container.innerHTML = "<div id=\"div1\"></div>\n<div id=\"div2\"></div>";
+    engine.solve(['rule', ['tag', 'div'], [['==', ['get', 'width'], 100], ['==', ['get', 'z-index'], 1]]]);
+    return expect(window.engine.exporter["export"](container)).to.eql("#div1{width: 1rem; z-index: 1;}\n#div2{width: 1rem; z-index: 1;}");
+  });
+});
+
+
+
+},{}],18:[function(require,module,exports){
 describe('External .gss files', function() {
   var container, engine;
   engine = null;
@@ -7426,7 +7460,7 @@ describe('External .gss files', function() {
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var assert, expect, property;
 
 expect = chai.expect;
@@ -7808,7 +7842,7 @@ describe('Matrix', function() {
 
 
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 describe('Standalone page tests', function() {
   var container, engine, iframe, roughAssert;
   engine = container = iframe = null;
@@ -8050,7 +8084,7 @@ describe('Standalone page tests', function() {
 
 
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var Engine, assert, expect, remove, stringify;
 
 Engine = GSS.Engine;
@@ -8169,7 +8203,7 @@ describe('Perf', function() {
 
 
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var DEMOS, assert, expect, remove, roughAssert;
 
 DEMOS = {
@@ -8542,7 +8576,7 @@ describe('Full page tests', function() {
 
 
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 describe('Ranges', function() {
   var engine;
   engine = null;
@@ -8843,7 +8877,7 @@ describe('Ranges', function() {
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -8980,7 +9014,7 @@ describe('Selectors', function() {
 
 
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var assert, expect;
 
 expect = chai.expect;
@@ -9164,7 +9198,7 @@ describe('Styles', function() {
 
 
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var IE10, assert, expect;
 
 expect = chai.expect;
@@ -9704,7 +9738,7 @@ describe('Stylesheet', function() {
 
 
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var assert, expect, remove;
 
 expect = chai.expect;
@@ -9837,7 +9871,7 @@ describe('Units', function() {
 
 
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 describe('Vanilla CSS', function() {
   var container, engine, getSource;
   engine = null;
@@ -10368,7 +10402,7 @@ describe('Vanilla CSS', function() {
 
 
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var assert, expect, remove;
 
 assert = chai.assert;

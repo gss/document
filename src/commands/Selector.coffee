@@ -700,7 +700,6 @@ Selector.define
           node = scope
 
       prefix = @getScope(engine, node, continuation) || '$'
-
       return prefix + '"' + value + '"'
 
     prefix: '"'
