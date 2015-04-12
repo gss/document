@@ -233,13 +233,14 @@ class Document extends Engine
         update.removed = undefined
 
       if @ranges
-        cancelAnimationFrame(@transitioning)
-        engine = @
-        @transitioning = requestAnimationFrame ->
-          @transitioning = undefined
-          engine.solve 'Transition', ->
-            @updating.ranges = true
-            return
+        if !@precomputing || !@exporter.frequency
+          engine = @
+          cancelAnimationFrame(@transitioning)
+          @transitioning = requestAnimationFrame ->
+            @transitioning = undefined
+            engine.solve 'Transition', ->
+              @updating.ranges = true
+              return
 
 
     resize: (e = '::window') ->
@@ -262,13 +263,14 @@ class Document extends Engine
         if @updating && !@updating.resizing
           @updating.resizing = 'scheduled'
           return
+        console.log('resize now')
         @solve 'Resize', id, ->
           if @scope._gss_id != id
             @data.verify(id, "width")
             @data.verify(id, "height")
           if id != '::document'
-            @data.verify(id, "width")
-            @data.verify(id, "height")
+            @data.verify('::document', "width")
+            @data.verify('::document', "height")
           @data.verify(@scope, "width")
           @data.verify(@scope, "height")
           return @data.commit()
@@ -557,6 +559,7 @@ class Document extends Engine
   assign: (data) ->
     unless changes = @group(data)
       return
+    console.log('apply', data)
 
     @console.start('Apply', changes)
     styles = changes.styles
@@ -569,7 +572,14 @@ class Document extends Engine
       for id, value of transforms
         element = @identity[id]# || document.getElementById(id.substring(1))
         if element?.nodeType == 1
-          element.style[camel] = if value? then @output.Matrix::format(value) else ''
+          if @precomputing
+            if value
+              copy = Array.prototype.slice.call(value)
+              copy[12] = parseFloat(copy[12].toFixed(2))
+              copy[13] = parseFloat(copy[13].toFixed(2))
+              (@precomputing[id] ||= {}).transform = @output.Matrix::format(copy)
+          else
+            element.style[camel] = if value? then @output.Matrix::format(value) else ''
         else
           path = @output.getPath(id, 'final-transform')
           if value? || @output.values[path]?
@@ -584,7 +594,15 @@ class Document extends Engine
         element = @identity[id] || document.getElementById(id.substring(1))
         if element.nodeType == 1
           for prop, value of properties
-            @setStyle(element, prop, value)
+            if @precomputing
+              if typeof value == 'object'
+                value = +value
+              if typeof value == 'number'
+                value = parseFloat(value.toFixed(3))
+              (@precomputing[id] ||= {})[prop] = value;
+            else
+              @setStyle(element, prop, value)
+
       if !styles && !positions
         return
 

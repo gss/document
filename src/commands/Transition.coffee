@@ -26,6 +26,7 @@ class Transition extends Range.Progress
 
   complete: (range, value) ->
     if value >= 1
+
       return true
 
   #before: (args, engine, operation, continuation, scope) ->
@@ -34,8 +35,14 @@ class Transition extends Range.Progress
   #      return ranges[index + 2]
 
   update: (range, engine, operation, continuation, scope) ->
-    now   = Date.now()
+    if frame = engine.precomputing
+      now = frame.timestamp || 0
+    else 
+      now = Date.now()
     from  = range[4] ||= now
+
+    #if from > 100000
+    #  debugger
 
     value = @compute(range, now, from)
     if value == true
@@ -49,7 +56,9 @@ class Transition extends Range.Progress
       copy[2] = value
       @ascend(engine, operation, continuation, scope, copy, true)
 
-    return @complete(range, value)
+    if @complete(range, value)
+
+      return true
 
 
 # Code taken from rebound.js. Thanks facebook!
@@ -88,7 +97,7 @@ class Transition.Spring extends Transition
     start = range[0] || 0
     end   = range[1] || 0
     goal  = range[3] ? 1
-    from  = range[14] || from
+    from  = range[14] || now
 
     range[5] = Math.min(@MAX, range[5] + (now - from) / 1000)
 
@@ -163,17 +172,25 @@ class Transition.Spring extends Transition
     else
       range[15] += diff
       if range[7] && Math.abs(range[6]) < @REST_THRESHOLD
+        @clean(range)
+        range[7] = 0
         if position != goal
           return goal
-        else
-          return
       return
+
+  clean: (range) ->
+    range[15] = 0
+    range[14] = 0
+    for i in [4 ... 7]
+      range[i] = 0
+    for i in [8 ... 12]
+      range[i] = 0
+
 
   complete: (range, value) ->
 
     if range[7] && Math.abs(range[6]) < @REST_THRESHOLD
       range[7] = 0
-      range[15] = 0
       return true
     else if range[2] == range[3] && Math.abs(range[6]) < @REST_THRESHOLD
       return true

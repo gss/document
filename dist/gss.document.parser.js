@@ -5650,6 +5650,7 @@ Range.Mapper = (function(_super) {
   Mapper.define({
     map: function(left, right, engine, operation, continuation, scope, ascender, ascending) {
       var end, start, _ref, _ref1, _ref2;
+      console.log('map', arguments);
       if (ascender === 2) {
         if ((start = (_ref = left[2]) != null ? _ref : left[0]) != null) {
           if (start !== false && right < start) {
@@ -6843,7 +6844,7 @@ Exporter = (function() {
   var getIndex, getSelector;
 
   function Exporter(_at_engine) {
-    var states, _ref, _ref1;
+    var last, states, _ref, _ref1;
     this.engine = _at_engine;
     if (!(this.command = typeof location !== "undefined" && location !== null ? (_ref = location.search.match(/export=([a-z0-9,]+)/)) != null ? _ref[1] : void 0 : void 0)) {
       return;
@@ -6852,7 +6853,24 @@ Exporter = (function() {
       this.states = states;
     }
     if (this.command.indexOf('x') > -1) {
-      this.sizes = this.command.split(',');
+      if ((this.sizes = this.command.split(',')).length) {
+        this.sizes = this.sizes.map(function(size) {
+          return size.split('x').map(function(v) {
+            return parseInt(v);
+          });
+        });
+        last = this.sizes[this.sizes.length - 1];
+        this.engine.precomputing = true;
+        this.engine.once('compile', (function(_this) {
+          return function() {
+            console.error('pre-resized to', last);
+            _this.override('::window[width]', last[0]);
+            _this.override('::window[height]', last[1]);
+            _this.override('::document[height]', -10000);
+            return _this.override('::document[scroll-top]', -10000);
+          };
+        })(this));
+      }
     }
     window.addEventListener('load', (function(_this) {
       return function() {
@@ -6864,6 +6882,167 @@ Exporter = (function() {
   Exporter.prototype.text = '';
 
   Exporter.prototype.states = [];
+
+  Exporter.prototype.overriden = {};
+
+  Exporter.prototype.handlers = {
+    animations: function(height, scroll) {
+      var callback;
+      this.override('::document[scroll-top]', scroll != null ? scroll : 0);
+      this.override('::document[height]', height != null ? height : document.documentElement.scrollHeight);
+      console.error('overring', height);
+      callback = (function(_this) {
+        return function() {
+          var frames, _base;
+          console.error(arguments);
+          if (_this.frequency) {
+            (_base = _this.engine.precomputing).timestamp || (_base.timestamp = 0);
+          } else {
+            _this.engine.precomputing.timestamp = _this.engine.console.getTime();
+          }
+          frames = 0;
+          while (_this.engine.ranges) {
+            if (++frames > 100) {
+              debugger;
+              break;
+            }
+            _this.record();
+            _this.engine.solve('Transition', function() {
+              this.updating.ranges = true;
+            });
+          }
+          return _this.stop();
+        };
+      })(this);
+      this.record();
+      this.engine.then(callback);
+      this.engine.solve(function() {
+        debugger;
+        this.data.verify('::document[height]');
+        this.data.verify('::document[scroll-top]');
+        return this.data.commit();
+      });
+      return console.log('animations', this.phase);
+    }
+  };
+
+  Exporter.prototype.frequency = 64;
+
+  Exporter.prototype.threshold = 0;
+
+  Exporter.prototype.record = function() {
+    var old;
+    old = this.engine.precomputing;
+    console.log('frame', this.engine.precomputing, this.engine.ranges);
+    this.engine.precomputing = {
+      timestamp: 0
+    };
+    if (this.frequency && ((old != null ? old.timestamp : void 0) != null)) {
+      this.engine.precomputing.timestamp = old.timestamp + this.frequency;
+    }
+    return (this.frames || (this.frames = [])).push(this.engine.precomputing);
+  };
+
+  Exporter.prototype.stop = function() {
+    if (!this.appeared) {
+      this.appeared = true;
+      this.animate();
+      this.record();
+      this.phase = 'disappearance';
+      debugger;
+      setTimeout((function(_this) {
+        return function() {
+          return _this.handlers.animations.call(_this, -10000, -10000);
+        };
+      })(this), 10);
+    } else {
+      this.animate();
+      document.documentElement.classList.remove('animations');
+      this.phase = this.appeared = void 0;
+      this.next();
+    }
+    return console.log('stop', this.frames);
+  };
+
+  Exporter.prototype.sequence = function(id, frames, prefix) {
+    var frame, h, last, name, phase, properties, property, selector, text, value, y, _i, _len;
+    if (prefix == null) {
+      prefix = '';
+    }
+    h = document.documentElement.scrollHeight;
+    y = Math.floor((1000 * this.engine.values[id + '[absolute-y]'] / h).toFixed(4));
+    h = Math.floor((1000 * this.engine.values[id + '[computed-height]'] / h).toFixed(4));
+    phase = this.phase || 'appearance';
+    name = phase + '-' + id.substring(1) + '-' + h + '-' + y;
+    text = '@' + prefix + 'keyframes ' + name + ' {';
+    last = null;
+    for (_i = 0, _len = frames.length; _i < _len; _i++) {
+      frame = frames[_i];
+      if ((last == null) || frame.progress - last.progress > this.threshold || frame.progress === 1) {
+        last = frame;
+        text += parseFloat((frame.progress * 100).toFixed(3)) + '% {';
+        properties = {};
+        for (property in frame) {
+          value = frame[property];
+          if (property !== 'timestamp' && property !== 'progress' && property !== 'duration') {
+            if (property === 'transform') {
+              property = prefix + property;
+            }
+            text += property + ':' + value + ';';
+          }
+        }
+        text += '}\n';
+      }
+    }
+    text += '}\n';
+    selector = getSelector(engine.identity[id]);
+    text += '.' + name + ' ' + selector + ' {\n';
+    text += prefix + 'animation: ' + name + ' ' + Math.round(last.duration) + 'ms';
+    if (this.phase === 'disappearance') {
+      text += ' forwards';
+    }
+    text += ';\n';
+    text += prefix + 'animation-play-state: paused;\n';
+    text += '}\n';
+    text += '.' + name + '-running ' + selector + ' {\n';
+    text += prefix + 'animation-play-state: running\n';
+    text += '}\n';
+    return text;
+  };
+
+  Exporter.prototype.animate = function() {
+    var animations, duration, first, frame, id, keyframe, keyframes, last, properties, _i, _j, _len, _len1, _ref, _results;
+    animations = {};
+    _ref = this.frames;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      frame = _ref[_i];
+      for (id in frame) {
+        properties = frame[id];
+        if (id !== 'timestamp' && id !== 'duration' && id !== 'frequency') {
+          (animations[id] || (animations[id] = [])).push(properties);
+          properties.timestamp = frame.timestamp;
+        }
+      }
+    }
+    this.frames = void 0;
+    _results = [];
+    for (id in animations) {
+      keyframes = animations[id];
+      first = keyframes[0];
+      last = keyframes[keyframes.length - 1];
+      duration = last.timestamp - first.timestamp;
+      for (_j = 0, _len1 = keyframes.length; _j < _len1; _j++) {
+        keyframe = keyframes[_j];
+        keyframe.duration = duration;
+        keyframe.progress = (keyframe.timestamp - first.timestamp) / duration;
+      }
+      this.text += this.sequence(id, keyframes);
+      this.text += '\n';
+      this.text += this.sequence(id, keyframes, '-webkit-');
+      _results.push(this.text += '\n');
+    }
+    return _results;
+  };
 
   getSelector = function(_context) {
     var index, localName, node, pathSelector, tag, that;
@@ -6929,12 +7108,15 @@ Exporter = (function() {
       if (child.nodeType === 1) {
         if (child.tagName === 'STYLE') {
           if (child.assignments) {
-            if (child.getAttribute('scoped') !== null && !element.id) {
+            if (child.hasOwnProperty('scoping') && !element.id) {
               selector = getSelector(element) + ' ';
+            } else if (element.id) {
+              selector = '#' + element.id + ' ';
             } else {
               selector = '';
             }
             text += Array.prototype.map.call(child.sheet.cssRules, function(rule) {
+              text = rule.cssText;
               return selector + rule.cssText + '\n';
             }).join('\n');
           }
@@ -6951,9 +7133,9 @@ Exporter = (function() {
                 if (m === '1px') {
                   return m;
                 } else if (unit === 'em') {
-                  return (parseFloat(m) / childFontSize).toFixed(4) + unit;
+                  return parseFloat((parseFloat(m) / childFontSize).toFixed(4)) + unit;
                 } else {
-                  return (parseFloat(m) / baseFontSize).toFixed(4) + unit;
+                  return parseFloat((parseFloat(m) / baseFontSize).toFixed(4)) + unit;
                 }
               });
               style += ';';
@@ -6965,9 +7147,9 @@ Exporter = (function() {
           }
           if (fontSize !== childFontSize) {
             if (unit === 'em') {
-              style += 'font-size: ' + (childFontSize / fontSize).toFixed(4) + unit + ';';
+              style += 'font-size: ' + parseFloat((childFontSize / fontSize).toFixed(4)) + unit + ';';
             } else {
-              style += 'font-size: ' + (childFontSize / baseFontSize).toFixed(4) + unit + ';';
+              style += 'font-size: ' + parseFloat((childFontSize / baseFontSize).toFixed(4)) + unit + ';';
             }
           }
           if (!linebreaks && child.className.indexOf('layout-system') > -1) {
@@ -7028,10 +7210,10 @@ Exporter = (function() {
   };
 
   Exporter.prototype.nextSize = function() {
-    var height, size, width, _ref;
+    var callback, height, size, width;
     if (size = this.sizes.pop()) {
-      _ref = size.split('x'), width = _ref[0], height = _ref[1];
-      this.engine.then((function(_this) {
+      width = size[0], height = size[1];
+      callback = (function(_this) {
         return function() {
           var text;
           text = '';
@@ -7045,17 +7227,19 @@ Exporter = (function() {
             text += '\n@media (max-width: ' + width + 'px) {\n';
           }
           _this.base = _this.serialize();
-          console.error('BASIS', width, height);
           text += _this.base;
-          _this.previous = parseInt(width);
+          _this.previous = width;
           _this.text += text;
           if (_this.states.length) {
             _this.uncomputed = _this.states.slice();
           }
           return _this.next();
         };
-      })(this));
-      this.resize(parseInt(width), parseInt(height));
+      })(this);
+      this.engine.then(callback);
+      if (this.text) {
+        this.resize(width, height);
+      }
       return true;
     }
   };
@@ -7114,14 +7298,17 @@ Exporter = (function() {
     if (state = this.uncomputed.pop()) {
       setTimeout((function(_this) {
         return function() {
+          var handler;
           document.documentElement.classList.add(state);
+          if (handler = _this.handlers[state]) {
+            return handler.apply(_this, arguments);
+          }
           return _this.engine.then(function() {
             var change, diff, end, match, overlay, prefix, property, rest, result, rule, selector, start, text, value, z, _i, _len;
             result = _this.serialize();
             prefix = 'html.' + state + ' ';
             diff = _this.differ.diff_main(_this.base, result);
             _this.differ.diff_cleanupSemantic(diff);
-            console.log(diff);
             selector = void 0;
             property = void 0;
             value = void 0;
@@ -7183,14 +7370,19 @@ Exporter = (function() {
     }
   };
 
+  Exporter.prototype.override = function(property, value) {
+    var _base;
+    (_base = this.overriden)[property] || (_base[property] = this.engine.data.properties[property]);
+    return this.engine.data.properties[property] = function() {
+      return value;
+    };
+  };
+
   Exporter.prototype.resize = function(width, height) {
-    console.log('resize', height, width);
-    this.engine.data.properties['::window[height]'] = function() {
-      return height;
-    };
-    this.engine.data.properties['::window[width]'] = function() {
-      return width;
-    };
+    this.override('::window[height]', height);
+    this.override('::window[width]', width);
+    this.width = width;
+    this.height = height;
     return this.engine.triggerEvent('resize');
   };
 
@@ -24300,14 +24492,16 @@ Document = (function(superClass) {
         update.removed = void 0;
       }
       if (this.ranges) {
-        cancelAnimationFrame(this.transitioning);
-        engine = this;
-        return this.transitioning = requestAnimationFrame(function() {
-          this.transitioning = void 0;
-          return engine.solve('Transition', function() {
-            this.updating.ranges = true;
+        if (!this.precomputing || !this.exporter.frequency) {
+          engine = this;
+          cancelAnimationFrame(this.transitioning);
+          return this.transitioning = requestAnimationFrame(function() {
+            this.transitioning = void 0;
+            return engine.solve('Transition', function() {
+              this.updating.ranges = true;
+            });
           });
-        });
+        }
       }
     },
     resize: function(e) {
@@ -24343,14 +24537,15 @@ Document = (function(superClass) {
             _this.updating.resizing = 'scheduled';
             return;
           }
+          console.log('resize now');
           return _this.solve('Resize', id, function() {
             if (this.scope._gss_id !== id) {
               this.data.verify(id, "width");
               this.data.verify(id, "height");
             }
             if (id !== '::document') {
-              this.data.verify(id, "width");
-              this.data.verify(id, "height");
+              this.data.verify('::document', "width");
+              this.data.verify('::document', "height");
             }
             this.data.verify(this.scope, "width");
             this.data.verify(this.scope, "height");
@@ -24696,10 +24891,11 @@ Document = (function(superClass) {
    */
 
   Document.prototype.assign = function(data) {
-    var camel, changes, element, id, path, positions, prop, properties, restyles, styles, transforms, value;
+    var base, base1, camel, changes, copy, element, id, path, positions, prop, properties, restyles, styles, transforms, value;
     if (!(changes = this.group(data))) {
       return;
     }
+    console.log('apply', data);
     this.console.start('Apply', changes);
     styles = changes.styles;
     positions = changes.positions;
@@ -24711,7 +24907,16 @@ Document = (function(superClass) {
         value = transforms[id];
         element = this.identity[id];
         if ((element != null ? element.nodeType : void 0) === 1) {
-          element.style[camel] = value != null ? this.output.Matrix.prototype.format(value) : '';
+          if (this.precomputing) {
+            if (value) {
+              copy = Array.prototype.slice.call(value);
+              copy[12] = parseFloat(copy[12].toFixed(2));
+              copy[13] = parseFloat(copy[13].toFixed(2));
+              ((base = this.precomputing)[id] || (base[id] = {})).transform = this.output.Matrix.prototype.format(copy);
+            }
+          } else {
+            element.style[camel] = value != null ? this.output.Matrix.prototype.format(value) : '';
+          }
         } else {
           path = this.output.getPath(id, 'final-transform');
           if ((value != null) || (this.output.values[path] != null)) {
@@ -24730,7 +24935,17 @@ Document = (function(superClass) {
         if (element.nodeType === 1) {
           for (prop in properties) {
             value = properties[prop];
-            this.setStyle(element, prop, value);
+            if (this.precomputing) {
+              if (typeof value === 'object') {
+                value = +value;
+              }
+              if (typeof value === 'number') {
+                value = parseFloat(value.toFixed(3));
+              }
+              ((base1 = this.precomputing)[id] || (base1[id] = {}))[prop] = value;
+            } else {
+              this.setStyle(element, prop, value);
+            }
           }
         }
       }
@@ -26583,6 +26798,7 @@ Stylesheet = (function(superClass) {
       sheet = engine.stylesheets[path] = document.createElement('STYLE');
       if (anchor = engine.Query.prototype.getByPath(engine, continuation)) {
         if (anchor.scoped != null) {
+          sheet.scoping = null;
           if (scope = engine.getScopeElement(anchor.parentNode)) {
             if (scope.nodeType === 1) {
               sheet.scoping = scope.id;
@@ -27135,9 +27351,9 @@ Transition = (function(superClass) {
   }
 
   Transition.prototype.condition = function(engine, operation) {
-    var i, len, op;
-    for (i = 0, len = operation.length; i < len; i++) {
-      op = operation[i];
+    var j, len, op;
+    for (j = 0, len = operation.length; j < len; j++) {
+      op = operation[j];
       if (op.command) {
         if (engine.output.Time[op[0]] || this.condition(engine, op)) {
           return true;
@@ -27172,8 +27388,12 @@ Transition = (function(superClass) {
   };
 
   Transition.prototype.update = function(range, engine, operation, continuation, scope) {
-    var copy, from, now, value;
-    now = Date.now();
+    var copy, frame, from, now, value;
+    if (frame = engine.precomputing) {
+      now = frame.timestamp || 0;
+    } else {
+      now = Date.now();
+    }
     from = range[4] || (range[4] = now);
     value = this.compute(range, now, from);
     if (value === true) {
@@ -27187,7 +27407,9 @@ Transition = (function(superClass) {
       copy[2] = value;
       this.ascend(engine, operation, continuation, scope, copy, true);
     }
-    return this.complete(range, value);
+    if (this.complete(range, value)) {
+      return true;
+    }
   };
 
   return Transition;
@@ -27244,7 +27466,7 @@ Transition.Spring = (function(superClass) {
     start = range[0] || 0;
     end = range[1] || 0;
     goal = (ref = range[3]) != null ? ref : 1;
-    from = range[14] || from;
+    from = range[14] || now;
     range[5] = Math.min(this.MAX, range[5] + (now - from) / 1000);
     tension = range[12];
     friction = range[13];
@@ -27298,19 +27520,32 @@ Transition.Spring = (function(superClass) {
     } else {
       range[15] += diff;
       if (range[7] && Math.abs(range[6]) < this.REST_THRESHOLD) {
+        this.clean(range);
+        range[7] = 0;
         if (position !== goal) {
           return goal;
-        } else {
-          return;
         }
       }
     }
   };
 
+  Spring.prototype.clean = function(range) {
+    var i, j, k, results;
+    range[15] = 0;
+    range[14] = 0;
+    for (i = j = 4; j < 7; i = ++j) {
+      range[i] = 0;
+    }
+    results = [];
+    for (i = k = 8; k < 12; i = ++k) {
+      results.push(range[i] = 0);
+    }
+    return results;
+  };
+
   Spring.prototype.complete = function(range, value) {
     if (range[7] && Math.abs(range[6]) < this.REST_THRESHOLD) {
       range[7] = 0;
-      range[15] = 0;
       return true;
     } else if (range[2] === range[3] && Math.abs(range[6]) < this.REST_THRESHOLD) {
       return true;

@@ -117,6 +117,7 @@ class Stylesheet extends Command.List
       sheet = engine.stylesheets[path] = document.createElement('STYLE')
       if anchor = engine.Query::getByPath(engine, continuation)
         if anchor.scoped?
+          sheet.scoping = null
           if scope = engine.getScopeElement(anchor.parentNode)
             if scope.nodeType == 1
               sheet.scoping = scope.id
