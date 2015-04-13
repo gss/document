@@ -171,9 +171,9 @@ class Transition.Spring extends Transition
       return position
     else
       range[15] += diff
-      if range[7] && Math.abs(range[6]) < @REST_THRESHOLD
+      if range[7] > 0 && Math.abs(range[6]) < @REST_THRESHOLD
         @clean(range)
-        range[7] = 0
+        range[7] = -1
         if position != goal
           return goal
       return
