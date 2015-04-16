@@ -1362,7 +1362,7 @@ Domain = (function() {
     var i, old, op, path, stack, updated, _base, _i, _len, _ref;
     path = this.getPath(object, property);
     old = this.values[path];
-    if (continuation) {
+    if (continuation != null) {
       _ref = stack = (_base = (this.stacks || (this.stacks = {})))[path] || (_base[path] = []);
       for (i = _i = 0, _len = _ref.length; _i < _len; i = _i += 3) {
         op = _ref[i];
@@ -1553,13 +1553,21 @@ Domain = (function() {
   };
 
   Domain.prototype.remove = function() {
-    var contd, i, observer, operation, operations, path, property, stack, stacks, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2;
+    var contd, i, observer, operation, operations, path, property, stack, stacks, unstacked, _base, _base1, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2;
     for (_i = 0, _len = arguments.length; _i < _len; _i++) {
       path = arguments[_i];
       if (stacks = this.stacks) {
         _ref = this.stacks;
         for (property in _ref) {
           stack = _ref[property];
+          if (this.updating && this === this.data && stack.indexOf(path) > -1) {
+            unstacked = (_base = ((_base1 = this.updating).unstacked || (_base1.unstacked = {})))[property] || (_base[property] = []);
+            if (unstacked.indexOf(path) === -1) {
+              unstacked.push(path);
+            } else {
+              break;
+            }
+          }
           while ((i = stack.indexOf(path)) > -1) {
             stack.splice(i - 1, 3);
             if (stack.length < i) {
@@ -2093,6 +2101,7 @@ Engine = (function() {
     remove: function(path) {
       var paths, ranges, subpath, _i, _len, _ref, _ref1, _results;
       this.output.remove(path);
+      this.data.remove(path);
       if ((_ref = this.updating) != null) {
         _ref.remove(path);
       }
@@ -5650,7 +5659,6 @@ Range.Mapper = (function(_super) {
   Mapper.define({
     map: function(left, right, engine, operation, continuation, scope, ascender, ascending) {
       var end, start, _ref, _ref1, _ref2;
-      console.log('map', arguments);
       if (ascender === 2) {
         if ((start = (_ref = left[2]) != null ? _ref : left[0]) != null) {
           if (start !== false && right < start) {
@@ -6844,40 +6852,45 @@ Exporter = (function() {
   var getIndex, getSelector;
 
   function Exporter(_at_engine) {
-    var last, states, _ref, _ref1;
+    var command, states, _ref, _ref1;
     this.engine = _at_engine;
-    if (!(this.command = typeof location !== "undefined" && location !== null ? (_ref = location.search.match(/export=([a-z0-9,]+)/)) != null ? _ref[1] : void 0 : void 0)) {
+    if (!(command = typeof location !== "undefined" && location !== null ? (_ref = location.search.match(/export=([a-z0-9,]+)/)) != null ? _ref[1] : void 0 : void 0)) {
       return;
     }
-    if (states = typeof location !== "undefined" && location !== null ? (_ref1 = location.search.match(/export-states=([a-z0-9,_-]+)/)) != null ? _ref1[1].split(',') : void 0 : void 0) {
-      this.states = states;
+    states = typeof location !== "undefined" && location !== null ? (_ref1 = location.search.match(/export-states=([a-z0-9,_-]+)/)) != null ? _ref1[1] : void 0 : void 0;
+    this.schedule(command, states);
+  }
+
+  Exporter.prototype.schedule = function(query, states) {
+    var last;
+    if (states == null) {
+      states = 'animations';
     }
-    if (this.command.indexOf('x') > -1) {
-      if ((this.sizes = this.command.split(',')).length) {
-        this.sizes = this.sizes.map(function(size) {
-          return size.split('x').map(function(v) {
-            return parseInt(v);
-          });
+    if ((this.sizes = query.split(',')).length) {
+      this.states = states.split(',');
+      this.sizes = this.sizes.map(function(size) {
+        return size.split('x').map(function(v) {
+          return parseInt(v);
         });
-        last = this.sizes[this.sizes.length - 1];
-        this.engine.precomputing = true;
-        this.engine.once('compile', (function(_this) {
-          return function() {
-            console.error('pre-resized to', last);
-            _this.override('::window[width]', last[0]);
-            _this.override('::window[height]', last[1]);
-            _this.override('::document[height]', -10000);
-            return _this.override('::document[scroll-top]', -10000);
-          };
-        })(this));
-      }
+      });
+      last = this.sizes[this.sizes.length - 1];
+      this.record();
+      this.engine.once('compile', (function(_this) {
+        return function() {
+          console.error('pre-resized to', last);
+          _this.override('::window[width]', last[0]);
+          _this.override('::window[height]', last[1]);
+          _this.override('::document[height]', -10000);
+          return _this.override('::document[scroll-top]', -10000);
+        };
+      })(this));
     }
-    window.addEventListener('load', (function(_this) {
+    return window.addEventListener('load', (function(_this) {
       return function() {
         return _this.nextSize();
       };
     })(this));
-  }
+  };
 
   Exporter.prototype.text = '';
 
@@ -6891,9 +6904,10 @@ Exporter = (function() {
       this.override('::document[scroll-top]', scroll != null ? scroll : 0);
       this.override('::document[height]', height != null ? height : document.documentElement.scrollHeight);
       console.error('overring', height);
+      debugger;
       callback = (function(_this) {
         return function() {
-          var frames, _base;
+          var frames, property, value, _base, _i, _len, _ref;
           console.error(arguments);
           if (_this.frequency) {
             (_base = _this.engine.precomputing).timestamp || (_base.timestamp = 0);
@@ -6901,6 +6915,14 @@ Exporter = (function() {
             _this.engine.precomputing.timestamp = _this.engine.console.getTime();
           }
           frames = 0;
+          _this.record();
+          debugger;
+          _this.initial = {};
+          _ref = _this.engine.values;
+          for (value = _i = 0, _len = _ref.length; _i < _len; value = ++_i) {
+            property = _ref[value];
+            _this.initial[property] = value;
+          }
           while (_this.engine.ranges) {
             if (++frames > 100) {
               debugger;
@@ -6914,7 +6936,6 @@ Exporter = (function() {
           return _this.stop();
         };
       })(this);
-      this.record();
       this.engine.then(callback);
       this.engine.solve(function() {
         debugger;
@@ -6930,7 +6951,7 @@ Exporter = (function() {
 
   Exporter.prototype.threshold = 0;
 
-  Exporter.prototype.record = function() {
+  Exporter.prototype.record = function(soft) {
     var old;
     old = this.engine.precomputing;
     console.log('frame', this.engine.precomputing, this.engine.ranges);
@@ -6947,9 +6968,9 @@ Exporter = (function() {
     if (!this.appeared) {
       this.appeared = true;
       this.animate();
+      this.engine.precomputing = void 0;
       this.record();
       this.phase = 'disappearance';
-      debugger;
       setTimeout((function(_this) {
         return function() {
           return _this.handlers.animations.call(_this, -10000, -10000);
@@ -6965,7 +6986,7 @@ Exporter = (function() {
   };
 
   Exporter.prototype.sequence = function(id, frames, prefix) {
-    var frame, h, last, name, phase, properties, property, selector, text, value, y, _i, _len;
+    var frame, h, last, name, other, phase, properties, property, selector, text, value, y, _i, _len, _ref;
     if (prefix == null) {
       prefix = '';
     }
@@ -6973,8 +6994,8 @@ Exporter = (function() {
     y = Math.floor((1000 * this.engine.values[id + '[absolute-y]'] / h).toFixed(4));
     h = Math.floor((1000 * this.engine.values[id + '[computed-height]'] / h).toFixed(4));
     phase = this.phase || 'appearance';
-    name = phase + '-' + id.substring(1) + '-' + h + '-' + y;
-    text = '@' + prefix + 'keyframes ' + name + ' {';
+    name = phase + '-' + id.substring(1) + '-' + h + '-' + y + '-' + this.engine.values['::window[width]'];
+    text = '';
     last = null;
     for (_i = 0, _len = frames.length; _i < _len; _i++) {
       frame = frames[_i];
@@ -6995,24 +7016,29 @@ Exporter = (function() {
       }
     }
     text += '}\n';
+    if (other = (_ref = this.keyframes) != null ? _ref[prefix + text] : void 0) {
+      text = '';
+    } else {
+      (this.keyframes || (this.keyframes = {}))[prefix + text] = name;
+      text = '@' + prefix + 'keyframes ' + name + ' {' + text;
+    }
     selector = getSelector(engine.identity[id]);
     text += '.' + name + ' ' + selector + ' {\n';
-    text += prefix + 'animation: ' + name + ' ' + Math.round(last.duration) + 'ms';
-    if (this.phase === 'disappearance') {
-      text += ' forwards';
-    }
+    text += prefix + 'animation: ' + (other || name) + ' ' + Math.round(last.duration) + 'ms';
+    text += ' forwards';
     text += ';\n';
     text += prefix + 'animation-play-state: paused;\n';
     text += '}\n';
     text += '.' + name + '-running ' + selector + ' {\n';
-    text += prefix + 'animation-play-state: running\n';
+    text += prefix + 'animation-play-state: running;\n';
     text += '}\n';
     return text;
   };
 
   Exporter.prototype.animate = function() {
-    var animations, duration, first, frame, id, keyframe, keyframes, last, properties, _i, _j, _len, _len1, _ref, _results;
+    var animations, duration, final, first, frame, id, index, initial, keyframe, keyframes, last, prev, properties, property, props, start, subframe, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
     animations = {};
+    final = {};
     _ref = this.frames;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       frame = _ref[_i];
@@ -7020,28 +7046,62 @@ Exporter = (function() {
         properties = frame[id];
         if (id !== 'timestamp' && id !== 'duration' && id !== 'frequency') {
           (animations[id] || (animations[id] = [])).push(properties);
+          for (property in properties) {
+            value = properties[property];
+            (final[id] || (final[id] = {}))[property] = value;
+          }
           properties.timestamp = frame.timestamp;
         }
       }
     }
     this.frames = void 0;
-    _results = [];
     for (id in animations) {
       keyframes = animations[id];
+      if (keyframes.length === 1) {
+        continue;
+      }
       first = keyframes[0];
       last = keyframes[keyframes.length - 1];
-      duration = last.timestamp - first.timestamp;
+      start = first.timestamp;
+      duration = last.timestamp - start;
+      if (this.frequency) {
+        index = 0;
+        while (++index < keyframes.length) {
+          if (((_ref1 = (prev = keyframes[index - 1])) != null ? _ref1.timestamp : void 0) < (keyframes[index].timestamp - this.frequency)) {
+            subframe = {};
+            for (property in prev) {
+              value = prev[property];
+              subframe[property] = value;
+            }
+            subframe.timestamp = prev.timestamp + this.frequency;
+            keyframes.splice(index, 0, subframe);
+          }
+        }
+      }
       for (_j = 0, _len1 = keyframes.length; _j < _len1; _j++) {
         keyframe = keyframes[_j];
         keyframe.duration = duration;
-        keyframe.progress = (keyframe.timestamp - first.timestamp) / duration;
+        keyframe.progress = (keyframe.timestamp - start) / duration;
+      }
+      initial = {
+        timestamp: start,
+        progress: 0,
+        duration: duration
+      };
+      if ((props = (_ref2 = this.final) != null ? _ref2[id] : void 0) && this.phase !== 'disappearance') {
+        for (property in props) {
+          value = props[property];
+          initial[property] = value;
+        }
+        keyframes.unshift(initial);
       }
       this.text += this.sequence(id, keyframes);
       this.text += '\n';
       this.text += this.sequence(id, keyframes, '-webkit-');
-      _results.push(this.text += '\n');
+      this.text += '\n';
     }
-    return _results;
+    this.final = final;
+    return this.keyframes = void 0;
   };
 
   getSelector = function(_context) {
@@ -7236,9 +7296,19 @@ Exporter = (function() {
           return _this.next();
         };
       })(this);
-      this.engine.then(callback);
       if (this.text) {
-        this.resize(width, height);
+        this.engine.then(callback);
+        if (this.text) {
+          this.resize(width, height);
+        }
+      } else if (this.engine.updating) {
+        this.engine.then(callback);
+      } else {
+        setTimeout((function(_this) {
+          return function() {
+            return callback();
+          };
+        })(this), 10);
       }
       return true;
     }
@@ -27519,9 +27589,9 @@ Transition.Spring = (function(superClass) {
       return position;
     } else {
       range[15] += diff;
-      if (range[7] && Math.abs(range[6]) < this.REST_THRESHOLD) {
+      if (range[7] > 0 && Math.abs(range[6]) < this.REST_THRESHOLD) {
         this.clean(range);
-        range[7] = 0;
+        range[7] = -1;
         if (position !== goal) {
           return goal;
         }

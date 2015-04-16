@@ -95,7 +95,7 @@ describe('Assignments', function() {
       });
     });
   });
-  return describe('in expressions', function() {
+  describe('in expressions', function() {
     return describe('on assigned variables', function() {
       describe('with static numbers', function() {
         return it('should set values', function() {
@@ -141,6 +141,54 @@ describe('Assignments', function() {
             c: 20
           });
         });
+      });
+    });
+  });
+  return describe('conditional assignments', function() {
+    return it('should compute and update', function() {
+      var engine, operations;
+      operations = GSS.Parser.parse("\nbase = 72;\n\n// Leigh Taylor's Screen Resolution is the base screen\n\ntaylorW = 1440;\n\n// If your screen is the same width as LT's, you see what he saw when designing 1:1\n\nscaleFactor = 1;\n\n@if full-width <= taylorW / 2 {\n  // YF: gss bug with double centering while exporting\n  scaleFactor = full-width/taylorW * 2;\n} @else {\n  scaleFactor = full-width/taylorW;\n};\n\nmd = base * scaleFactor;\ng = base / 9 * scaleFactor;");
+      engine = new GSS({
+        'full-width': 1080
+      });
+      expect(engine.solve(operations.commands)).to.eql({
+        base: 72,
+        scaleFactor: 0.75,
+        g: 6,
+        md: 54,
+        taylorW: 1440
+      });
+      expect(engine.solve({
+        'full-width': 1440
+      })).to.eql({
+        'full-width': 1440,
+        scaleFactor: 1,
+        g: 8,
+        md: 72
+      });
+      expect(engine.solve({
+        'full-width': 720
+      })).to.eql({
+        'full-width': 720,
+        scaleFactor: 1,
+        g: 8,
+        md: 72
+      });
+      expect(engine.solve({
+        'full-width': 360
+      })).to.eql({
+        'full-width': 360,
+        scaleFactor: 0.5,
+        g: 4,
+        md: 36
+      });
+      return expect(engine.solve({
+        'full-width': 1080
+      })).to.eql({
+        'full-width': 1080,
+        scaleFactor: 0.75,
+        g: 6,
+        md: 54
       });
     });
   });
