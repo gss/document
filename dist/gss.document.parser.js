@@ -6854,6 +6854,15 @@ Exporter = (function() {
   function Exporter(_at_engine) {
     var command, states, _ref, _ref1;
     this.engine = _at_engine;
+    this.engine["export"] = (function(_this) {
+      return function(callback) {
+        if (_this.result) {
+          return callback(_this.result);
+        } else {
+          return _this.engine.once('export', callback);
+        }
+      };
+    })(this);
     if (!(command = typeof location !== "undefined" && location !== null ? (_ref = location.search.match(/export=([a-z0-9,]+)/)) != null ? _ref[1] : void 0 : void 0)) {
       return;
     }
@@ -7266,7 +7275,8 @@ Exporter = (function() {
   };
 
   Exporter.prototype.output = function(text) {
-    return document.write(text.split(/\n/g).join('<br>'));
+    this.result = text;
+    return this.engine.triggerEvent('export', text);
   };
 
   Exporter.prototype.nextSize = function() {
