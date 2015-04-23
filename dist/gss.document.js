@@ -7115,7 +7115,9 @@ Exporter = (function() {
     index = getIndex(that);
     while (that.tagName) {
       if (that.id) {
-        pathSelector = '#' + that.id + (pathSelector ? '>' + pathSelector : '');
+        if (pathSelector.substring(0, that.id.length + 2) !== '#' + that.id + ' ') {
+          pathSelector = '#' + that.id + (pathSelector ? '>' + pathSelector : '');
+        }
         break;
       } else {
         tag = that.localName;
