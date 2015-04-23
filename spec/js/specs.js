@@ -199,14 +199,6 @@ describe('Assignments', function() {
 },{}],2:[function(require,module,exports){
 var expect;
 
-c.SimplexSolver.prototype._setConstant = function(constraint, value) {
-  var marker;
-  marker = this.markerVars.get(cn);
-  if (marker == null) {
-    throw new c.InternalError("Constraint not found in setConstant");
-  }
-};
-
 expect = chai.expect;
 
 describe('Cassowary', function() {
@@ -220,7 +212,6 @@ describe('Cassowary', function() {
     solver = new c.SimplexSolver();
     x = new c.Variable();
     ieq = new c.Inequality(x, c.GEQ, 100);
-    debugger;
     solver.addConstraint(ieq);
     return expect(x.value).to.equal(100);
   });
