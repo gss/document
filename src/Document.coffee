@@ -263,7 +263,7 @@ class Document extends Engine
         if @updating && !@updating.resizing
           @updating.resizing = 'scheduled'
           return
-        console.log('resize now')
+
         @solve 'Resize', id, ->
           if @scope._gss_id != id
             @data.verify(id, "width")
@@ -559,7 +559,6 @@ class Document extends Engine
   assign: (data) ->
     unless changes = @group(data)
       return
-    console.log('apply', data)
 
     @console.start('Apply', changes)
     styles = changes.styles

@@ -4455,8 +4455,8 @@ Update.prototype = {
       if (last[property] === value) {
         if (Math.abs(now - value) < 2) {
           (this.changes || (this.changes = {}))[property] = solution[property] = now;
+          continue;
         }
-        continue;
       }
       if (now !== value) {
         if (solution === this.solution && (value != null)) {
@@ -8657,7 +8657,6 @@ Document = (function(superClass) {
             _this.updating.resizing = 'scheduled';
             return;
           }
-          console.log('resize now');
           return _this.solve('Resize', id, function() {
             if (this.scope._gss_id !== id) {
               this.data.verify(id, "width");
@@ -9015,7 +9014,6 @@ Document = (function(superClass) {
     if (!(changes = this.group(data))) {
       return;
     }
-    console.log('apply', data);
     this.console.start('Apply', changes);
     styles = changes.styles;
     positions = changes.positions;
