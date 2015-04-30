@@ -48,7 +48,7 @@ class Measurement.Length extends Measurement
       return value * 96
 
   @formatNumber: (number) ->
-    return number + 'px'
+    return Math.ceil(number) + 'px'
 
 
 # Rotations

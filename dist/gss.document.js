@@ -12777,7 +12777,7 @@ Measurement.Length = (function(superClass) {
   });
 
   Length.formatNumber = function(number) {
-    return number + 'px';
+    return Math.ceil(number) + 'px';
   };
 
   return Length;
