@@ -7293,7 +7293,7 @@ Exporter = (function() {
       } else {
         setTimeout((function(_this) {
           return function() {
-            if (engine.domains) {
+            if (engine.updating) {
               return callback();
             } else {
               return engine.once('solve', callback);
