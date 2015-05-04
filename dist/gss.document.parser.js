@@ -7451,9 +7451,7 @@ Exporter = (function() {
     this.override('::window[width]', width);
     this.width = width;
     this.height = height;
-    return setTimeout(function() {
-      return this.engine.triggerEvent('resize');
-    }, 10);
+    return this.engine.triggerEvent('resize');
   };
 
   return Exporter;
