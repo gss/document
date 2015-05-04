@@ -7169,7 +7169,7 @@ Exporter = (function() {
             }).join('\n');
           }
         } else if (child.tagName !== 'SCRIPT') {
-          if (child.offsetParent) {
+          if (child.offsetParent || child.tagName === 'svg') {
             if (fontSize == null) {
               styles = window.getComputedStyle(element, null);
               fontSize = parseFloat(styles['font-size']);
@@ -7193,7 +7193,7 @@ Exporter = (function() {
           } else {
             childFontSize = fontSize;
           }
-          if (fontSize !== childFontSize) {
+          if (fontSize !== childFontSize && style.indexOf('font-size:') === -1) {
             if (unit === 'em') {
               style += 'font-size: ' + parseFloat((childFontSize / fontSize).toFixed(4)) + unit + ';';
             } else {
@@ -7205,10 +7205,12 @@ Exporter = (function() {
             linebreaks = [];
             linebreaks.counter = 0;
           }
-          if (unit === 'em') {
-            exported = this.serialize(child, prefix, childFontSize, unit, baseFontSize, linebreaks);
-          } else {
-            exported = this.serialize(child, prefix, baseFontSize, unit, baseFontSize, linebreaks);
+          if (child.tagName !== 'svg') {
+            if (unit === 'em') {
+              exported = this.serialize(child, prefix, childFontSize, unit, baseFontSize, linebreaks);
+            } else {
+              exported = this.serialize(child, prefix, baseFontSize, unit, baseFontSize, linebreaks);
+            }
           }
           if (style) {
             if (child.id) {
@@ -7227,7 +7229,7 @@ Exporter = (function() {
           if (breaking) {
             linebreaks = breaking = void 0;
           }
-          text += exported;
+          text += exported || '';
         }
       } else if (linebreaks && child.nodeType === 3 && child.parentNode.tagName !== 'STYLE' && child.parentNode.tagName !== 'SCRIPT') {
         counter = 0;
@@ -7291,15 +7293,11 @@ Exporter = (function() {
       } else if (this.engine.updating) {
         this.engine.once('finish', callback);
       } else {
-        setTimeout((function(_this) {
-          return function() {
-            if (engine.updating) {
-              return callback();
-            } else {
-              return engine.once('solve', callback);
-            }
-          };
-        })(this), 10);
+        if (engine.values['::window[width]'] === width) {
+          callback();
+        } else {
+          engine.once('solve', callback);
+        }
       }
       return true;
     }
