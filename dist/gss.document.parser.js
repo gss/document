@@ -7298,15 +7298,17 @@ Exporter = (function() {
       })(this);
       if (this.text) {
         this.engine.once('finish', callback);
-        if (this.text) {
-          this.resize(width, height);
-        }
+        this.resize(width, height);
       } else if (this.engine.updating) {
         this.engine.once('finish', callback);
       } else {
         setTimeout((function(_this) {
           return function() {
-            return callback();
+            if (engine.domains) {
+              return callback();
+            } else {
+              return engine.once('solve', callback);
+            }
           };
         })(this), 10);
       }
