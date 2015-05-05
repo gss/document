@@ -7304,10 +7304,10 @@ Exporter = (function() {
       } else if (this.engine.updating) {
         this.engine.once('finish', callback);
       } else {
-        if (engine.values['::window[width]'] === width) {
+        if (this.engine.values['::window[width]'] === width || !this.engine.scope.querySelectorAll('style[type*="gss"]').length) {
           callback();
         } else {
-          engine.once('solve', callback);
+          this.engine.once('solve', callback);
         }
       }
       return true;
