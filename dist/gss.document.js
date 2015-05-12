@@ -4451,7 +4451,7 @@ Update.prototype = {
       value = result[property];
       now = solution[property];
       if (last[property] === value) {
-        if (Math.abs(now - value) < 2) {
+        if (Math.abs(now - value) <= 2) {
           (this.changes || (this.changes = {}))[property] = solution[property] = now;
           continue;
         }
@@ -7293,7 +7293,7 @@ Exporter = (function() {
       } else if (this.engine.updating) {
         this.engine.once('finish', callback);
       } else {
-        if (this.engine.values['::window[width]'] === width || !this.engine.scope.querySelectorAll('style[type*="text/gss"]').length) {
+        if (this.engine.updated || !this.engine.scope.querySelectorAll('style[type*="gss"]').length) {
           callback();
         } else {
           this.engine.once('solve', callback);
