@@ -1,6 +1,6 @@
 {
-  "name": "gss-engine",
-  "description": "GSS styling engine",
+  "name": "gss-document",
+  "description": "GSS engine for HTML pages",
   "version": "2.1.0",
   "repository": {
     "type": "git",
@@ -31,7 +31,9 @@
     "grunt-saucelabs": "^8.4.1"
   },
   "browserify": {
-      "transform": ["coffeeify"]
+    "transform": [
+      "coffeeify"
+    ]
   },
   "keywords": [],
   "scripts": {
@@ -42,8 +44,8 @@
     "./vendor"
   ],
   "dependencies": {
+    "gss-engine": "git://github.com/gss/engine.git#841a07aab8d8a9645cdf0e7fc8358a9161ef8c92",
     "gss-parser": "git://github.com/gss/parser.git#61c4b2849e78d76b0e67b20a5abc08ce52b6c9cb",
-    "vfl-compiler": "~1.1.3",
-    "gss-engine": "/Users/invizko/Sites/engine"
+    "vfl-compiler": "~1.1.3"
   }
 }
