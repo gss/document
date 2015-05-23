@@ -1,7 +1,7 @@
 {
   "name": "gss-document",
   "description": "GSS engine for HTML pages",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/gss/engine.git"
@@ -44,7 +44,7 @@
     "./vendor"
   ],
   "dependencies": {
-    "gss-engine": "git://github.com/gss/engine.git#841a07aab8d8a9645cdf0e7fc8358a9161ef8c92",
+    "gss-engine": "git://github.com/gss/engine.git#3f6a5922420ce94fcc2db60a9fd1eba5b443f6a5",
     "gss-parser": "git://github.com/gss/parser.git#61c4b2849e78d76b0e67b20a5abc08ce52b6c9cb",
     "vfl-compiler": "~1.1.3"
   }
