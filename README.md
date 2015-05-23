@@ -12,7 +12,6 @@ It consists of three projects:
 * [Parser](https://github.com/gss/parser#readme) - Converts GSS stylesheets to expression tree. *Can be preprocessed*
 
 
-
 GSS supports the following syntaxes for defining layout rules:
 
 * [CCSS](https://github.com/gss/ccss-compiler#readme) - direct constraints related to position and size of DOM elements
