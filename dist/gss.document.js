@@ -10655,7 +10655,7 @@ if (typeof document !== "undefined" && document !== null) {
     Selector.matcher = 'matches';
   } else if (dummy.matchesSelector) {
     Selector.matcher = 'matchesSelector';
-  } else if (dummy.matches) {
+  } else if (dummy.webkitMatchesSelector) {
     Selector.matcher = 'webkitMatchesSelector';
   }
   if (!dummy.hasOwnProperty("classList")) {

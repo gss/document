@@ -902,7 +902,7 @@ if document?
     Selector.matcher = 'matches'
   else if dummy.matchesSelector
     Selector.matcher = 'matchesSelector'
-  else if dummy.matches
+  else if dummy.webkitMatchesSelector
     Selector.matcher = 'webkitMatchesSelector'
   
   unless dummy.hasOwnProperty("classList")
