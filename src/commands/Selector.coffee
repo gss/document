@@ -53,7 +53,7 @@ class Selector extends Query
     node = @precontextualize(engine, scope, args[0])
     if command.selecting
       result ?= node.querySelectorAll(args[1])
-    else if (result != node) && node.matches(args[1])
+    else if (result != node) && node[Selector.matcher](args[1])
       result ?= node
     command.unlog(engine, result)
     if result = command.after(args, result, engine, operation, continuation, scope)
@@ -897,6 +897,13 @@ if document?
   dummy.appendChild(div)
   dummy.innerHTML = ""
   Selector.destructuring = !div.childNodes.length
+
+  if dummy.matches
+    Selector.matcher = 'matches'
+  else if dummy.matchesSelector
+    Selector.matcher = 'matchesSelector'
+  else if dummy.matches
+    Selector.matcher = 'webkitMatchesSelector'
   
   unless dummy.hasOwnProperty("classList")
     Selector['.']::Qualifier = (node, value) ->

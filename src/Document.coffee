@@ -411,6 +411,9 @@ class Document extends Engine
     # Recurse to children
     if parent == document
       parent = document.body
+
+    return unless parent
+    
     child = parent.firstChild
 
     while child

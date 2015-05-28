@@ -6850,7 +6850,7 @@ Exporter = (function() {
   var getIndex, getSelector;
 
   function Exporter(_at_engine) {
-    var command, states, _ref, _ref1;
+    var command, states, _ref, _ref1, _ref2, _ref3;
     this.engine = _at_engine;
     this.engine["export"] = (function(_this) {
       return function(callback) {
@@ -6865,6 +6865,7 @@ Exporter = (function() {
       return;
     }
     states = typeof location !== "undefined" && location !== null ? (_ref1 = location.search.match(/export-states=([a-z0-9,_-]+)/)) != null ? _ref1[1] : void 0 : void 0;
+    this.deinherit = typeof location !== "undefined" && location !== null ? (_ref2 = location.search.match(/export-deinherit=([a-z0-9,_-]+)/)) != null ? (_ref3 = _ref2[1]) != null ? _ref3.split(',') : void 0 : void 0 : void 0;
     this.schedule(command, states);
   }
 
@@ -7145,13 +7146,16 @@ Exporter = (function() {
     return i;
   };
 
-  Exporter.prototype.serialize = function(element, prefix, fontSize, unit, baseFontSize, linebreaks) {
-    var breaking, char, child, childFontSize, content, counter, exported, range, rect, selector, style, styles, text, top, _i, _len, _ref;
+  Exporter.prototype.serialize = function(element, prefix, inherited, unit, baseFontSize, linebreaks) {
+    var breaking, char, child, childFontSize, content, counter, exported, fontSize, property, range, rect, selector, style, styles, text, top, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
     if (element == null) {
       element = this.engine.scope;
     }
     if (prefix == null) {
       prefix = '';
+    }
+    if (inherited == null) {
+      inherited = {};
     }
     if (unit == null) {
       unit = 'rem';
@@ -7163,9 +7167,20 @@ Exporter = (function() {
       element = element.documentElement;
     }
     text = "";
-    _ref = element.childNodes;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      child = _ref[_i];
+    if ((fontSize = inherited.fontSize) == null) {
+      styles = window.getComputedStyle(element, null);
+      inherited.fontSize = fontSize = parseFloat(styles['font-size']);
+      if (this.deinherit) {
+        _ref = this.deinherit;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          property = _ref[_i];
+          inherited[property] = styles[property];
+        }
+      }
+    }
+    _ref1 = element.childNodes;
+    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+      child = _ref1[_j];
       if (child.nodeType === 1) {
         if (child.tagName === 'STYLE') {
           if (child.assignments) {
@@ -7181,10 +7196,6 @@ Exporter = (function() {
           }
         } else if (child.tagName !== 'SCRIPT') {
           if (child.offsetParent || child.tagName === 'svg') {
-            if (fontSize == null) {
-              styles = window.getComputedStyle(element, null);
-              fontSize = parseFloat(styles['font-size']);
-            }
             styles = window.getComputedStyle(child, null);
             childFontSize = parseFloat(styles['font-size']);
             if (style = child.getAttribute('style')) {
@@ -7201,14 +7212,28 @@ Exporter = (function() {
             } else {
               style = '';
             }
-          } else {
-            childFontSize = fontSize;
-          }
-          if (fontSize !== childFontSize && style.indexOf('font-size:') === -1) {
-            if (unit === 'em') {
-              style += 'font-size: ' + parseFloat((childFontSize / fontSize).toFixed(4)) + unit + ';';
-            } else {
-              style += 'font-size: ' + parseFloat((childFontSize / baseFontSize).toFixed(4)) + unit + ';';
+            if (fontSize !== childFontSize && style.indexOf('font-size:') === -1) {
+              if (unit === 'em') {
+                style += 'font-size: ' + parseFloat((childFontSize / fontSize).toFixed(4)) + unit + ';';
+              } else {
+                style += 'font-size: ' + parseFloat((childFontSize / baseFontSize).toFixed(4)) + unit + ';';
+              }
+            }
+            if (this.deinherit) {
+              _ref2 = this.deinherit;
+              for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+                property = _ref2[_k];
+                if (child.style[property] === '') {
+                  if (inherited[property] !== styles[property]) {
+                    value = styles[property];
+                    if (parseFloat(value) + 'px' === value) {
+                      value = (parseFloat(value) / baseFontSize).toFixed(4) + unit + ';';
+                    }
+                    style += property + ': ' + value + ';';
+                    inherited[property] = styles[property];
+                  }
+                }
+              }
             }
           }
           if (!linebreaks && child.className.indexOf('layout-system') > -1) {
@@ -7217,11 +7242,8 @@ Exporter = (function() {
             linebreaks.counter = 0;
           }
           if (child.tagName !== 'svg') {
-            if (unit === 'em') {
-              exported = this.serialize(child, prefix, childFontSize, unit, baseFontSize, linebreaks);
-            } else {
-              exported = this.serialize(child, prefix, baseFontSize, unit, baseFontSize, linebreaks);
-            }
+            inherited.fontSize = childFontSize;
+            exported = this.serialize(child, prefix, inherited, unit, baseFontSize, linebreaks);
           }
           if (style) {
             if (child.id) {
@@ -7285,8 +7307,10 @@ Exporter = (function() {
             } else {
               text += '\n@media (min-width: ' + (_this.previous + 1) + 'px) {\n';
             }
-          } else {
+          } else if (_this.sizes.length) {
             text += '\n@media (max-width: ' + width + 'px) {\n';
+          } else {
+            _this.plain = true;
           }
           _this.base = _this.serialize();
           text += _this.base;
@@ -7341,7 +7365,9 @@ Exporter = (function() {
 
   Exporter.prototype.next = function() {
     if (!this.nextState()) {
-      this.text += '\n}';
+      if (!this.plain) {
+        this.text += '\n}';
+      }
       if (!this.nextSize()) {
         return this.output(this.text);
       }
@@ -24786,6 +24812,9 @@ Document = (function(superClass) {
     if (parent === document) {
       parent = document.body;
     }
+    if (!parent) {
+      return;
+    }
     child = parent.firstChild;
     while (child) {
       if (child.nodeType === 1) {
@@ -25524,7 +25553,7 @@ Selector = (function(superClass) {
       if (result == null) {
         result = node.querySelectorAll(args[1]);
       }
-    } else if ((result !== node) && node.matches(args[1])) {
+    } else if ((result !== node) && node[Selector.matcher](args[1])) {
       if (result == null) {
         result = node;
       }
@@ -26570,6 +26599,13 @@ if (typeof document !== "undefined" && document !== null) {
   dummy.appendChild(div);
   dummy.innerHTML = "";
   Selector.destructuring = !div.childNodes.length;
+  if (dummy.matches) {
+    Selector.matcher = 'matches';
+  } else if (dummy.matchesSelector) {
+    Selector.matcher = 'matchesSelector';
+  } else if (dummy.matches) {
+    Selector.matcher = 'webkitMatchesSelector';
+  }
   if (!dummy.hasOwnProperty("classList")) {
     Selector['.'].prototype.Qualifier = function(node, value) {
       if (node.className.split(/\s+/).indexOf(value) > -1) {
