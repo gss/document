@@ -6880,11 +6880,17 @@ Exporter = (function() {
         };
       })(this));
     }
-    return window.addEventListener('load', (function(_this) {
-      return function() {
-        return _this.nextSize();
-      };
-    })(this));
+    if (document.readyState === 'complete') {
+      return this.nextSize();
+    } else {
+      return document.addEventListener('readystatechange', (function(_this) {
+        return function() {
+          if (document.readyState === 'complete') {
+            return _this.nextSize();
+          }
+        };
+      })(this));
+    }
   };
 
   Exporter.prototype.text = '';
