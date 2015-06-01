@@ -6841,8 +6841,10 @@ Exporter = (function() {
   function Exporter(_at_engine) {
     var command, states, _ref, _ref1, _ref2, _ref3;
     this.engine = _at_engine;
+    this.logs = [];
     this.engine["export"] = (function(_this) {
       return function(callback) {
+        _this.logs.push('export()');
         if (_this.result) {
           return callback(_this.result);
         } else {
@@ -6863,6 +6865,7 @@ Exporter = (function() {
     if (states == null) {
       states = 'animations';
     }
+    this.logs.push('schedule');
     if ((this.sizes = query.split(',')).length) {
       this.states = states.split(',');
       this.sizes = this.sizes.map(function(size) {
@@ -6881,10 +6884,13 @@ Exporter = (function() {
       })(this));
     }
     if (document.readyState === 'complete') {
+      this.logs.push('complete');
       return this.nextSize();
     } else {
+      this.logs.push('wait');
       return document.addEventListener('readystatechange', (function(_this) {
         return function() {
+          _this.logs.push('loaded');
           if (document.readyState === 'complete') {
             return _this.nextSize();
           }
@@ -7291,10 +7297,12 @@ Exporter = (function() {
   Exporter.prototype.nextSize = function() {
     var callback, height, size, width;
     if (size = this.sizes.pop()) {
+      this.logs.push('nextSize');
       width = size[0], height = size[1];
       callback = (function(_this) {
         return function() {
           var text;
+          _this.logs.push('success');
           text = '';
           if (_this.previous) {
             if (_this.sizes.length) {
@@ -7317,13 +7325,15 @@ Exporter = (function() {
           return _this.next();
         };
       })(this);
-      if (this.text) {
+      if (this.text || !this.engine.updating) {
         this.engine.once('finish', callback);
         this.resize(width, height);
       } else if (this.engine.updating) {
+        this.logs.push('wait');
         this.engine.once('finish', callback);
       } else {
-        if (this.engine.updated || !this.engine.scope.querySelectorAll('style[type*="gss"]').length) {
+        if (!this.engine.scope.querySelectorAll('style[type*="gss"]').length) {
+          this.logs.push('abort');
           callback();
         } else {
           this.engine.once('solve', callback);
@@ -7364,6 +7374,7 @@ Exporter = (function() {
         this.text += '\n}';
       }
       if (!this.nextSize()) {
+        this.logs.push('done');
         return this.output(this.text);
       }
     }
@@ -7387,11 +7398,13 @@ Exporter = (function() {
       return true;
     }
     if (state = this.uncomputed.pop()) {
+      this.logs.push('nextState');
       document.documentElement.classList.add(state);
       this.record();
       this.engine.once('finish', (function(_this) {
         return function() {
           var change, diff, end, handler, match, overlay, prefix, property, rest, result, rule, selector, start, text, value, z, _i, _len;
+          _this.logs.push('state:' + state);
           if (handler = _this.handlers[state]) {
             return handler.call(_this);
           }
@@ -7468,6 +7481,7 @@ Exporter = (function() {
   };
 
   Exporter.prototype.resize = function(width, height) {
+    this.logs.push('resize:' + width + 'x' + height);
     this.override('::window[height]', height);
     this.override('::window[width]', width);
     this.width = width;
