@@ -7240,14 +7240,18 @@ Exporter = (function() {
               }
             }
           }
-          if (!linebreaks && child.className.indexOf('layout-system') > -1) {
+          if (child.className.indexOf('export-linebreaks') > -1) {
             breaking = true;
             linebreaks = [];
             linebreaks.counter = 0;
           }
           if (child.tagName !== 'svg') {
             inherited.fontSize = childFontSize;
-            exported = this.serialize(child, prefix, inherited, unit, baseFontSize, linebreaks);
+            if (child.className.indexOf('foreign') > -1 && !child.offsetParent) {
+              exported = this.serialize(child, prefix, inherited, unit, baseFontSize);
+            } else {
+              exported = this.serialize(child, prefix, inherited, unit, baseFontSize, linebreaks);
+            }
           }
           if (style) {
             if (child.id) {
@@ -7262,8 +7266,6 @@ Exporter = (function() {
           }
           if (breaking) {
             text += selector + ':before{content: "' + linebreaks.join(',') + '"; display: none;}\n';
-          }
-          if (breaking) {
             linebreaks = breaking = void 0;
           }
           text += exported || '';
