@@ -4451,7 +4451,7 @@ Update.prototype = {
       value = result[property];
       now = solution[property];
       if (last[property] === value) {
-        if (Math.abs(now - value) <= 2) {
+        if (Math.abs(now - value) < 2) {
           (this.changes || (this.changes = {}))[property] = solution[property] = now;
           continue;
         }
@@ -4459,6 +4459,9 @@ Update.prototype = {
       if (now !== value) {
         if (solution === this.solution && (value != null)) {
           last[property] = now;
+        }
+        if (property.match('/\[(?:x|y|width|height)\]')) {
+          value = Math.floor(value);
         }
         (this.changes || (this.changes = {}))[property] = value;
         solution[property] = value;
@@ -6841,7 +6844,7 @@ Exporter = (function() {
   function Exporter(_at_engine) {
     var command, states, _ref, _ref1, _ref2, _ref3;
     this.engine = _at_engine;
-    this.logs = [];
+    this.logs = ['init'];
     this.engine["export"] = (function(_this) {
       return function(callback) {
         _this.logs.push('export()');
@@ -7148,7 +7151,7 @@ Exporter = (function() {
   };
 
   Exporter.prototype.serialize = function(element, prefix, inherited, unit, baseFontSize, linebreaks) {
-    var breaking, char, child, childFontSize, content, counter, exported, fontSize, property, range, rect, selector, style, styles, text, top, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
+    var breaking, char, child, childFontSize, content, counter, exported, fontSize, property, range, rect, selector, style, styles, text, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
     if (element == null) {
       element = this.engine.scope;
     }
@@ -7256,9 +7259,9 @@ Exporter = (function() {
               text += '\n';
             }
             text += selector + '{' + style + '}\n';
-            if (breaking) {
-              text += selector + ':before{content: "' + linebreaks.join(',') + '"; display: none;}\n';
-            }
+          }
+          if (breaking) {
+            text += selector + ':before{content: "' + linebreaks.join(',') + '"; display: none;}\n';
           }
           if (breaking) {
             linebreaks = breaking = void 0;
@@ -7268,18 +7271,17 @@ Exporter = (function() {
       } else if (linebreaks && child.nodeType === 3 && child.parentNode.tagName !== 'STYLE' && child.parentNode.tagName !== 'SCRIPT') {
         counter = 0;
         content = child.textContent;
-        top = 0;
         while (counter < content.length) {
           char = content.charAt(counter);
           range = document.createRange();
           range.setStart(child, counter);
           range.setEnd(child, counter + 1);
           rect = range.getBoundingClientRect();
-          if (rect.width && rect.top && rect.top !== top) {
-            if (top) {
+          if (rect.width && rect.top && rect.top !== linebreaks.position) {
+            if (linebreaks.position) {
               linebreaks.push(linebreaks.counter);
             }
-            top = rect.top;
+            linebreaks.position = rect.top;
           }
           counter++;
           linebreaks.counter++;
