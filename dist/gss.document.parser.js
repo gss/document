@@ -3492,7 +3492,7 @@ Query = (function(_super) {
       }
       result.single = true;
       return result;
-    } else if (value != null ? value.splice : void 0) {
+    } else if ((value != null ? value.splice : void 0) && value.slice) {
       return value.slice();
     } else {
       return value || [];
@@ -4470,9 +4470,6 @@ Update.prototype = {
       if (now !== value) {
         if (solution === this.solution && (value != null)) {
           last[property] = now;
-        }
-        if (property.match('/\[(?:x|y|width|height)\]')) {
-          value = Math.floor(value);
         }
         (this.changes || (this.changes = {}))[property] = value;
         solution[property] = value;
@@ -6071,7 +6068,8 @@ Input.prototype.Remove = Command.extend({
     args = 2 <= arguments.length ? __slice.call(arguments, 0, _i = arguments.length - 1) : (_i = 0, []), engine = arguments[_i++];
     for (_j = 0, _len = args.length; _j < _len; _j++) {
       path = args[_j];
-      engine.triggerEvent('remove', path);
+      engine.Query.prototype.unobserve(engine, path);
+      engine.Query.prototype.clean(engine, path);
     }
     return true;
   }
@@ -6856,16 +6854,16 @@ Exporter = (function() {
     var command, states, _ref, _ref1, _ref2, _ref3;
     this.engine = _at_engine;
     this.logs = ['init'];
-    this.engine["export"] = (function(_this) {
-      return function(callback) {
-        _this.logs.push('export()');
-        if (_this.result) {
-          return callback(_this.result);
+    this.engine["export"] = function(callback) {
+      this.exporter.logs.push('export()');
+      if (callback) {
+        if (this.result) {
+          return callback(this.result);
         } else {
-          return _this.engine.once('export', callback);
+          return this.once('export', callback);
         }
-      };
-    })(this);
+      }
+    };
     if (!(command = typeof location !== "undefined" && location !== null ? (_ref = location.search.match(/export=([a-z0-9,]+)/)) != null ? _ref[1] : void 0 : void 0)) {
       return;
     }
@@ -27056,7 +27054,7 @@ Stylesheet = (function(superClass) {
     if (stylesheet.scoping) {
       for (index = j = 0, len = selectors.length; j < len; index = ++j) {
         selector = selectors[index];
-        selectors[index] = '#' + stylesheet.scoping + ' ' + selector;
+        selectors[index] = '#' + stylesheet.scoping + selector;
       }
     }
     return selectors.join(', ');
