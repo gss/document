@@ -206,7 +206,8 @@ class Stylesheet extends Command.List
     selectors = @getSelectors(stylesheet, operation)
     if stylesheet.scoping
       for selector, index in selectors
-        selectors[index] = '#' + stylesheet.scoping + ' ' + selector
+        # Ignore top level qualifier
+        selectors[index] = '#' + stylesheet.scoping + selector
     return selectors.join(', ')
 
   getSelectors: (stylesheet, operation) ->

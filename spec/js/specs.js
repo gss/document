@@ -4860,6 +4860,34 @@ describe('End - to - End', function() {
         });
       });
     });
+    describe('temporary bound to intrinsics via outside commands', function() {
+      return it('should bind elements with itself', function(done) {
+        container.innerHTML = "<div id=\"a1\" class=\"a\" style=\" display: inline-block;\"><span style=\"width: 100px; display: inline-block;\">3</span></div>\n<div id=\"a2\" class=\"a\" style=\" display: inline-block;\"><span style=\"width: 100px; display: inline-block;\">3</span></div>\n<div id=\"a3\" class=\"a\" style=\" display: inline-block;\"><span style=\"width: 100px; display: inline-block;\">3</span></div>";
+        engine.once('solve', function(e) {
+          expect(engine.values).to.eql({
+            "$a1[intrinsic-width]": 100,
+            "$a2[intrinsic-width]": 100,
+            "$a3[intrinsic-width]": 100,
+            "$a1[width]": 100,
+            "$a2[width]": 100,
+            "$a3[width]": 100
+          });
+          engine.once('solve', function(e) {
+            expect(engine.updated.solution).to.eql({
+              "$a1[intrinsic-width]": null,
+              "$a1[width]": null,
+              "$a2[intrinsic-width]": null,
+              "$a2[width]": null,
+              "$a3[intrinsic-width]": null,
+              "$a3[width]": null
+            });
+            return done();
+          });
+          return engine.remove('tracking');
+        });
+        return engine.solve((GSS.Parser.parse(".a {\n  ::[width] == ::[intrinsic-width];\n} ")).commands, 'tracking');
+      });
+    });
     describe('equal simple selector on the both sides', function() {
       return it('should bind elements with itself', function(done) {
         container.innerHTML = "<style type=\"text/gss\" scoped>                            \n  [x] == 100;\n  .a {\n    ::[x] == 10;\n  } \n  .a[y] == .a[x];\n</style>\n<div id=\"a1\" class=\"a\"></div>\n<div id=\"a2\" class=\"a\"></div>\n<div id=\"a3\" class=\"a\"></div>";
@@ -4969,6 +4997,37 @@ describe('End - to - End', function() {
                   });
                 });
               });
+            });
+          });
+        });
+      });
+    });
+    describe('top-level qualifier', function() {
+      return it('should compute values', function(done) {
+        container.innerHTML = "<div class=\"container active\" id=\"c\">\n  <style type=\"text/gss\" id=\"style\" scoped>                            \n    &.active {\n      .a {\n        font-size: 10px;\n        width: == 100;\n      }\n    }\n  </style>\n  <div id=\"a1\" class=\"a\"></div>\n  <div id=\"a2\" class=\"a\"></div>\n  <div id=\"a3\" class=\"a\"></div> \n</div>\n<div id=\"a4\" class=\"a\"></div>";
+        return engine.once('solve', function() {
+          expect(window.getComputedStyle(engine.id("a1"), null).getPropertyValue("font-size")).to.equal("10px");
+          expect(window.getComputedStyle(engine.id("a4"), null).getPropertyValue("font-size")).to.not.equal("10px");
+          expect(engine.values).to.eql({
+            "$a1[width]": 100,
+            "$a2[width]": 100,
+            "$a3[width]": 100
+          });
+          engine.id('c').setAttribute('class', 'container');
+          return engine.once('solve', function() {
+            expect(window.getComputedStyle(engine.id("a1"), null).getPropertyValue("font-size")).to.not.equal("10px");
+            expect(window.getComputedStyle(engine.id("a4"), null).getPropertyValue("font-size")).to.not.equal("10px");
+            expect(engine.values).to.eql({});
+            engine.id('c').setAttribute('class', 'container active');
+            return engine.once('solve', function() {
+              expect(window.getComputedStyle(engine.id("a1"), null).getPropertyValue("font-size")).to.equal("10px");
+              expect(window.getComputedStyle(engine.id("a4"), null).getPropertyValue("font-size")).to.not.equal("10px");
+              expect(engine.values).to.eql({
+                "$a1[width]": 100,
+                "$a2[width]": 100,
+                "$a3[width]": 100
+              });
+              return done();
             });
           });
         });
@@ -6111,7 +6170,7 @@ describe('End - to - End', function() {
         return engine.once('solve', listen);
       });
       return describe('with selector', function() {
-        return it('should compute', function(done) {
+        return xit('should compute', function(done) {
           engine.then(function(solution) {
             var p12;
             expect(solution).to.eql({
@@ -7141,7 +7200,9 @@ describe('Exporter', function() {
   return it('should export regular styles', function() {
     container.innerHTML = "<div id=\"div1\"></div>\n<div id=\"div2\"></div>";
     engine.solve(['rule', ['tag', 'div'], [['==', ['get', 'width'], 100], ['==', ['get', 'z-index'], 1]]]);
-    return expect(window.engine.exporter["export"](container)).to.eql("#div1{width: 1rem; z-index: 1;}\n#div2{width: 1rem; z-index: 1;}");
+    return engine["export"](function(result) {
+      return expect(result).to.eql("#div1{width: 1rem; z-index: 1;}\n#div2{width: 1rem; z-index: 1;}");
+    });
   });
 });
 

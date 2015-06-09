@@ -1043,6 +1043,55 @@ describe 'End - to - End', ->
             engine.scope.appendChild(a3)
             engine.once 'solve', ->
               expect(engine.values).to.eql
+    describe 'top-level qualifier', ->
+      it 'should compute values', (done) ->                        
+        container.innerHTML =  """
+          <div class="container active" id="c">
+            <style type="text/gss" id="style" scoped>                            
+              &.active {
+                .a {
+                  font-size: 10px;
+                  width: == 100;
+                }
+              }
+            </style>
+            <div id="a1" class="a"></div>
+            <div id="a2" class="a"></div>
+            <div id="a3" class="a"></div> 
+          </div>
+          <div id="a4" class="a"></div>
+        """
+        engine.once 'solve', ->
+          expect(window.getComputedStyle(engine.id("a1"),null).
+            getPropertyValue("font-size")).to.equal "10px"
+          expect(window.getComputedStyle(engine.id("a4"),null).
+            getPropertyValue("font-size")).to.not.equal "10px"
+          expect(engine.values).to.eql
+            "$a1[width]": 100,
+            "$a2[width]": 100,
+            "$a3[width]": 100
+
+          engine.id('c').setAttribute('class', 'container')
+          engine.once 'solve', ->
+            expect(window.getComputedStyle(engine.id("a1"),null).
+              getPropertyValue("font-size")).to.not.equal "10px"
+            expect(window.getComputedStyle(engine.id("a4"),null).
+              getPropertyValue("font-size")).to.not.equal "10px"
+            expect(engine.values).to.eql {}
+
+            engine.id('c').setAttribute('class', 'container active')
+            engine.once 'solve', ->
+              expect(window.getComputedStyle(engine.id("a1"),null).
+                getPropertyValue("font-size")).to.equal "10px"
+              expect(window.getComputedStyle(engine.id("a4"),null).
+                getPropertyValue("font-size")).to.not.equal "10px"
+              expect(engine.values).to.eql
+                "$a1[width]": 100,
+                "$a2[width]": 100,
+                "$a3[width]": 100
+
+              done()
+
                 "$a1[width]": 100,
                 "$a2[width]": 100,
                 "$a3[width]": 100,
