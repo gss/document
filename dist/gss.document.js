@@ -7149,7 +7149,7 @@ Exporter = (function() {
   };
 
   Exporter.prototype.serialize = function(element, prefix, inherited, unit, baseFontSize, linebreaks) {
-    var breaking, char, child, childFontSize, content, counter, exported, fontSize, property, range, rect, selector, style, styles, text, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
+    var breaking, char, child, childFontSize, content, counter, exported, fontSize, property, range, rect, selector, style, styles, text, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _ref4;
     if (element == null) {
       element = this.engine.scope;
     }
@@ -7238,14 +7238,14 @@ Exporter = (function() {
               }
             }
           }
-          if (child.className.indexOf('export-linebreaks') > -1) {
-            breaking = true;
-            linebreaks = [];
-            linebreaks.counter = 0;
-          }
           if (child.tagName !== 'svg') {
+            if (((_ref3 = child.className) != null ? _ref3.indexOf('export-linebreaks') : void 0) > -1) {
+              breaking = true;
+              linebreaks = [];
+              linebreaks.counter = 0;
+            }
             inherited.fontSize = childFontSize;
-            if (child.className.indexOf('foreign') > -1 && !child.offsetParent) {
+            if (((_ref4 = child.className) != null ? _ref4.indexOf('foreign') : void 0) > -1 && !child.offsetParent) {
               exported = this.serialize(child, prefix, inherited, unit, baseFontSize);
             } else {
               exported = this.serialize(child, prefix, inherited, unit, baseFontSize, linebreaks);
