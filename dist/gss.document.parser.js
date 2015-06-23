@@ -4455,12 +4455,16 @@ Update.prototype = {
     return solution || this;
   },
   apply: function(result) {
-    var last, now, property, solution, value;
+    var last, now, obj, property, solution, value, _base, _ref, _ref1;
     solution = this.solution || (this.solution = {});
     last = this.last || (this.last = {});
     for (property in result) {
       value = result[property];
       now = solution[property];
+      if (((_ref = this.repeating) != null ? (_ref1 = _ref[property]) != null ? _ref1[value] : void 0 : void 0) >= 3) {
+        this.changes = this.repeating = void 0;
+        return;
+      }
       if (last[property] === value) {
         if (Math.abs(now - value) < 2) {
           (this.changes || (this.changes = {}))[property] = solution[property] = now;
@@ -4468,6 +4472,8 @@ Update.prototype = {
         }
       }
       if (now !== value) {
+        obj = ((_base = (this.repeating || (this.repeating = {})))[property] || (_base[property] = {}));
+        obj[value] = (obj[value] || 0) + 1;
         if (solution === this.solution && (value != null)) {
           last[property] = now;
         }
