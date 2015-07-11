@@ -7259,7 +7259,7 @@ Exporter = (function() {
           }
           if (style) {
             if (child.id) {
-              selector = prefix + '#' + child.id;
+              selector = prefix + '#' + child.id + '#' + child.id;
             } else {
               selector = prefix + getSelector(child);
             }
