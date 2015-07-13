@@ -7294,7 +7294,7 @@ Exporter = (function() {
           range.setStart(child, counter);
           range.setEnd(child, counter + 1);
           rect = range.getBoundingClientRect();
-          if (rect.width && rect.top && rect.top !== linebreaks.position) {
+          if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 3 * 2) {
             if (linebreaks.position) {
               linebreaks.push(linebreaks.counter);
             }
