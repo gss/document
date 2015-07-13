@@ -7294,10 +7294,12 @@ Exporter = (function() {
           range.setStart(child, counter);
           range.setEnd(child, counter + 1);
           rect = range.getBoundingClientRect();
-          if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 3 * 2) {
+          if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 5) {
             if (linebreaks.position) {
               linebreaks.push(linebreaks.counter);
             }
+          }
+          if (rect.top) {
             linebreaks.position = rect.top;
           }
           counter++;
