@@ -7154,8 +7154,25 @@ Exporter = (function() {
     return i;
   };
 
+  Exporter.prototype.prepareLinebreaks = function(linebreaks, id) {
+    var object, property, value;
+    if (id) {
+      object = {};
+      for (property in linebreaks) {
+        value = linebreaks[property];
+        if (property.substring(0, id.length) === id) {
+          object['$' + property.substring(id.length)] = value;
+        } else {
+          object[property] = value;
+        }
+      }
+      linebreaks = object;
+    }
+    return JSON.stringify(linebreaks).replace(/"/g, '\\"');
+  };
+
   Exporter.prototype.serialize = function(element, prefix, inherited, unit, baseFontSize, linebreaks) {
-    var breaking, char, child, childFontSize, content, counter, exported, fontSize, property, range, rect, selector, style, styles, text, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _ref4;
+    var breaking, char, child, childFontSize, content, counter, current, exported, fontSize, position, property, range, rect, selector, style, styles, text, value, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
     if (element == null) {
       element = this.engine.scope;
     }
@@ -7247,14 +7264,32 @@ Exporter = (function() {
           if (child.tagName !== 'svg') {
             if (((_ref3 = child.className) != null ? _ref3.indexOf('export-linebreaks') : void 0) > -1) {
               breaking = true;
-              linebreaks = [];
-              linebreaks.counter = 0;
+              linebreaks = {
+                current: [],
+                result: {},
+                counter: 0,
+                position: 0
+              };
             }
             inherited.fontSize = childFontSize;
-            if (((_ref4 = child.className) != null ? _ref4.indexOf('foreign') : void 0) > -1 && !child.offsetParent) {
+            if (!child.offsetParent || !linebreaks) {
               exported = this.serialize(child, prefix, inherited, unit, baseFontSize);
             } else {
+              if (child.id) {
+                current = linebreaks.current, counter = linebreaks.counter, position = linebreaks.position;
+                linebreaks.counter = 0;
+                linebreaks.position = 0;
+                linebreaks.current = linebreaks.result[child.id] = [];
+              }
               exported = this.serialize(child, prefix, inherited, unit, baseFontSize, linebreaks);
+              if (child.id) {
+                if (!linebreaks.current.length) {
+                  delete linebreaks.result[child.id];
+                }
+                linebreaks.current = current;
+                linebreaks.counter = counter;
+                linebreaks.position = position;
+              }
             }
           }
           if (style) {
@@ -7269,7 +7304,7 @@ Exporter = (function() {
             text += selector + '{' + style + '}\n';
           }
           if (breaking) {
-            text += selector + ':before{content: "' + linebreaks.join(',') + '"; display: none;}\n';
+            text += selector + ':before{content: "' + this.prepareLinebreaks(linebreaks.result, child.id) + '"; display: none;}\n';
             linebreaks = breaking = void 0;
           }
           text += exported || '';
@@ -7285,7 +7320,7 @@ Exporter = (function() {
           rect = range.getBoundingClientRect();
           if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 5) {
             if (linebreaks.position) {
-              linebreaks.push(linebreaks.counter);
+              linebreaks.current.push(linebreaks.counter);
             }
           }
           if (rect.top) {
