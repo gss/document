@@ -5433,8 +5433,14 @@ Range.Modifier = (function(_super) {
     var end, start, value;
     if ((value = this[2]) != null) {
       if ((start = this[0]) === false || value > 0) {
-        if ((end = this[1]) === false || value < 1) {
-          return value * ((end - start) || 1) + start;
+        if ((end = this[1]) === false) {
+          if (value !== 1 || start === 0) {
+            return value * ((end - start) || 1) + start;
+          }
+        } else {
+          if (value < 1) {
+            return value * ((end - start) || 1) + start;
+          }
         }
       }
     }
