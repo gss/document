@@ -4798,7 +4798,12 @@ Condition = (function(_super) {
       }
       path = this.delimit(continuation, this.DESCEND) + this.key;
       if ((result != null ? result.push : void 0) && result.valueOf !== Array.prototype.valueOf) {
-        result = result.valueOf() || false;
+        result = result.valueOf();
+        if (result === 0) {
+          result = true;
+        } else {
+          result || (result = false);
+        }
       }
       value = engine.queries[path];
       if (result && !value) {
