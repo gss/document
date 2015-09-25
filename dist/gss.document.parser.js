@@ -17816,7 +17816,7 @@ Selector.Reference = Selector.Element.extend({
   },
   kind: 'Element',
   prefix: '',
-  after: function() {
+  after: function(args, result) {
     return result;
   },
   retrieve: function(engine, operation, continuation, scope, ascender, ascending) {

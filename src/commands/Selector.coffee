@@ -488,7 +488,7 @@ Selector.Reference = Selector.Element.extend
   prefix: ''
 
   # Does not create DOM observer
-  after: ->
+  after: (args, result) ->
     return result
 
   # Bypasses cache and pairing
