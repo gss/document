@@ -682,14 +682,14 @@ Selector.define
 
   # Return abstract reference to window
   '::document':
-    Reference: ->
-      return document
+    Reference: (parameter, engine) ->
+      return (engine.scope.ownerDocument || engine.scope)
 
 
   # Return abstract reference to window
   '::window':
-    Reference: ->
-      return window
+    Reference: (parameter, engine) ->
+      return (engine.scope.ownerDocument || engine.scope).defaultView
   
   'virtual':
     localizers: ['Selector', 'Iterator']

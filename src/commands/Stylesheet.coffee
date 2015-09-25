@@ -117,6 +117,8 @@ class Stylesheet extends Command.List
       sheet = engine.stylesheets[path] = document.createElement('STYLE')
       if anchor = engine.Query::getByPath(engine, continuation)
         if anchor.scoped?
+          if anchor.className.indexOf('inlinable') > -1
+            sheet.className += ' inlinable'
           sheet.scoping = null
           if scope = engine.getScopeElement(anchor.parentNode)
             if scope.nodeType == 1
@@ -438,7 +440,7 @@ class Stylesheet.Import extends Query
             if engine.updating.unblock(engine) && async
               engine.engine.commit()
 
-          unless @read src, method, command.resolver
+          unless @read src, method, command.resolver, engine.scope
             @resolve src, method, command.resolver
           async = true
 
@@ -446,8 +448,8 @@ class Stylesheet.Import extends Query
 
       return stylesheet
 
-  read: (url, method, callback) ->
-    if script = document.querySelectorAll('script[type*=gss][href*="' + url + '"]')[0]
+  read: (url, method, callback, scope) ->
+    if script = (scope.ownerDocument || scope).querySelectorAll('script[type*=gss][href*="' + url + '"]')[0]
       callback(script.textContent.trim())
       return true
     return

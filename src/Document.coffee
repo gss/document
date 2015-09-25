@@ -150,13 +150,15 @@ class Document extends Engine
     @scope = @getScopeElement(scope)
     Engine[@identify(@scope)] = @
 
+    doc = scope.ownerDocument || scope
+    win = doc.defaultView
     if @scope.nodeType == 9
       state = @scope.readyState
       if state != 'complete' && state != 'loaded' && 
-          (state != 'interactive' || document.documentMode)
-        document.addEventListener('DOMContentLoaded', @engine, false)
-        document.addEventListener('readystatechange', @engine, false)
-        window  .addEventListener('load',             @engine, false)
+          (state != 'interactive' || @scope.documentMode)
+        doc.addEventListener('DOMContentLoaded', @engine, false)
+        doc.addEventListener('readystatechange', @engine, false)
+        win.addEventListener('load',             @engine, false)
       else
         setTimeout =>
           unless @engine.running
@@ -166,7 +168,7 @@ class Document extends Engine
     @input.Selector.observe(@engine)
 
     @scope.addEventListener 'scroll', @engine, true
-    window?.addEventListener 'resize', @engine, true
+    win?.addEventListener 'resize', @engine, true
 
   prefixes: ['moz', 'webkit', 'ms']
     
@@ -290,19 +292,19 @@ class Document extends Engine
         
     # Fire as early as possible
     DOMContentLoaded: ->
-      document.removeEventListener 'DOMContentLoaded', @
+      (@scope.ownerDocument || @scope).removeEventListener 'DOMContentLoaded', @
       @compile()
       @solve 'Ready', ->
 
     # Wait for web fonts
     readystatechange: ->
-      if @running && document.readyState == 'complete'
+      if @running && (@scope.ownerDocument || @scope).readyState == 'complete'
         @solve 'Statechange', ->
 
     # Remeasure when images are loaded
     load: ->
-      window.removeEventListener 'load', @
-      document.removeEventListener 'DOMContentLoaded', @
+      (@scope.ownerDocument || @scope).removeEventListener 'DOMContentLoaded', @
+      (@scope.ownerDocument || @scope).defaultView.removeEventListener 'load', @
       @solve 'Loaded', ->
 
     # Unsubscribe events and observers
@@ -317,7 +319,7 @@ class Document extends Engine
       #if @scope != document
       #  document.removeEventListener 'scroll', @
       @scope.removeEventListener 'scroll', @
-      window.removeEventListener 'resize', @
+      (@scope.ownerDocument || @scope).defaultView.removeEventListener 'resize', @
 
       @input.Selector.disconnect(@)
 
@@ -328,7 +330,7 @@ class Document extends Engine
       id = @identify(element)
       old = computed[id]
       if force || !old?
-        return computed[id] = window.getComputedStyle(element)
+        return computed[id] = (@scope.ownerDocument || @scope).defaultView.getComputedStyle(element)
     return old
 
   # Set or unset absolute position 
@@ -409,8 +411,8 @@ class Document extends Engine
         measure = true
 
     # Recurse to children
-    if parent == document
-      parent = document.body
+    if parent.nodeType == 9
+      parent = parent.body
 
     return unless parent
     
@@ -424,7 +426,7 @@ class Document extends Engine
           x += parent.offsetLeft + parent.clientLeft
           y += parent.offsetTop + parent.clientTop
           measure = false
-        if child.style.position == 'relative'
+        if child.style.position == 'relative' || child.classList.contains('relative')
           @offsetLeft += x
           @offsetTop  += y
           @each(child, callback, 0, 0, a,r,g,s)
@@ -528,7 +530,7 @@ class Document extends Engine
         continue
 
       if id.indexOf('"') == -1
-        if @identity[id] || document.getElementById(id.substring(1))
+        if @identity[id] || (@scope.ownerDocument || @scope).getElementById(id.substring(1))
           (((result ||= {})[key] ||= {})[id] ||= {})[property] = value
 
     # Combine matricies
@@ -593,7 +595,7 @@ class Document extends Engine
     # Apply styles that don't affect layout
     if restyles
       for id, properties of restyles
-        element = @identity[id] || document.getElementById(id.substring(1))
+        element = @identity[id] || (@scope.ownerDocument || @scope).getElementById(id.substring(1))
         if element.nodeType == 1
           for prop, value of properties
             if @precomputing
@@ -610,7 +612,7 @@ class Document extends Engine
 
     if styles
       for id, properties of styles
-        element = @identity[id] || document.getElementById(id.substring(1))
+        element = @identity[id] || (@scope.ownerDocument || @scope).getElementById(id.substring(1))
         if element.nodeType == 1
           for prop, value of properties
             @setStyle(element, prop, value)
@@ -621,7 +623,7 @@ class Document extends Engine
       @each(@scope, 'placehold', null, null, changes.positions)
 
       for id, styles of positions
-        element = @identity[id] || document.getElementById(id.substring(1))
+        element = @identity[id] || (@scope.ownerDocument || @scope).getElementById(id.substring(1))
         if element.nodeType == 1
           for prop, value of styles
             @setStyle(element, prop, value)
