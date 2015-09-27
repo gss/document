@@ -426,7 +426,7 @@ class Document extends Engine
           x += parent.offsetLeft + parent.clientLeft
           y += parent.offsetTop + parent.clientTop
           measure = false
-        if child.style.position == 'relative' || child.classList.contains('relative')
+        if child.style.position == 'relative'
           @offsetLeft += x
           @offsetTop  += y
           @each(child, callback, 0, 0, a,r,g,s)
