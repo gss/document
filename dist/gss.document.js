@@ -16476,6 +16476,7 @@ Exporter = (function() {
   };
 
   Exporter.prototype.stop = function() {
+    var callback;
     if (!this.appeared) {
       this.appeared = true;
       this.animate();
@@ -16491,11 +16492,14 @@ Exporter = (function() {
       this.animate();
       document.documentElement.classList.remove('animations');
       this.phase = this.appeared = void 0;
-      return this.engine.once('finish', (function(_this) {
+      callback = (function(_this) {
         return function() {
+          clearTimeout(_this.timeout);
           return _this.next();
         };
-      })(this));
+      })(this);
+      this.timeout = setTimeout(callback, 100);
+      return this.engine.once('finish', callback);
     }
   };
 
