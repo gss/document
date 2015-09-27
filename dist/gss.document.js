@@ -16676,7 +16676,7 @@ Exporter = (function() {
   };
 
   Exporter.prototype.serialize = function(element, prefix, inherited, unit, baseFontSize, linebreaks) {
-    var breaking, char, child, childFontSize, content, counter, current, exported, fontSize, j, k, l, len, len1, len2, position, property, range, rect, ref, ref1, ref2, ref3, selector, style, styles, text, value;
+    var breaking, char, child, childFontSize, content, counter, current, exported, fontSize, j, k, l, len, len1, len2, position, property, range, rect, ref, ref1, ref2, ref3, ref4, selector, style, styles, text, value;
     if (element == null) {
       element = this.engine.scope;
     }
@@ -16712,7 +16712,7 @@ Exporter = (function() {
       child = ref1[k];
       if (child.nodeType === 1) {
         if (child.tagName === 'STYLE') {
-          if (child.assignments && !child.classList.contains('inlinable')) {
+          if (child.assignments && ((ref2 = child.className) != null ? ref2.indexOf('inlinable') : void 0) > -1) {
             if (child.hasOwnProperty('scoping') && !element.id) {
               selector = getSelector(element) + ' ';
             } else {
@@ -16749,9 +16749,9 @@ Exporter = (function() {
               }
             }
             if (this.deinherit) {
-              ref2 = this.deinherit;
-              for (l = 0, len2 = ref2.length; l < len2; l++) {
-                property = ref2[l];
+              ref3 = this.deinherit;
+              for (l = 0, len2 = ref3.length; l < len2; l++) {
+                property = ref3[l];
                 if (child.style[property] === '') {
                   if (inherited[property] !== styles[property]) {
                     value = styles[property];
@@ -16766,7 +16766,7 @@ Exporter = (function() {
             }
           }
           if (child.tagName !== 'svg') {
-            if (((ref3 = child.className) != null ? ref3.indexOf('export-linebreaks') : void 0) > -1) {
+            if (((ref4 = child.className) != null ? ref4.indexOf('export-linebreaks') : void 0) > -1) {
               breaking = true;
               linebreaks = {
                 current: [],
