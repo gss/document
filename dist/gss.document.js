@@ -16716,16 +16716,25 @@ Exporter = (function() {
       child = ref1[k];
       if (child.nodeType === 1) {
         if (child.tagName === 'STYLE') {
-          if (child.assignments && ((ref2 = child.className) != null ? ref2.indexOf('inlinable') : void 0) > -1) {
-            if (child.hasOwnProperty('scoping') && !element.id) {
-              selector = getSelector(element) + ' ';
-            } else {
-              selector = '';
+          if (((ref2 = child.className) != null ? ref2.indexOf('inlinable') : void 0) > -1) {
+            if (child.assignments) {
+              if (child.hasOwnProperty('scoping') && !element.id) {
+                selector = getSelector(element) + ' ';
+              } else {
+                selector = '';
+              }
+              text += Array.prototype.map.call(child.sheet.cssRules, function(rule) {
+                text = rule.cssText;
+                return selector + rule.cssText + '\n';
+              }).join('\n');
+            } else if (child.sheet) {
+              text += Array.prototype.map.call(child.sheet.cssRules, function(rule) {
+                if (element.id) {
+                  selector = '#' + element.id;
+                }
+                return (selector || '') + rule.cssText + '\n';
+              }).join('\n');
             }
-            text += Array.prototype.map.call(child.sheet.cssRules, function(rule) {
-              text = rule.cssText;
-              return selector + rule.cssText + '\n';
-            }).join('\n');
           }
         } else if (child.tagName !== 'SCRIPT') {
           if (child.offsetParent || child.tagName === 'svg') {
