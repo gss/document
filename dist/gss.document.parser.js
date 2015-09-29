@@ -32627,7 +32627,7 @@ Exporter = (function() {
   };
 
   Exporter.prototype.serialize = function(element, prefix, inherited, unit, baseFontSize, linebreaks) {
-    var breaking, char, child, childFontSize, content, counter, current, exported, fontSize, inherits, j, k, l, len, len1, len2, position, property, props, range, rect, ref, ref1, ref2, ref3, ref4, ref5, selector, style, styles, text, transition, value;
+    var breaking, char, child, childFontSize, content, counter, current, exported, fontSize, inherits, j, k, l, len, len1, len2, position, property, range, rect, ref, ref1, ref2, ref3, ref4, ref5, selector, style, styles, text, value;
     if (element == null) {
       element = this.engine.scope;
     }
@@ -32714,14 +32714,9 @@ Exporter = (function() {
               }
             }
             if (this.deinherit) {
-              transition = styles['transition-property'] || styles['-webkit-transition-property'] || styles['-moz-transition-property'] || styles['-ms-transition-property'];
-              props = transition.split(/\s*,\s*/);
               ref4 = this.deinherit;
               for (l = 0, len2 = ref4.length; l < len2; l++) {
                 property = ref4[l];
-                if (props.indexOf(property) > -1) {
-                  continue;
-                }
                 if (child.style[property] === '') {
                   if (inherits[property] !== styles[property]) {
                     value = styles[property];
