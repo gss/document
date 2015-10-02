@@ -16195,9 +16195,6 @@ Document = (function(superClass) {
     }
     this.input.Selector.observe(this.engine);
     this.scope.addEventListener('scroll', this.engine, true);
-    if (win != null) {
-      win.addEventListener('resize', this.engine, true);
-    }
   }
 
   Document.prototype.prefixes = ['moz', 'webkit', 'ms'];
@@ -16231,6 +16228,9 @@ Document = (function(superClass) {
     },
     compile: function() {
       var camelized, i, len, prefix, prefixed, prop, property, ref, ref1, scope, value;
+      if (typeof win !== "undefined" && win !== null) {
+        win.addEventListener('resize', this.engine, true);
+      }
       scope = this.scope.documentElement || this.scope;
       ref = this.output.properties;
       for (property in ref) {
@@ -32323,7 +32323,7 @@ Exporter = (function() {
     if (states == null) {
       states = 'animations';
     }
-    this.logs.push('schedule');
+    this.logs.push(document.readyState);
     if ((this.sizes = query.split(',')).length) {
       this.states = states.split(',');
       this.sizes = this.sizes.map(function(size) {
