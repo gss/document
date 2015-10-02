@@ -32918,8 +32918,6 @@ Exporter = (function() {
         return function() {
           html.setAttribute('class', _this.previousClass + ' ' + state);
           _this.logs.push(state);
-          _this.logs.push(_this.previousClass + ' ' + state);
-          _this.logs.push(String(html.setAttribute));
           _this.record();
           return _this.engine.once('finish', function() {
             var change, diff, end, handler, j, len, match, overlay, prefix, property, rest, result, rule, selector, start, text, value, z;
