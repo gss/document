@@ -16398,7 +16398,7 @@ Exporter = (function() {
       this.logs.push('complete');
       return this.nextSize();
     } else {
-      this.logs.push('wait');
+      this.logs.push('waiting');
       return document.addEventListener('readystatechange', (function(_this) {
         return function() {
           _this.logs.push('loaded');
@@ -16839,14 +16839,15 @@ Exporter = (function() {
           range = document.createRange();
           range.setStart(child, counter);
           range.setEnd(child, counter + 1);
-          rect = range.getBoundingClientRect();
-          if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 5) {
-            if (linebreaks.position) {
-              linebreaks.current.push(linebreaks.counter);
+          if (rect = range.getBoundingClientRect()) {
+            if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 5) {
+              if (linebreaks.position) {
+                linebreaks.current.push(linebreaks.counter);
+              }
             }
-          }
-          if (rect.top) {
-            linebreaks.position = rect.top;
+            if (rect.top) {
+              linebreaks.position = rect.top;
+            }
           }
           counter++;
           linebreaks.counter++;
@@ -16889,6 +16890,7 @@ Exporter = (function() {
           if (_this.states.length) {
             _this.uncomputed = _this.states.slice();
           }
+          _this.logs.push('serialized');
           return _this.next();
         };
       })(this);
