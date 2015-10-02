@@ -32423,7 +32423,6 @@ Exporter = (function() {
   };
 
   Exporter.prototype.stop = function() {
-    var callback;
     if (!this.appeared) {
       this.appeared = true;
       this.animate();
@@ -32437,16 +32436,9 @@ Exporter = (function() {
       })(this), 10);
     } else {
       this.animate();
-      document.documentElement.classList.remove('animations');
+      document.documentElement.setAttribute('class', this.previousClass);
       this.phase = this.appeared = void 0;
-      callback = (function(_this) {
-        return function() {
-          clearTimeout(_this.timeout);
-          return _this.next();
-        };
-      })(this);
-      this.timeout = setTimeout(callback, 100);
-      return this.engine.once('finish', callback);
+      return this.engine.once('finish', this.next.bind(this));
     }
   };
 
@@ -32816,26 +32808,31 @@ Exporter = (function() {
       width = size[0], height = size[1];
       callback = (function(_this) {
         return function() {
-          var text;
+          var e, text;
           _this.logs.push('success');
           text = '';
-          if (_this.previous) {
-            if (_this.sizes.length) {
-              text += '\n@media (max-width: ' + width + 'px) and (min-width: ' + (_this.previous + 1) + 'px) {\n';
+          try {
+            if (_this.previous) {
+              if (_this.sizes.length) {
+                text += '\n@media (max-width: ' + width + 'px) and (min-width: ' + (_this.previous + 1) + 'px) {\n';
+              } else {
+                text += '\n@media (min-width: ' + (_this.previous + 1) + 'px) {\n';
+              }
+            } else if (_this.sizes.length) {
+              text += '\n@media (max-width: ' + width + 'px) {\n';
             } else {
-              text += '\n@media (min-width: ' + (_this.previous + 1) + 'px) {\n';
+              _this.plain = true;
+              _this.base = _this.serialize();
+              text += _this.base;
+              _this.previous = width;
+              _this.text += text;
             }
-          } else if (_this.sizes.length) {
-            text += '\n@media (max-width: ' + width + 'px) {\n';
-          } else {
-            _this.plain = true;
-          }
-          _this.base = _this.serialize();
-          text += _this.base;
-          _this.previous = width;
-          _this.text += text;
-          if (_this.states.length) {
-            _this.uncomputed = _this.states.slice();
+            if (_this.states.length) {
+              _this.uncomputed = _this.states.slice();
+            }
+          } catch (_error) {
+            e = _error;
+            _this.logs.push(String(e));
           }
           _this.logs.push('serialized');
           return _this.next();
@@ -32897,7 +32894,7 @@ Exporter = (function() {
   };
 
   Exporter.prototype.nextState = function() {
-    var ref, script, state;
+    var html, ref, script, state;
     if (!this.uncomputed) {
       return;
     }
@@ -32915,75 +32912,82 @@ Exporter = (function() {
     }
     if (state = this.uncomputed.pop()) {
       this.logs.push('nextState');
-      document.documentElement.classList.add(state);
-      this.record();
-      this.engine.once('finish', (function(_this) {
+      html = document.documentElement;
+      this.previousClass = html.getAttribute('class');
+      setTimeout((function(_this) {
         return function() {
-          var change, diff, end, handler, j, len, match, overlay, prefix, property, rest, result, rule, selector, start, text, value, z;
-          _this.logs.push('state:' + state);
-          if (handler = _this.handlers[state]) {
-            return handler.call(_this);
-          }
-          result = _this.serialize();
-          prefix = 'html.' + state + ' ';
-          diff = _this.differ.diff_main(_this.base, result);
-          _this.differ.diff_cleanupSemantic(diff);
-          selector = void 0;
-          property = void 0;
-          value = void 0;
-          rule = '';
-          overlay = '';
-          z = 0;
-          for (j = 0, len = diff.length; j < len; j++) {
-            change = diff[j];
-            text = change[1];
-            if (change[0] === 0) {
-              if (rule) {
-                rule = _this.endRule(rule, text);
-                if (text.indexOf('}') > -1) {
-                  overlay += rule;
+          html.setAttribute('class', _this.previousClass + ' ' + state);
+          _this.logs.push(state);
+          _this.logs.push(_this.previousClass + ' ' + state);
+          _this.logs.push(String(html.setAttribute));
+          _this.record();
+          return _this.engine.once('finish', function() {
+            var change, diff, end, handler, j, len, match, overlay, prefix, property, rest, result, rule, selector, start, text, value, z;
+            _this.logs.push('state:' + state);
+            if (handler = _this.handlers[state]) {
+              return handler.call(_this);
+            }
+            result = _this.serialize();
+            prefix = 'html.' + state + ' ';
+            diff = _this.differ.diff_main(_this.base, result);
+            _this.differ.diff_cleanupSemantic(diff);
+            selector = void 0;
+            property = void 0;
+            value = void 0;
+            rule = '';
+            overlay = '';
+            z = 0;
+            for (j = 0, len = diff.length; j < len; j++) {
+              change = diff[j];
+              text = change[1];
+              if (change[0] === 0) {
+                if (rule) {
+                  rule = _this.endRule(rule, text);
+                  if (text.indexOf('}') > -1) {
+                    overlay += rule;
+                    rule = '';
+                    z++;
+                  }
+                }
+                if ((end = text.lastIndexOf('{')) > -1) {
+                  start = text.lastIndexOf('}');
+                  selector = text.substring(start + 1, end).trim();
+                  rest = text.substring(end + 1);
+                  if (match = rest.match(/(?:;|^)\s*([^;{]+):\s*([^;}]+)$/)) {
+                    property = match[1];
+                    value = match[2];
+                  }
+                  start = end = void 0;
+                }
+              } else if (change[0] === 1) {
+                if (selector) {
+                  rule = prefix + selector + '{';
+                  selector = void 0;
+                }
+                if (property) {
+                  rule += property + ':';
+                  property = void 0;
+                }
+                if (value != null) {
+                  rule += value;
+                  value = void 0;
+                }
+                rule += change[1].trim();
+                if (rule.charAt(rule.length - 1) === '}') {
                   rule = '';
-                  z++;
                 }
-              }
-              if ((end = text.lastIndexOf('{')) > -1) {
-                start = text.lastIndexOf('}');
-                selector = text.substring(start + 1, end).trim();
-                rest = text.substring(end + 1);
-                if (match = rest.match(/(?:;|^)\s*([^;{]+):\s*([^;}]+)$/)) {
-                  property = match[1];
-                  value = match[2];
-                }
-                start = end = void 0;
-              }
-            } else if (change[0] === 1) {
-              if (selector) {
-                rule = prefix + selector + '{';
-                selector = void 0;
-              }
-              if (property) {
-                rule += property + ':';
-                property = void 0;
-              }
-              if (value != null) {
-                rule += value;
-                value = void 0;
-              }
-              rule += change[1].trim();
-              if (rule.charAt(rule.length - 1) === '}') {
-                rule = '';
               }
             }
-          }
-          _this.text += overlay;
-          return setTimeout(function() {
-            document.documentElement.classList.remove(state);
-            return _this.engine.once('finish', function() {
-              return _this.next();
-            });
-          }, 100);
+            _this.text += overlay;
+            return setTimeout(function() {
+              html.setAttribute('class', _this.previousClass);
+              return _this.engine.once('finish', function() {
+                return _this.next();
+              });
+            }, 100);
+          });
         };
-      })(this));
+      })(this), 10);
       return true;
     }
   };
