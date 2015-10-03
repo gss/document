@@ -16370,7 +16370,7 @@ Exporter = (function() {
   }
 
   Exporter.prototype.schedule = function(query, states) {
-    var last;
+    var callback, last;
     if (states == null) {
       states = 'animations';
     }
@@ -16391,19 +16391,21 @@ Exporter = (function() {
         };
       })(this));
     }
-    if (document.readyState === 'complete' || (this.engine.updated && document.documentElement.classList.contains('wf-active'))) {
+    if (document.readyState === 'complete' || document.documentElement.classList.contains('wf-active')) {
       this.logs.push('complete');
       return this.nextSize();
     } else {
       this.logs.push('waiting');
-      return document.addEventListener('readystatechange', (function(_this) {
+      callback = (function(_this) {
         return function() {
           _this.logs.push('loaded');
-          if (document.readyState === 'complete') {
-            return _this.nextSize();
-          }
+          _this.engine.removeEventListener('solved', callback);
+          _this.engine.removeEventListener('load', callback);
+          return _this.nextSize();
         };
-      })(this));
+      })(this);
+      this.engine.once('load', callback);
+      return this.engine.once('solved', callback);
     }
   };
 
