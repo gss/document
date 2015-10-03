@@ -198,7 +198,7 @@ class Document extends Engine
       @data.remove(path)
 
     compile: ->
-      win?.addEventListener 'resize', @engine, true
+      (@scope.ownerDocument || @scope).defaultView.addEventListener 'resize', @, true
       scope = @scope.documentElement || @scope
       for property, value of @output.properties
         camelized = @camelize(property)

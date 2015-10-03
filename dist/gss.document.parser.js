@@ -16228,9 +16228,7 @@ Document = (function(superClass) {
     },
     compile: function() {
       var camelized, i, len, prefix, prefixed, prop, property, ref, ref1, scope, value;
-      if (typeof win !== "undefined" && win !== null) {
-        win.addEventListener('resize', this.engine, true);
-      }
+      (this.scope.ownerDocument || this.scope).defaultView.addEventListener('resize', this, true);
       scope = this.scope.documentElement || this.scope;
       ref = this.output.properties;
       for (property in ref) {
