@@ -16374,7 +16374,6 @@ Exporter = (function() {
     if (states == null) {
       states = 'animations';
     }
-    this.logs.push(document.readyState);
     if ((this.sizes = query.split(',')).length) {
       this.states = states.split(',');
       this.sizes = this.sizes.map(function(size) {
@@ -16392,7 +16391,7 @@ Exporter = (function() {
         };
       })(this));
     }
-    if (document.readyState === 'complete') {
+    if (document.readyState === 'complete' || (this.engine.updated && document.documentElement.classList.contains('wf-active'))) {
       this.logs.push('complete');
       return this.nextSize();
     } else {
@@ -16859,36 +16858,31 @@ Exporter = (function() {
       width = size[0], height = size[1];
       callback = (function(_this) {
         return function() {
-          var e, text;
+          var text;
           _this.logs.push('success');
           text = '';
-          try {
-            if (_this.previous) {
-              if (_this.sizes.length) {
-                text += '\n@media (max-width: ' + width + 'px) and (min-width: ' + (_this.previous + 1) + 'px) {\n';
-              } else {
-                text += '\n@media (min-width: ' + (_this.previous + 1) + 'px) {\n';
-              }
-            } else if (_this.sizes.length) {
-              text += '\n@media (max-width: ' + width + 'px) {\n';
+          if (_this.previous) {
+            if (_this.sizes.length) {
+              text += '\n@media (max-width: ' + width + 'px) and (min-width: ' + (_this.previous + 1) + 'px) {\n';
             } else {
-              _this.plain = true;
-              _this.base = _this.serialize();
-              text += _this.base;
-              _this.previous = width;
-              _this.text += text;
+              text += '\n@media (min-width: ' + (_this.previous + 1) + 'px) {\n';
             }
-            if (_this.states.length) {
-              _this.uncomputed = _this.states.slice();
-            }
-          } catch (_error) {
-            e = _error;
-            _this.logs.push(String(e));
+          } else if (_this.sizes.length) {
+            text += '\n@media (max-width: ' + width + 'px) {\n';
+          } else {
+            _this.plain = true;
           }
-          _this.logs.push('serialized');
-          return _this.next();
+          _this.base = _this.serialize();
+          text += _this.base;
+          _this.previous = width;
+          return _this.text += text;
         };
       })(this);
+      if (this.states.length) {
+        this.uncomputed = this.states.slice();
+      }
+      this.logs.push('serialized');
+      this.next();
       if (this.text || !this.engine.updating) {
         this.engine.once('finish', callback);
         this.resize(width, height);
