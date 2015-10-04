@@ -16372,7 +16372,7 @@ Exporter = (function() {
   }
 
   Exporter.prototype.schedule = function(query, states) {
-    var callback, last;
+    var base, last, onInteractive, onSolve, overriders;
     if (states == null) {
       states = 'animations';
     }
@@ -16384,32 +16384,43 @@ Exporter = (function() {
         });
       });
       last = this.sizes[this.sizes.length - 1];
-      this.engine.once('compile', (function(_this) {
+      overriders = (function(_this) {
         return function() {
           _this.override('::window[width]', last[0]);
           _this.override('::window[height]', last[1]);
           _this.override('::document[height]', -10000);
           return _this.override('::document[scroll-top]', -10000);
         };
-      })(this));
+      })(this);
+      if (this.engine.running) {
+        overriders();
+      } else {
+        ((base = this.engine.listeners)['compile'] || (base['compile'] = [])).unshift(overriders);
+      }
     }
     if (document.readyState === 'complete' || (document.documentElement.classList.contains('wf-active') && !this.engine.updating && this.engine.running)) {
       this.logs.push('complete');
       return this.nextSize();
     } else {
       this.logs.push('waiting');
-      callback = (function(_this) {
+      onInteractive = (function(_this) {
         return function() {
-          _this.engine.removeEventListener('interactive', callback);
-          _this.logs.push('loaded');
+          _this.logs.push('ready');
           if (!_this.engine.updating) {
-            _this.engine.removeEventListener('solved', callback);
+            _this.engine.removeEventListener('solve', onSolve);
             return _this.nextSize();
           }
         };
       })(this);
-      this.engine.once('interactive', callback);
-      return this.engine.once('solved', callback);
+      onSolve = (function(_this) {
+        return function() {
+          _this.engine.removeEventListener('interactive', onInteractive);
+          _this.logs.push('solved');
+          return _this.nextSize();
+        };
+      })(this);
+      this.engine.once('interactive', onInteractive);
+      return this.engine.once('solve', onSolve);
     }
   };
 
