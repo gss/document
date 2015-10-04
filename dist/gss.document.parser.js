@@ -32683,6 +32683,9 @@ Exporter = (function() {
             childFontSize = parseFloat(styles['font-size']);
             if (style = child.getAttribute('style')) {
               style = style.replace(/\d+px|\.\d+|\d+\.\d+/g, function(m) {
+                if (m === '1px') {
+                  m = '1.75px';
+                }
                 if (unit === 'em') {
                   return parseFloat((parseFloat(m) / childFontSize).toFixed(4)) + unit;
                 } else {
