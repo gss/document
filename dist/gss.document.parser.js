@@ -32319,11 +32319,10 @@ Exporter = (function() {
   }
 
   Exporter.prototype.schedule = function(query, states) {
-    var last;
+    var callback, last;
     if (states == null) {
       states = 'animations';
     }
-    this.logs.push('schedule');
     if ((this.sizes = query.split(',')).length) {
       this.states = states.split(',');
       this.sizes = this.sizes.map(function(size) {
@@ -32341,19 +32340,21 @@ Exporter = (function() {
         };
       })(this));
     }
-    if (document.readyState === 'complete') {
+    if (document.readyState === 'complete' || document.documentElement.classList.contains('wf-active')) {
       this.logs.push('complete');
       return this.nextSize();
     } else {
-      this.logs.push('wait');
-      return document.addEventListener('readystatechange', (function(_this) {
+      this.logs.push('waiting');
+      callback = (function(_this) {
         return function() {
           _this.logs.push('loaded');
-          if (document.readyState === 'complete') {
-            return _this.nextSize();
-          }
+          _this.engine.removeEventListener('solved', callback);
+          _this.engine.removeEventListener('load', callback);
+          return _this.nextSize();
         };
-      })(this));
+      })(this);
+      this.engine.once('load', callback);
+      return this.engine.once('solved', callback);
     }
   };
 
@@ -32423,7 +32424,6 @@ Exporter = (function() {
   };
 
   Exporter.prototype.stop = function() {
-    var callback;
     if (!this.appeared) {
       this.appeared = true;
       this.animate();
@@ -32437,16 +32437,9 @@ Exporter = (function() {
       })(this), 10);
     } else {
       this.animate();
-      document.documentElement.classList.remove('animations');
+      document.documentElement.setAttribute('class', this.previousClass);
       this.phase = this.appeared = void 0;
-      callback = (function(_this) {
-        return function() {
-          clearTimeout(_this.timeout);
-          return _this.next();
-        };
-      })(this);
-      this.timeout = setTimeout(callback, 100);
-      return this.engine.once('finish', callback);
+      return this.engine.once('finish', this.next.bind(this));
     }
   };
 
@@ -32691,10 +32684,8 @@ Exporter = (function() {
             styles = window.getComputedStyle(child, null);
             childFontSize = parseFloat(styles['font-size']);
             if (style = child.getAttribute('style')) {
-              style = style.replace(/\d+(?:.?\d*?)px/g, function(m) {
-                if (m === '1px') {
-                  return m;
-                } else if (unit === 'em') {
+              style = style.replace(/\d+px|\.\d+|\d+\.\d+/g, function(m) {
+                if (unit === 'em') {
                   return parseFloat((parseFloat(m) / childFontSize).toFixed(4)) + unit;
                 } else {
                   return parseFloat((parseFloat(m) / baseFontSize).toFixed(4)) + unit;
@@ -32720,7 +32711,7 @@ Exporter = (function() {
                 if (child.style[property] === '') {
                   if (inherits[property] !== styles[property]) {
                     value = styles[property];
-                    if (parseFloat(value) + 'px' === value) {
+                    if (value.substring(value.length - 2) === 'px') {
                       value = (parseFloat(value) / baseFontSize).toFixed(4) + unit + ';';
                     }
                     style += property + ': ' + value + ';';
@@ -32786,14 +32777,15 @@ Exporter = (function() {
           range = document.createRange();
           range.setStart(child, counter);
           range.setEnd(child, counter + 1);
-          rect = range.getBoundingClientRect();
-          if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 5) {
-            if (linebreaks.position) {
-              linebreaks.current.push(linebreaks.counter);
+          if (rect = range.getBoundingClientRect()) {
+            if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 5) {
+              if (linebreaks.position) {
+                linebreaks.current.push(linebreaks.counter);
+              }
             }
-          }
-          if (rect.top) {
-            linebreaks.position = rect.top;
+            if (rect.top) {
+              linebreaks.position = rect.top;
+            }
           }
           counter++;
           linebreaks.counter++;
@@ -32832,13 +32824,14 @@ Exporter = (function() {
           _this.base = _this.serialize();
           text += _this.base;
           _this.previous = width;
-          _this.text += text;
-          if (_this.states.length) {
-            _this.uncomputed = _this.states.slice();
-          }
-          return _this.next();
+          return _this.text += text;
         };
       })(this);
+      if (this.states.length) {
+        this.uncomputed = this.states.slice();
+      }
+      this.logs.push('serialized');
+      this.next();
       if (this.text || !this.engine.updating) {
         this.engine.once('finish', callback);
         this.resize(width, height);
@@ -32895,7 +32888,7 @@ Exporter = (function() {
   };
 
   Exporter.prototype.nextState = function() {
-    var ref, script, state;
+    var html, ref, script, state;
     if (!this.uncomputed) {
       return;
     }
@@ -32913,75 +32906,80 @@ Exporter = (function() {
     }
     if (state = this.uncomputed.pop()) {
       this.logs.push('nextState');
-      document.documentElement.classList.add(state);
-      this.record();
-      this.engine.once('finish', (function(_this) {
+      html = document.documentElement;
+      this.previousClass = html.getAttribute('class');
+      setTimeout((function(_this) {
         return function() {
-          var change, diff, end, handler, j, len, match, overlay, prefix, property, rest, result, rule, selector, start, text, value, z;
-          _this.logs.push('state:' + state);
-          if (handler = _this.handlers[state]) {
-            return handler.call(_this);
-          }
-          result = _this.serialize();
-          prefix = 'html.' + state + ' ';
-          diff = _this.differ.diff_main(_this.base, result);
-          _this.differ.diff_cleanupSemantic(diff);
-          selector = void 0;
-          property = void 0;
-          value = void 0;
-          rule = '';
-          overlay = '';
-          z = 0;
-          for (j = 0, len = diff.length; j < len; j++) {
-            change = diff[j];
-            text = change[1];
-            if (change[0] === 0) {
-              if (rule) {
-                rule = _this.endRule(rule, text);
-                if (text.indexOf('}') > -1) {
-                  overlay += rule;
+          html.setAttribute('class', _this.previousClass + ' ' + state);
+          _this.logs.push(state);
+          _this.record();
+          return _this.engine.once('finish', function() {
+            var change, diff, end, handler, j, len, match, overlay, prefix, property, rest, result, rule, selector, start, text, value, z;
+            _this.logs.push('state:' + state);
+            if (handler = _this.handlers[state]) {
+              return handler.call(_this);
+            }
+            result = _this.serialize();
+            prefix = 'html.' + state + ' ';
+            diff = _this.differ.diff_main(_this.base, result);
+            _this.differ.diff_cleanupSemantic(diff);
+            selector = void 0;
+            property = void 0;
+            value = void 0;
+            rule = '';
+            overlay = '';
+            z = 0;
+            for (j = 0, len = diff.length; j < len; j++) {
+              change = diff[j];
+              text = change[1];
+              if (change[0] === 0) {
+                if (rule) {
+                  rule = _this.endRule(rule, text);
+                  if (text.indexOf('}') > -1) {
+                    overlay += rule;
+                    rule = '';
+                    z++;
+                  }
+                }
+                if ((end = text.lastIndexOf('{')) > -1) {
+                  start = text.lastIndexOf('}');
+                  selector = text.substring(start + 1, end).trim();
+                  rest = text.substring(end + 1);
+                  if (match = rest.match(/(?:;|^)\s*([^;{]+):\s*([^;}]+)$/)) {
+                    property = match[1];
+                    value = match[2];
+                  }
+                  start = end = void 0;
+                }
+              } else if (change[0] === 1) {
+                if (selector) {
+                  rule = prefix + selector + '{';
+                  selector = void 0;
+                }
+                if (property) {
+                  rule += property + ':';
+                  property = void 0;
+                }
+                if (value != null) {
+                  rule += value;
+                  value = void 0;
+                }
+                rule += change[1].trim();
+                if (rule.charAt(rule.length - 1) === '}') {
                   rule = '';
-                  z++;
                 }
-              }
-              if ((end = text.lastIndexOf('{')) > -1) {
-                start = text.lastIndexOf('}');
-                selector = text.substring(start + 1, end).trim();
-                rest = text.substring(end + 1);
-                if (match = rest.match(/(?:;|^)\s*([^;{]+):\s*([^;}]+)$/)) {
-                  property = match[1];
-                  value = match[2];
-                }
-                start = end = void 0;
-              }
-            } else if (change[0] === 1) {
-              if (selector) {
-                rule = prefix + selector + '{';
-                selector = void 0;
-              }
-              if (property) {
-                rule += property + ':';
-                property = void 0;
-              }
-              if (value != null) {
-                rule += value;
-                value = void 0;
-              }
-              rule += change[1].trim();
-              if (rule.charAt(rule.length - 1) === '}') {
-                rule = '';
               }
             }
-          }
-          _this.text += overlay;
-          return setTimeout(function() {
-            document.documentElement.classList.remove(state);
-            return _this.engine.once('finish', function() {
-              return _this.next();
-            });
-          }, 100);
+            _this.text += overlay;
+            return setTimeout(function() {
+              html.setAttribute('class', _this.previousClass);
+              return _this.engine.once('finish', function() {
+                return _this.next();
+              });
+            }, 100);
+          });
         };
-      })(this));
+      })(this), 10);
       return true;
     }
   };
