@@ -16195,9 +16195,6 @@ Document = (function(superClass) {
     }
     this.input.Selector.observe(this.engine);
     this.scope.addEventListener('scroll', this.engine, true);
-    if (win != null) {
-      win.addEventListener('resize', this.engine, true);
-    }
   }
 
   Document.prototype.prefixes = ['moz', 'webkit', 'ms'];
@@ -16231,6 +16228,7 @@ Document = (function(superClass) {
     },
     compile: function() {
       var camelized, i, len, prefix, prefixed, prop, property, ref, ref1, scope, value;
+      (this.scope.ownerDocument || this.scope).defaultView.addEventListener('resize', this, true);
       scope = this.scope.documentElement || this.scope;
       ref = this.output.properties;
       for (property in ref) {
