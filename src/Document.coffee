@@ -161,8 +161,7 @@ class Document extends Engine
         win.addEventListener('load',             @engine, false)
       else
         setTimeout =>
-          unless @engine.running
-            @engine.compile()
+          @triggerEvent('interactive')
         , 10
 
     @input.Selector.observe(@engine)
@@ -295,6 +294,11 @@ class Document extends Engine
       (@scope.ownerDocument || @scope).removeEventListener 'DOMContentLoaded', @
       @compile()
       @solve 'Ready', ->
+
+    # Allow external code to force ready event
+    interactive: ->
+      @compile()
+      @solve 'Interactive', ->
 
     # Wait for web fonts
     readystatechange: ->

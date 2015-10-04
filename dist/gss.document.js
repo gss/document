@@ -239,9 +239,7 @@ Document = (function(superClass) {
       } else {
         setTimeout((function(_this) {
           return function() {
-            if (!_this.engine.running) {
-              return _this.engine.compile();
-            }
+            return _this.triggerEvent('interactive');
           };
         })(this), 10);
       }
@@ -414,6 +412,10 @@ Document = (function(superClass) {
       (this.scope.ownerDocument || this.scope).removeEventListener('DOMContentLoaded', this);
       this.compile();
       return this.solve('Ready', function() {});
+    },
+    interactive: function() {
+      this.compile();
+      return this.solve('Interactive', function() {});
     },
     readystatechange: function() {
       if (this.running && (this.scope.ownerDocument || this.scope).readyState === 'complete') {
@@ -16391,20 +16393,22 @@ Exporter = (function() {
         };
       })(this));
     }
-    if (document.readyState === 'complete' || document.documentElement.classList.contains('wf-active')) {
+    if (document.readyState === 'complete' || (document.documentElement.classList.contains('wf-active') && !this.engine.updating && this.engine.running)) {
       this.logs.push('complete');
       return this.nextSize();
     } else {
       this.logs.push('waiting');
       callback = (function(_this) {
         return function() {
+          _this.engine.removeEventListener('interactive', callback);
           _this.logs.push('loaded');
-          _this.engine.removeEventListener('solved', callback);
-          _this.engine.removeEventListener('load', callback);
-          return _this.nextSize();
+          if (!_this.engine.updating) {
+            _this.engine.removeEventListener('solved', callback);
+            return _this.nextSize();
+          }
         };
       })(this);
-      this.engine.once('load', callback);
+      this.engine.once('interactive', callback);
       return this.engine.once('solved', callback);
     }
   };
@@ -16735,7 +16739,7 @@ Exporter = (function() {
             styles = window.getComputedStyle(child, null);
             childFontSize = parseFloat(styles['font-size']);
             if (style = child.getAttribute('style')) {
-              style = style.replace(/\d+px|\.\d+|\d+\.\d+/g, function(m) {
+              style = style.replace(/(\d+|\.\d+|\d+\.\d+)px/g, function(m) {
                 if (m === '1px') {
                   m = '1.75px';
                 }
