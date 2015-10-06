@@ -16361,6 +16361,9 @@ Document = (function(superClass) {
       return this.solve('Ready', function() {});
     },
     interactive: function() {
+      (this.scope.ownerDocument || this.scope).removeEventListener('readystatechange', this);
+      (this.scope.ownerDocument || this.scope).removeEventListener('DOMContentLoaded', this);
+      (this.scope.ownerDocument || this.scope).defaultView.removeEventListener('load', this);
       this.compile();
       return this.solve('Interactive', function() {});
     },
@@ -32699,7 +32702,7 @@ Exporter = (function() {
             if (style = child.getAttribute('style')) {
               style = style.replace(/(\d+|\.\d+|\d+\.\d+)px/g, function(m) {
                 if (m === '1px') {
-                  m = '1.75px';
+                  m = '1.49px';
                 }
                 if (unit === 'em') {
                   return parseFloat((parseFloat(m) / childFontSize).toFixed(4)) + unit;

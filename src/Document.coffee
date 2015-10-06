@@ -212,7 +212,6 @@ class Document extends Engine
         unless value.camelized
           value.property ||= property
           value.camelized = camelized
-              
       @solve @input.StylesheetOperations || @input.Stylesheet.operations
       @input.Selector.connect(@, true)
 
@@ -297,6 +296,9 @@ class Document extends Engine
 
     # Allow external code to force ready event
     interactive: ->
+      (@scope.ownerDocument || @scope).removeEventListener 'readystatechange', @
+      (@scope.ownerDocument || @scope).removeEventListener 'DOMContentLoaded', @
+      (@scope.ownerDocument || @scope).defaultView.removeEventListener 'load', @
       @compile()
       @solve 'Interactive', ->
 
