@@ -279,7 +279,7 @@ Document = (function(superClass) {
     },
     compile: function() {
       var camelized, i, len, prefix, prefixed, prop, property, ref, ref1, scope, value;
-      (this.scope.ownerDocument || this.scope).defaultView.addEventListener('resize', this, true);
+      (this.scope.ownerDocument || this.scope).defaultView.addEventListener('resize', this, false);
       scope = this.scope.documentElement || this.scope;
       ref = this.output.properties;
       for (property in ref) {
