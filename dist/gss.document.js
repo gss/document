@@ -410,14 +410,12 @@ Document = (function(superClass) {
     },
     DOMContentLoaded: function() {
       (this.scope.ownerDocument || this.scope).removeEventListener('DOMContentLoaded', this);
-      this.compile();
       return this.solve('Ready', function() {});
     },
     interactive: function() {
       (this.scope.ownerDocument || this.scope).removeEventListener('readystatechange', this);
       (this.scope.ownerDocument || this.scope).removeEventListener('DOMContentLoaded', this);
       (this.scope.ownerDocument || this.scope).defaultView.removeEventListener('load', this);
-      this.compile();
       return this.solve('Interactive', function() {});
     },
     readystatechange: function() {

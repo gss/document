@@ -291,7 +291,6 @@ class Document extends Engine
     # Fire as early as possible
     DOMContentLoaded: ->
       (@scope.ownerDocument || @scope).removeEventListener 'DOMContentLoaded', @
-      @compile()
       @solve 'Ready', ->
 
     # Allow external code to force ready event
@@ -299,7 +298,6 @@ class Document extends Engine
       (@scope.ownerDocument || @scope).removeEventListener 'readystatechange', @
       (@scope.ownerDocument || @scope).removeEventListener 'DOMContentLoaded', @
       (@scope.ownerDocument || @scope).defaultView.removeEventListener 'load', @
-      @compile()
       @solve 'Interactive', ->
 
     # Wait for web fonts
