@@ -32360,6 +32360,7 @@ Exporter = (function() {
           _this.logs.push('ready');
           if (!_this.engine.updating) {
             _this.engine.removeEventListener('solve', onSolve);
+            _this.engine.removeEventListener('interactive', onInteractive);
             return _this.nextSize();
           }
         };
@@ -32371,12 +32372,13 @@ Exporter = (function() {
             return;
           }
           _this.engine.removeEventListener('interactive', onInteractive);
+          _this.engine.removeEventListener('solve', onSolve);
           _this.logs.push('solved');
           return _this.nextSize();
         };
       })(this);
-      this.engine.once('interactive', onInteractive);
-      return this.engine.once('solve', onSolve);
+      this.engine.addEventListener('interactive', onInteractive);
+      return this.engine.addEventListener('solve', onSolve);
     }
   };
 
