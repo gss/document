@@ -32461,7 +32461,7 @@ Exporter = (function() {
       })(this), 10);
     } else {
       this.animate();
-      document.documentElement.setAttribute('class', this.previousClass);
+      document.documentElement.classList.remove('animations');
       this.phase = this.appeared = void 0;
       return this.engine.once('finish', this.next.bind(this));
     }
@@ -32934,10 +32934,9 @@ Exporter = (function() {
     if (state = this.uncomputed.pop()) {
       this.logs.push('nextState');
       html = document.documentElement;
-      this.previousClass = html.getAttribute('class');
       setTimeout((function(_this) {
         return function() {
-          html.setAttribute('class', _this.previousClass + ' ' + state);
+          html.classList.add(state);
           _this.logs.push(state);
           _this.record();
           return _this.engine.once('finish', function() {
@@ -32999,7 +32998,7 @@ Exporter = (function() {
             }
             _this.text += overlay;
             return setTimeout(function() {
-              html.setAttribute('class', _this.previousClass);
+              html.classList.remove(state);
               return _this.engine.once('finish', function() {
                 return _this.next();
               });
