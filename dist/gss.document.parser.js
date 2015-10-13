@@ -32353,6 +32353,10 @@ Exporter = (function() {
       this.logs.push('waiting');
       onInteractive = (function(_this) {
         return function() {
+          if (document.documentElement.classList.contains('wf-loading')) {
+            _this.logs.push('not-ready');
+            return;
+          }
           _this.logs.push('ready');
           if (!_this.engine.updating) {
             _this.engine.removeEventListener('solve', onSolve);
@@ -32362,6 +32366,10 @@ Exporter = (function() {
       })(this);
       onSolve = (function(_this) {
         return function() {
+          if (document.documentElement.classList.contains('wf-loading')) {
+            _this.logs.push('not-solved');
+            return;
+          }
           _this.engine.removeEventListener('interactive', onInteractive);
           _this.logs.push('solved');
           return _this.nextSize();
