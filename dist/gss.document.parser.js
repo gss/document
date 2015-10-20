@@ -25551,6 +25551,10 @@ Command = (function() {
   Command.prototype.descend = function(engine, operation, continuation, scope, ascender, ascending) {
     var args, argument, command, contd, extras, i, index, l, length, ref, ref1, shift;
     length = operation.length - 1 + this.padding;
+    if (length < 0) {
+      console.warn('Empty rule: ', operation.parent[1].command.selector || operation.parent[1].command.path, 'in', scope);
+      length = 0;
+    }
     args = Array(length);
     index = 0;
     shift = this.contextualize(args, engine, operation, continuation, scope, ascender, ascending);
@@ -29522,8 +29526,13 @@ Update.compile = Updater;
 
 Update.prototype = {
   push: function(problems, domain, reverse) {
-    var index, k, len, other, position, ref;
+    var error, index, k, len, other, position, ref;
     if (domain === void 0) {
+      if (!(problems != null ? problems.domains : void 0)) {
+        error = new Error('Can\'t constraint suggested variable: ');
+        error.meta = problems;
+        throw error;
+      }
       ref = problems.domains;
       for (index = k = 0, len = ref.length; k < len; index = ++k) {
         domain = ref[index];
@@ -29891,7 +29900,7 @@ Update.prototype = {
     return solution || this;
   },
   apply: function(result) {
-    var base, last, now, obj, property, ref, ref1, solution, value;
+    var base, error, last, length, now, obj, property, ref, ref1, ref2, repeating, solution, timeout, val, value;
     solution = this.solution || (this.solution = {});
     last = this.last || (this.last = {});
     for (property in result) {
@@ -29916,6 +29925,31 @@ Update.prototype = {
         (this.changes || (this.changes = {}))[property] = value;
         solution[property] = value;
       }
+    }
+    timeout = window.GSS_TIMEOUT || 30000;
+    if (this.engine.console.getTime(this.started) > timeout) {
+      error = new Error('GSS Update takes more than ' + timeout / 1000 + 's');
+      repeating = {};
+      ref2 = this.repeating;
+      for (property in ref2) {
+        value = ref2[property];
+        repeating[property] = 0;
+        for (val in value) {
+          length = value[val];
+          repeating[property] += length;
+        }
+      }
+      error.meta = {
+        top: Object.keys(repeating).sort((function(_this) {
+          return function(a, b) {
+            return _this.repeating[b].length - _this.repeating[a].length;
+          };
+        })(this)).slice(0, 15).reduce(function(object, name) {
+          object[name] = repeating[name];
+          return object;
+        }, {})
+      };
+      throw error;
     }
     return solution;
   },
@@ -32029,7 +32063,7 @@ Console = (function() {
     this.stack = [];
     this.buffer = [];
     if (typeof self !== "undefined" && self !== null) {
-      self.addEventListener('error', this.onError, true);
+      self.addEventListener('error', this.onError, false);
     }
   }
 
@@ -32114,7 +32148,7 @@ Console = (function() {
     if (result == null) {
       result = '';
     }
-    if (this.level < 0.5) {
+    if (!this.level) {
       return;
     }
     fmt = '%c%s';
@@ -32149,7 +32183,7 @@ Console = (function() {
   };
 
   Console.prototype.closeGroup = function() {
-    if (this.level >= 0.5) {
+    if (this.level) {
       return this.groupEnd();
     }
   };
@@ -32320,7 +32354,7 @@ Exporter = (function() {
   }
 
   Exporter.prototype.schedule = function(query, states) {
-    var base, last, onInteractive, onSolve, overriders;
+    var base, last, onInteractive, onSolve, onStateChange, overriders, timeout;
     if (states == null) {
       states = 'animations';
     }
@@ -32351,32 +32385,31 @@ Exporter = (function() {
       return this.nextSize();
     } else {
       this.logs.push('waiting');
-      onInteractive = (function(_this) {
-        return function() {
-          if (document.documentElement.classList.contains('wf-loading')) {
-            _this.logs.push('not-ready');
-            return;
-          }
-          _this.logs.push('ready');
-          if (!_this.engine.updating) {
-            _this.engine.removeEventListener('solve', onSolve);
-            _this.engine.removeEventListener('interactive', onInteractive);
-            return _this.nextSize();
-          }
+      timeout = 0;
+      onStateChange = (function(_this) {
+        return function(title) {
+          return function() {
+            clearTimeout(timeout);
+            return timeout = setTimeout(function() {
+              if (document.documentElement.classList.contains('wf-loading')) {
+                _this.logs.push('not-' + title);
+                return;
+              }
+              _this.logs.push(title);
+              if (_this.engine.updating) {
+                return _this.logs.push('still-' + title);
+              } else {
+                _this.logs.push(title);
+                _this.engine.removeEventListener('solve', onSolve);
+                _this.engine.removeEventListener('interactive', onInteractive);
+                return _this.nextSize();
+              }
+            }, 100);
+          };
         };
       })(this);
-      onSolve = (function(_this) {
-        return function() {
-          if (document.documentElement.classList.contains('wf-loading')) {
-            _this.logs.push('not-solved');
-            return;
-          }
-          _this.engine.removeEventListener('interactive', onInteractive);
-          _this.engine.removeEventListener('solve', onSolve);
-          _this.logs.push('solved');
-          return _this.nextSize();
-        };
-      })(this);
+      onInteractive = onStateChange('ready');
+      onSolve = onStateChange('solved');
       this.engine.addEventListener('interactive', onInteractive);
       return this.engine.addEventListener('solve', onSolve);
     }
