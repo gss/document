@@ -17162,7 +17162,7 @@ Inspector = (function() {
   };
 
   Inspector.prototype.update = function() {
-    if (this.engine.console.level > 0) {
+    if (this.engine.console.level > 0.1) {
       this.domains(this.engine.domains);
     }
     if (this.engine.console.level > 1.5 || this.rulers) {
