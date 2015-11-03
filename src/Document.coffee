@@ -299,6 +299,7 @@ class Document extends Engine
       #(@scope.ownerDocument || @scope).removeEventListener 'DOMContentLoaded', @
       #(@scope.ownerDocument || @scope).defaultView.removeEventListener 'load', @
       @solve 'Interactive', ->
+        @data.perform()
 
     # Wait for web fonts
     readystatechange: ->

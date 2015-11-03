@@ -413,7 +413,9 @@ Document = (function(superClass) {
       return this.solve('Ready', function() {});
     },
     interactive: function() {
-      return this.solve('Interactive', function() {});
+      return this.solve('Interactive', function() {
+        return this.data.perform();
+      });
     },
     readystatechange: function() {
       if (this.running && (this.scope.ownerDocument || this.scope).readyState === 'complete') {
