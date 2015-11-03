@@ -16437,7 +16437,7 @@ Exporter = (function() {
       this.logs.push('complete');
       return this.nextSize();
     } else if (typeof window !== "undefined" && window !== null ? (ref = window.parent) != null ? (ref1 = ref.params) != null ? ref1.simplified : void 0 : void 0 : void 0) {
-      this.logs.push('hibernate+' + document.readyState);
+      this.logs.push('hibernate+' + document.readyState + '+' + document.documentElement.className);
       return this.engine.addEventListener('load', this.nextSize.bind(this));
     } else {
       this.logs.push('waiting');
