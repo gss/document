@@ -16920,7 +16920,7 @@ Exporter = (function() {
       width = size[0], height = size[1];
       callback = (function(_this) {
         return function() {
-          var text;
+          var ref, ref1, text;
           _this.logs.push('success');
           text = '';
           if (_this.previous) {
@@ -16933,6 +16933,13 @@ Exporter = (function() {
             text += '\n@media (max-width: ' + width + 'px) {\n';
           } else {
             _this.plain = true;
+            if ((ref = window.parent) != null) {
+              if ((ref1 = ref.params) != null) {
+                if (typeof ref1.onSerialize === "function") {
+                  ref1.onSerialize(width + 'x' + height);
+                }
+              }
+            }
           }
           _this.base = _this.serialize();
           text += _this.base;
