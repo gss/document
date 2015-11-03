@@ -32354,7 +32354,7 @@ Exporter = (function() {
   }
 
   Exporter.prototype.schedule = function(query, states) {
-    var base, last, onInteractive, onSolve, onStateChange, overriders, timeout;
+    var base, last, onInteractive, onSolve, onStateChange, overriders, ref, ref1, timeout;
     if (states == null) {
       states = 'animations';
     }
@@ -32383,6 +32383,8 @@ Exporter = (function() {
     if (document.readyState === 'complete' || (document.documentElement.classList.contains('wf-active') && !this.engine.updating && this.engine.running)) {
       this.logs.push('complete');
       return this.nextSize();
+    } else if (typeof window !== "undefined" && window !== null ? (ref = window.parent) != null ? (ref1 = ref.params) != null ? ref1.simplified : void 0 : void 0 : void 0) {
+      return this.engine.addEventListener('load', this.nextSize.bind(this));
     } else {
       this.logs.push('waiting');
       timeout = 0;
