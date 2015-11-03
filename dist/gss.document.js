@@ -413,9 +413,6 @@ Document = (function(superClass) {
       return this.solve('Ready', function() {});
     },
     interactive: function() {
-      (this.scope.ownerDocument || this.scope).removeEventListener('readystatechange', this);
-      (this.scope.ownerDocument || this.scope).removeEventListener('DOMContentLoaded', this);
-      (this.scope.ownerDocument || this.scope).defaultView.removeEventListener('load', this);
       return this.solve('Interactive', function() {});
     },
     readystatechange: function() {
@@ -16407,7 +16404,7 @@ Exporter = (function() {
   }
 
   Exporter.prototype.schedule = function(query, states) {
-    var base, last, overriders;
+    var base, last, onInteractive, onSolve, onStateChange, overriders, timeout;
     if (states == null) {
       states = 'animations';
     }
@@ -16433,7 +16430,39 @@ Exporter = (function() {
         ((base = this.engine.listeners)['compile'] || (base['compile'] = [])).unshift(overriders);
       }
     }
-    return this.nextSize();
+    if (document.readyState === 'complete' || document.readyState === 'loaded' || (document.documentElement.classList.contains('wf-active'))) {
+      this.logs.push('complete');
+      return this.nextSize();
+    } else {
+      this.logs.push('waiting');
+      timeout = 0;
+      onStateChange = (function(_this) {
+        return function(title) {
+          return function() {
+            clearTimeout(timeout);
+            return timeout = setTimeout(function() {
+              if (document.documentElement.classList.contains('wf-loading')) {
+                _this.logs.push('not-' + title);
+                return;
+              }
+              _this.logs.push(title);
+              if (_this.engine.updating) {
+                return _this.logs.push('still-' + title);
+              } else {
+                _this.logs.push(title);
+                _this.engine.removeEventListener('solve', onSolve);
+                _this.engine.removeEventListener('interactive', onInteractive);
+                return _this.nextSize();
+              }
+            }, 100);
+          };
+        };
+      })(this);
+      onInteractive = onStateChange('ready');
+      onSolve = onStateChange('solved');
+      this.engine.addEventListener('interactive', onInteractive);
+      return this.engine.addEventListener('solve', onSolve);
+    }
   };
 
   Exporter.prototype.text = '';
@@ -16927,20 +16956,8 @@ Exporter = (function() {
           return _this.next();
         };
       })(this);
-      if (this.text || !this.engine.updating) {
-        this.engine.once('finish', callback);
-        this.resize(width, height);
-      } else if (this.engine.updating) {
-        this.logs.push('wait');
-        this.engine.once('finish', callback);
-      } else {
-        if (!this.engine.scope.querySelectorAll('style[type*="gss"]').length) {
-          this.logs.push('abort');
-          callback();
-        } else {
-          this.engine.addEventListener('finish', callback);
-        }
-      }
+      this.engine.addEventListener('finish', callback);
+      this.resize(width, height);
       return true;
     }
   };

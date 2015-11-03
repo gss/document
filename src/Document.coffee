@@ -295,9 +295,9 @@ class Document extends Engine
 
     # Allow external code to force ready event
     interactive: ->
-      (@scope.ownerDocument || @scope).removeEventListener 'readystatechange', @
-      (@scope.ownerDocument || @scope).removeEventListener 'DOMContentLoaded', @
-      (@scope.ownerDocument || @scope).defaultView.removeEventListener 'load', @
+      #(@scope.ownerDocument || @scope).removeEventListener 'readystatechange', @
+      #(@scope.ownerDocument || @scope).removeEventListener 'DOMContentLoaded', @
+      #(@scope.ownerDocument || @scope).defaultView.removeEventListener 'load', @
       @solve 'Interactive', ->
 
     # Wait for web fonts
