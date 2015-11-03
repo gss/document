@@ -16433,7 +16433,7 @@ Exporter = (function() {
         ((base = this.engine.listeners)['compile'] || (base['compile'] = [])).unshift(overriders);
       }
     }
-    if (document.readyState === 'complete' || document.readyState === 'loaded' || (document.documentElement.classList.contains('wf-active') && !this.engine.updating && this.engine.running)) {
+    if (document.readyState === 'complete' || document.readyState === 'loaded' || (document.documentElement.classList.contains('wf-active'))) {
       this.logs.push('complete');
       return this.nextSize();
     } else if (typeof window !== "undefined" && window !== null ? (ref = window.parent) != null ? (ref1 = ref.params) != null ? ref1.simplified : void 0 : void 0 : void 0) {
