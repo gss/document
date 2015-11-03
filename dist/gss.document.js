@@ -16407,7 +16407,7 @@ Exporter = (function() {
   }
 
   Exporter.prototype.schedule = function(query, states) {
-    var base, last, onInteractive, onSolve, onStateChange, overriders, ref, ref1, timeout;
+    var base, last, overriders;
     if (states == null) {
       states = 'animations';
     }
@@ -16433,42 +16433,7 @@ Exporter = (function() {
         ((base = this.engine.listeners)['compile'] || (base['compile'] = [])).unshift(overriders);
       }
     }
-    if (document.readyState === 'complete' || document.readyState === 'loaded' || (document.documentElement.classList.contains('wf-active'))) {
-      this.logs.push('complete');
-      return this.nextSize();
-    } else if (typeof window !== "undefined" && window !== null ? (ref = window.parent) != null ? (ref1 = ref.params) != null ? ref1.simplified : void 0 : void 0 : void 0) {
-      this.logs.push('hibernate+' + document.readyState + '+' + document.documentElement.className);
-      return this.engine.addEventListener('load', this.nextSize.bind(this));
-    } else {
-      this.logs.push('waiting');
-      timeout = 0;
-      onStateChange = (function(_this) {
-        return function(title) {
-          return function() {
-            clearTimeout(timeout);
-            return timeout = setTimeout(function() {
-              if (document.documentElement.classList.contains('wf-loading')) {
-                _this.logs.push('not-' + title);
-                return;
-              }
-              _this.logs.push(title);
-              if (_this.engine.updating) {
-                return _this.logs.push('still-' + title);
-              } else {
-                _this.logs.push(title);
-                _this.engine.removeEventListener('solve', onSolve);
-                _this.engine.removeEventListener('interactive', onInteractive);
-                return _this.nextSize();
-              }
-            }, 100);
-          };
-        };
-      })(this);
-      onInteractive = onStateChange('ready');
-      onSolve = onStateChange('solved');
-      this.engine.addEventListener('interactive', onInteractive);
-      return this.engine.addEventListener('solve', onSolve);
-    }
+    return this.nextSize();
   };
 
   Exporter.prototype.text = '';
@@ -16924,6 +16889,13 @@ Exporter = (function() {
       callback = (function(_this) {
         return function() {
           var ref, ref1, text;
+          if (document.documentElement.className.indexOf('wf-') > -1 && document.document.className.indexOf('wf-active') === -1) {
+            return;
+          }
+          if (document.readyState === 'loading') {
+            return;
+          }
+          _this.engine.removeEventListener('finish', callback);
           _this.logs.push('success');
           text = '';
           if (_this.previous) {
@@ -16966,7 +16938,7 @@ Exporter = (function() {
           this.logs.push('abort');
           callback();
         } else {
-          this.engine.once('solve', callback);
+          this.engine.addEventListener('finish', callback);
         }
       }
       return true;
