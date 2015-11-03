@@ -32836,7 +32836,7 @@ Exporter = (function() {
       callback = (function(_this) {
         return function() {
           var ref, ref1, text;
-          if (document.documentElement.className.indexOf('wf-') > -1 && document.document.className.indexOf('wf-active') === -1) {
+          if (document.documentElement.className.indexOf('wf-') > -1 && document.documentElement.className.indexOf('wf-active') === -1) {
             return;
           }
           if (document.readyState === 'loading') {
@@ -32866,14 +32866,14 @@ Exporter = (function() {
           _this.base = _this.serialize();
           text += _this.base;
           _this.previous = width;
-          return _this.text += text;
+          _this.text += text;
+          if (_this.states.length) {
+            _this.uncomputed = _this.states.slice();
+          }
+          _this.logs.push('serialized');
+          return _this.next();
         };
       })(this);
-      if (this.states.length) {
-        this.uncomputed = this.states.slice();
-      }
-      this.logs.push('serialized');
-      this.next();
       if (this.text || !this.engine.updating) {
         this.engine.once('finish', callback);
         this.resize(width, height);
