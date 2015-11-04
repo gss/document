@@ -32390,20 +32390,8 @@ Exporter = (function() {
           return function() {
             clearTimeout(timeout);
             return timeout = setTimeout(function() {
-              if (document.documentElement.classList.contains('wf-loading')) {
-                _this.logs.push('not-' + title);
-                return;
-              }
-              _this.logs.push(title);
-              if (_this.engine.updating) {
-                return _this.logs.push('still-' + title);
-              } else {
-                _this.logs.push(title);
-                _this.engine.removeEventListener('solve', onSolve);
-                _this.engine.removeEventListener('interactive', onInteractive);
-                return _this.nextSize();
-              }
-            }, 100);
+              return _this.nextSize();
+            }, 200);
           };
         };
       })(this);
