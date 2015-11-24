@@ -17,3 +17,4 @@ deploy:
   on:
     repo: gss/document
     branch: ranges3-travis
+    tags: true
