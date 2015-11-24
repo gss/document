@@ -1,6 +1,8 @@
 
   # Vanilla CSS + CCSS
   # ===========================================================
+
+itIfNotPhantom = if window?.callPhantom? then (desc, f) -> it.skip("SKIPPED on PhantomJS: #{desc}", f) else it
   
 describe 'Vanilla CSS', -> 
   
@@ -830,7 +832,7 @@ describe 'Vanilla CSS', ->
                       done()
 
   describe 'imported and unscoped', ->
-    it 'should dump', (done) ->
+    itIfNotPhantom 'should dump', (done) ->
       container.innerHTML =  """
         <div id="something">
           <div class="outer">

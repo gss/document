@@ -1,5 +1,7 @@
 
-describe 'Standalone page tests', -> 
+describeIfNotPhantom = if window?.callPhantom? then (desc, f) -> describe.skip("SKIPPED on PhantomJS: #{desc}", f) else describe
+
+describeIfNotPhantom 'Standalone page tests', ->
   engine = container = iframe = null
 
   afterEach ->
