@@ -32408,6 +32408,8 @@ Exporter = (function() {
 
   Exporter.prototype.overriden = {};
 
+  Exporter.prototype.inheritable = ['font-size', 'font-weight', 'line-height', 'color'];
+
   Exporter.prototype.handlers = {
     animations: function(height, scroll) {
       var callback;
@@ -32664,7 +32666,7 @@ Exporter = (function() {
   };
 
   Exporter.prototype.serialize = function(element, prefix, inherited, unit, baseFontSize, linebreaks) {
-    var breaking, char, child, childFontSize, content, counter, current, exported, fontSize, inherits, j, k, l, len, len1, len2, position, property, range, rect, ref, ref1, ref2, ref3, ref4, ref5, selector, style, styles, text, value;
+    var breaking, broken, char, child, childFontSize, chrs, content, counter, current, exported, fontSize, index, inherits, j, k, l, len, len1, len2, offset, position, prev, property, pstyles, r, range, rect, ref, ref1, ref2, ref3, ref4, ref5, selector, style, styles, text, value;
     if (element == null) {
       element = this.engine.scope;
     }
@@ -32696,8 +32698,8 @@ Exporter = (function() {
       }
     }
     ref1 = element.childNodes;
-    for (k = 0, len1 = ref1.length; k < len1; k++) {
-      child = ref1[k];
+    for (index = k = 0, len1 = ref1.length; k < len1; index = ++k) {
+      child = ref1[index];
       if (child.nodeType === 1) {
         inherits = Object.create(inherited);
         if (child.tagName === 'STYLE') {
@@ -32726,6 +32728,34 @@ Exporter = (function() {
         } else if (child.tagName !== 'SCRIPT') {
           if (child.offsetParent || child.tagName === 'svg') {
             styles = window.getComputedStyle(child, null);
+            if (linebreaks) {
+              if (styles.display === 'inline' || styles.display === 'inline-block') {
+                if (prev = child.previousSibling) {
+                  pstyles = prev.nodeType === 1 && window.getComputedStyle(prev);
+                  if (!pstyles || pstyles.display === 'inline' || pstyles.display === 'inline-block') {
+                    if ((prev.offsetTop != null) && (child.offsetTop != null)) {
+                      broken = prev.offsetTop < child.offsetTop && prev.offsetLeft > child.offsetLeft;
+                    } else {
+                      rect = child.getBoundingClientRect();
+                      if (prev.nodeType === 1) {
+                        r = prev.getBoundingClientRect();
+                        broken = Math.abs(r.top - rect.top) > rect.height / 5 && r.left > rect.left;
+                      } else if (linebreaks.last === prev) {
+                        broken = Math.abs(linebreaks.position - rect.top) > rect.height / 5 && linebreaks.left > rect.left;
+                      } else {
+                        broken = true;
+                      }
+                    }
+                    if (broken) {
+                      offset = -1;
+                      if (linebreaks.current.indexOf(linebreaks.counter - 1) === -1) {
+                        linebreaks.current.push(linebreaks.counter - 1);
+                      }
+                    }
+                  }
+                }
+              }
+            }
             childFontSize = parseFloat(styles['font-size']);
             if (style = child.getAttribute('style')) {
               style = style.replace(/(\d+|\.\d+|\d+\.\d+)px/g, function(m) {
@@ -32784,18 +32814,22 @@ Exporter = (function() {
             } else {
               if (child.id) {
                 current = linebreaks.current, counter = linebreaks.counter, position = linebreaks.position;
-                linebreaks.counter = 0;
-                linebreaks.position = 0;
-                linebreaks.current = linebreaks.result[child.id] = [];
+                if (!current.length) {
+                  linebreaks.counter = 0;
+                  linebreaks.position = 0;
+                  linebreaks.current = linebreaks.result[child.id] = [];
+                }
               }
               exported = this.serialize(child, prefix, inherits, unit, baseFontSize, linebreaks);
               if (child.id) {
-                if (!linebreaks.current.length) {
-                  delete linebreaks.result[child.id];
+                if (!current.length) {
+                  if (!linebreaks.current.length) {
+                    delete linebreaks.result[child.id];
+                  }
+                  linebreaks.current = current;
+                  linebreaks.counter = counter;
+                  linebreaks.position = position;
                 }
-                linebreaks.current = current;
-                linebreaks.counter = counter;
-                linebreaks.position = position;
               }
             }
           }
@@ -32819,6 +32853,7 @@ Exporter = (function() {
       } else if (linebreaks && child.nodeType === 3 && child.parentNode.tagName !== 'STYLE' && child.parentNode.tagName !== 'SCRIPT') {
         counter = 0;
         content = child.textContent;
+        chrs = 0;
         while (counter < content.length) {
           char = content.charAt(counter);
           range = document.createRange();
@@ -32826,12 +32861,17 @@ Exporter = (function() {
           range.setEnd(child, counter + 1);
           if (rect = range.getBoundingClientRect()) {
             if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 5) {
-              if (linebreaks.position) {
-                linebreaks.current.push(linebreaks.counter);
+              if (linebreaks.position && chrs) {
+                if (linebreaks.current.indexOf(linebreaks.counter) === -1) {
+                  linebreaks.current.push(linebreaks.counter);
+                }
               }
             }
-            if (rect.top) {
+            if (rect.top && rect.width) {
+              linebreaks.last = child;
               linebreaks.position = rect.top;
+              linebreaks.left = rect.left;
+              chrs++;
             }
           }
           counter++;
