@@ -8,7 +8,7 @@ stringify = (o) ->
 remove = (el) ->
   el?.parentNode?.removeChild(el)
 
-
+itIfNotPhantom = if window?.callPhantom? then (desc, f) -> it.skip("SKIPPED on PhantomJS: #{desc}", f) else it
 
 describe 'End - to - End', ->
   
@@ -25,7 +25,7 @@ describe 'End - to - End', ->
     engine.destroy()
 
   describe 'intrinsic properties', ->
-    it 'should bind to scrolling', (done) ->
+    itIfNotPhantom 'should bind to scrolling', (done) ->
       engine.once 'solve', (e) ->
         expect(stringify engine.values).to.eql stringify
           "$scroller[scroll-top]": 0

@@ -1,5 +1,7 @@
 
-describe 'Standalone page tests', -> 
+describeIfNotPhantom = if window?.callPhantom? then (desc, f) -> describe.skip("SKIPPED on PhantomJS: #{desc}", f) else describe
+
+describeIfNotPhantom 'Standalone page tests', ->
   engine = container = iframe = null
 
   afterEach ->
@@ -29,18 +31,18 @@ describe 'Standalone page tests', ->
             listener = (e) ->
               console.log('msg')
               if (e.origin == location.origin)
-                roughAssert(e.data['$wrap2"target"[x]'], 200);
-                roughAssert(e.data['$wrap2"target"[width]'], 100);
-                roughAssert(e.data['$wrap2"target"[height]'], 100);
-                roughAssert(e.data['$wrap1"target"[x]'], 50);
-                roughAssert(e.data['$wrap1"target"[width]'], 100);
-                roughAssert(e.data['$wrap1"target"[height]'], 100);
-                roughAssert(e.data['$other1[x]'], 75);
-                roughAssert(e.data['$other1[width]'], 50);
-                roughAssert(e.data['$other1[height]'], 50);
-                roughAssert(e.data['$other2[x]'], 225);
-                roughAssert(e.data['$other2[width]'], 50);
-                roughAssert(e.data['$other2[height]'], 50);
+                roughAssert(e.data['$wrap2"target"[x]'], 200)
+                roughAssert(e.data['$wrap2"target"[width]'], 100)
+                roughAssert(e.data['$wrap2"target"[height]'], 100)
+                roughAssert(e.data['$wrap1"target"[x]'], 50)
+                roughAssert(e.data['$wrap1"target"[width]'], 100)
+                roughAssert(e.data['$wrap1"target"[height]'], 100)
+                roughAssert(e.data['$other1[x]'], 75)
+                roughAssert(e.data['$other1[width]'], 50)
+                roughAssert(e.data['$other1[height]'], 50)
+                roughAssert(e.data['$other2[x]'], 225)
+                roughAssert(e.data['$other2[width]'], 50)
+                roughAssert(e.data['$other2[height]'], 50)
 
 
                 window.removeEventListener('message', listener)
@@ -63,38 +65,38 @@ describe 'Standalone page tests', ->
                   window.removeEventListener('message', listener)
                   done()
                 else if ++i % 3 == 1
-                  roughAssert(e.data['$content1[width]'], 624);
-                  roughAssert(e.data['$content1[x]'], 0);
-                  roughAssert(e.data['$content1[y]'], 72);
-                  expect(e.data['$title1[width]']?).to.eql(false);
-                  expect(e.data['$title1[x]']?).to.eql(false);
-                  expect(e.data['$title1[y]']?).to.eql(false);
-                  expect(e.data['$subtitle1[width]']?).to.eql(false);
-                  expect(e.data['$subtitle1[x]']?).to.eql(false);
-                  expect(e.data['$subtitle1[y]']?).to.eql(false);
+                  roughAssert(e.data['$content1[width]'], 624)
+                  roughAssert(e.data['$content1[x]'], 0)
+                  roughAssert(e.data['$content1[y]'], 72)
+                  expect(e.data['$title1[width]']?).to.eql(false)
+                  expect(e.data['$title1[x]']?).to.eql(false)
+                  expect(e.data['$title1[y]']?).to.eql(false)
+                  expect(e.data['$subtitle1[width]']?).to.eql(false)
+                  expect(e.data['$subtitle1[x]']?).to.eql(false)
+                  expect(e.data['$subtitle1[y]']?).to.eql(false)
 
                   iframe.width = 500
                 else if i % 3 == 2
-                  roughAssert(e.data['$content1[width]'], 226);
-                  roughAssert(e.data['$content1[x]'], 234);
-                  roughAssert(e.data['$content1[y]'], 32);
-                  roughAssert(e.data['$title1[width]'], 154);
-                  roughAssert(e.data['$title1[x]'], 270);
-                  roughAssert(e.data['$title1[y]'], 259);
-                  roughAssert(e.data['$subtitle1[width]'], 154);
-                  roughAssert(e.data['$subtitle1[x]'], 270);
-                  roughAssert(e.data['$subtitle1[y]'], 460);
+                  roughAssert(e.data['$content1[width]'], 226)
+                  roughAssert(e.data['$content1[x]'], 234)
+                  roughAssert(e.data['$content1[y]'], 32)
+                  roughAssert(e.data['$title1[width]'], 154)
+                  roughAssert(e.data['$title1[x]'], 270)
+                  roughAssert(e.data['$title1[y]'], 259)
+                  roughAssert(e.data['$subtitle1[width]'], 154)
+                  roughAssert(e.data['$subtitle1[x]'], 270)
+                  roughAssert(e.data['$subtitle1[y]'], 460)
                   iframe.width = 320
                 else
-                  roughAssert(e.data['$content1[width]'], 288);
-                  roughAssert(e.data['$content1[x]'], 16);
-                  roughAssert(e.data['$content1[y]'], 384);
-                  roughAssert(e.data['$title1[width]'], 248);
-                  roughAssert(e.data['$title1[x]'], 36);
-                  roughAssert(e.data['$title1[y]'], 456);
-                  roughAssert(e.data['$subtitle1[width]'], 248);
-                  roughAssert(e.data['$subtitle1[x]'], 36);
-                  roughAssert(e.data['$subtitle1[y]'], 583);
+                  roughAssert(e.data['$content1[width]'], 288)
+                  roughAssert(e.data['$content1[x]'], 16)
+                  roughAssert(e.data['$content1[y]'], 384)
+                  roughAssert(e.data['$title1[width]'], 248)
+                  roughAssert(e.data['$title1[x]'], 36)
+                  roughAssert(e.data['$title1[y]'], 456)
+                  roughAssert(e.data['$subtitle1[width]'], 248)
+                  roughAssert(e.data['$subtitle1[x]'], 36)
+                  roughAssert(e.data['$subtitle1[y]'], 583)
                   iframe.width = 1024
 
             window.addEventListener('message', listener)

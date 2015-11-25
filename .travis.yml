@@ -1,0 +1,20 @@
+language: node_js
+sudo: false
+node_js:
+- '0.12'
+sudo: false
+before_deploy:
+- gem install mime-types -v 2.6.2
+deploy:
+  provider: s3
+  access_key_id: AKIAIFEVDQA7JAPZIIGQ
+  secret_access_key:
+    secure: kv0m3BNe/JGiDD/RQCE7VsPMaRMYt74RyGrIPRI5YHJZ7ip+5VbjJkMW/HCHSPdQ8o6pwJdOL73i1ipsAf3eBEhZolVgslcsThC21gGguYBXo0r24kCaE2FCIG69zUCrLbqC5Rs5tJHHu05GPy2SWh6f3lvrt014Kn1HdkadCzI=
+  region: us-west-2
+  bucket: cdn.thegrid.io
+  local-dir: dist/
+  upload-dir: gss/gss-document/${TRAVIS_TAG:-${TRAVIS_BRANCH:-latest}}
+  on:
+    repo: gss/document
+    branch: ranges3-travis
+    tags: true

@@ -27,7 +27,7 @@
     "grunt-contrib-connect": "~0.3.0",
     "grunt-mocha-test": "^0.11.0",
     "grunt-docco": "^0.3.3",
-    "grunt-mocha-phantomjs": "~0.4.0",
+    "grunt-mocha-phantomjs": "~1.0.2",
     "grunt-saucelabs": "^8.4.1"
   },
   "browserify": {
@@ -44,7 +44,7 @@
     "./vendor"
   ],
   "dependencies": {
-    "gss-engine": "git://github.com/gss/engine.git#3f6a5922420ce94fcc2db60a9fd1eba5b443f6a5",
+    "gss-engine": "git://github.com/gss/engine.git#74b78aa74349bc4bf363019b2e2ee4cba008361b",
     "gss-parser": "git://github.com/gss/parser.git#61c4b2849e78d76b0e67b20a5abc08ce52b6c9cb",
     "vfl-compiler": "~1.1.3"
   }

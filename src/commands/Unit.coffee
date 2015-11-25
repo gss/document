@@ -74,16 +74,16 @@ class Unit::Numeric extends Unit
       return ['*', ['px', value] , ['get', path]]
 
     em: (value, engine, operation, continuation, scope) ->
-      return value * engine.data.watch(scope, 'computed-font-size', operation, continuation, scope);
+      return value * engine.data.watch(scope, 'computed-font-size', operation, continuation, scope)
     
     rem: (value, engine, operation, continuation, scope) ->
-      return value * engine.data.watch(engine.scope, 'computed-font-size', operation, continuation, scope);
+      return value * engine.data.watch(engine.scope, 'computed-font-size', operation, continuation, scope)
   
     vw: (value, engine, operation, continuation, scope) ->
-      return value / 100 * engine.data.watch('::window[width]', null, operation, continuation, scope);
+      return value / 100 * engine.data.watch('::window[width]', null, operation, continuation, scope)
     
     vh: (value, engine, operation, continuation, scope) ->
-      return value / 100 * engine.data.watch('::window[height]', null, operation, continuation, scope);
+      return value / 100 * engine.data.watch('::window[height]', null, operation, continuation, scope)
     
     vmin: (value, engine, operation, continuation, scope) ->
       return value / 100 * Math.min(

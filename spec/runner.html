@@ -11,7 +11,7 @@
     </style>
     <script src="../dist/gss.document.parser.js"></script>
     <script src="vendor/MutationObserver.attributes.js"></script>
-
+    <script src="polyfills/requestAnimationFrame.js"></script>
     <style>
       #mocha .test {
         overflow: auto;
@@ -28,6 +28,9 @@
       expect = chai.expect
     </script>
     <script>
+      if (window.initMochaPhantomJS) {
+        window.initMochaPhantomJS();
+      }
       mocha.setup('bdd');
       chai.config.includeStack = true;
       chai.config.showDiff = true;

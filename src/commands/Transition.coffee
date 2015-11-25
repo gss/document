@@ -91,7 +91,7 @@ class Transition.Spring extends Transition
     return (value - 30.0) * 3.62 + 194.0
 
   getFriction: (value) ->
-    return (value - 8.0) * 3.0 + 25.0;
+    return (value - 8.0) * 3.0 + 25.0
 
   compute: (range, now, from) ->
     start = range[0] || 0
@@ -144,7 +144,7 @@ class Transition.Spring extends Transition
       Dv = Tv
       Da = (tension * (goal - Tp)) - friction * Tv
 
-      dxdt = (Av + 2 * (Bv + Cv) + Dv) / 6;
+      dxdt = (Av + 2 * (Bv + Cv) + Dv) / 6
       dvdt = (Aa + 2 * (Ba + Ca) + Da) / 6
 
       position += dxdt * STEP

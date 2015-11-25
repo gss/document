@@ -608,7 +608,7 @@ class Document extends Engine
                 value = +value
               if typeof value == 'number'
                 value = parseFloat(value.toFixed(3))
-              (@precomputing[id] ||= {})[prop] = value;
+              (@precomputing[id] ||= {})[prop] = value
             else
               @setStyle(element, prop, value)
 
