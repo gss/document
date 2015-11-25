@@ -16739,6 +16739,7 @@ Exporter = (function() {
       element = element.documentElement;
     }
     text = "";
+    chrs = 0;
     if ((fontSize = inherited.fontSize) == null) {
       styles = window.getComputedStyle(element, null);
       inherited.fontSize = fontSize = parseFloat(styles['font-size']);
@@ -16906,7 +16907,6 @@ Exporter = (function() {
       } else if (linebreaks && child.nodeType === 3 && child.parentNode.tagName !== 'STYLE' && child.parentNode.tagName !== 'SCRIPT') {
         counter = 0;
         content = child.textContent;
-        chrs = 0;
         while (counter < content.length) {
           char = content.charAt(counter);
           range = document.createRange();
@@ -16915,8 +16915,12 @@ Exporter = (function() {
           if (rect = range.getBoundingClientRect()) {
             if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 5) {
               if (linebreaks.position && chrs) {
-                if (linebreaks.current.indexOf(linebreaks.counter) === -1) {
-                  linebreaks.current.push(linebreaks.counter);
+                index = linebreaks.counter;
+                if (!content.charAt(counter - 1).match(/[\s\n]/) && content.charAt(counter - 2).match(/-|\u2013|\u2014/)) {
+                  index--;
+                }
+                if (linebreaks.current.indexOf(index) === -1) {
+                  linebreaks.current.push(index);
                 }
               }
             }
