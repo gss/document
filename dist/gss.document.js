@@ -2552,7 +2552,14 @@ Stylesheet = (function(superClass) {
 
   Stylesheet.operations = [['import', ['[*=]', ['tag', 'style'], 'type', 'gss']], ['import', ['[*=]', ['tag', 'link'], 'type', 'gss']]];
 
-  Stylesheet.CanonicalizeSelectorRegExp = new RegExp("[$][a-z0-9]+[" + Command.prototype.DESCEND + "]\\s*", "gi");
+  Stylesheet.CanonicalizeSelectorRegExp = new RegExp("[$][a-z0-9-_]+([" + Command.prototype.DESCEND + Command.prototype.ASCEND + "])\\s*", "gi");
+
+  Stylesheet.CanonicalizeSelectorCallback = function(m, symbol) {
+    if (symbol === Command.prototype.DESCEND) {
+      return symbol;
+    }
+    return '';
+  };
 
   Stylesheet.prototype.update = function(engine, operation, property, value, stylesheet, rule) {
     var body, generated, i, index, j, len, needle, ops, other, previous, prop, ref, rules, selectors, sheet, watchers;
@@ -2883,7 +2890,7 @@ Stylesheet = (function(superClass) {
 
   Stylesheet.prototype.getCanonicalSelector = function(selector) {
     selector = selector.trim();
-    selector = selector.replace(Stylesheet.CanonicalizeSelectorRegExp, ' ').replace(/\s+/g, this.DESCEND);
+    selector = selector.replace(Stylesheet.CanonicalizeSelectorRegExp, Stylesheet.CanonicalizeSelectorCallback).replace(/\s+/g, this.DESCEND);
     return selector;
   };
 
@@ -16780,7 +16787,7 @@ Exporter = (function() {
             }
           }
         } else if (child.tagName !== 'SCRIPT') {
-          if (child.offsetParent || child.tagName === 'svg') {
+          if (child.offsetParent || child.offsetWidth || child.offsetHeight || child.tagName === 'svg') {
             styles = window.getComputedStyle(child, null);
             if (linebreaks) {
               if (styles.display === 'inline' || styles.display === 'inline-block') {
@@ -16863,7 +16870,7 @@ Exporter = (function() {
               };
             }
             inherits.fontSize = childFontSize;
-            if (!child.offsetParent || !linebreaks) {
+            if ((!child.offsetParent && !child.offsetWidth && !child.offsetHeight) || !linebreaks) {
               exported = this.serialize(child, prefix, inherits, unit, baseFontSize);
             } else {
               if (child.id) {

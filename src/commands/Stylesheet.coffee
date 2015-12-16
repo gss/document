@@ -41,8 +41,12 @@ class Stylesheet extends Command.List
   ]
   
   @CanonicalizeSelectorRegExp: new RegExp(
-    "[$][a-z0-9]+[" + Command::DESCEND + "]\\s*", "gi"
+    "[$][a-z0-9-_]+([" + Command::DESCEND + Command::ASCEND + "])\\s*", "gi"
   )
+  @CanonicalizeSelectorCallback: (m, symbol) ->
+    if symbol == Command::DESCEND
+      return symbol
+    return ''
 
   update: (engine, operation, property, value, stylesheet, rule) ->
     watchers = @getWatchers(engine, stylesheet)
@@ -290,9 +294,10 @@ class Stylesheet extends Command.List
   getCanonicalSelector: (selector) ->
     selector = selector.trim()
     selector = selector.
-      replace(Stylesheet.CanonicalizeSelectorRegExp, ' ').
+      replace(Stylesheet.CanonicalizeSelectorRegExp, Stylesheet.CanonicalizeSelectorCallback).
       replace(/\s+/g, @DESCEND)#.
     return selector
+
 
   # Schedule element to have its "matches" attribute updated
   @match: (engine, node, continuation, value) ->

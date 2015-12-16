@@ -2569,7 +2569,7 @@ describe('Domain', function() {
 
 
 },{}],7:[function(require,module,exports){
-var aesert, expect, remove, stringify;
+var aesert, expect, itIfNotPhantom, remove, stringify;
 
 aesert = chai.assert;
 
@@ -2585,6 +2585,10 @@ remove = function(el) {
   return el != null ? (ref = el.parentNode) != null ? ref.removeChild(el) : void 0 : void 0;
 };
 
+itIfNotPhantom = (typeof window !== "undefined" && window !== null ? window.callPhantom : void 0) != null ? function(desc, f) {
+  return it.skip("SKIPPED on PhantomJS: " + desc, f);
+} : it;
+
 describe('End - to - End', function() {
   var container, engine;
   engine = null;
@@ -2599,7 +2603,7 @@ describe('End - to - End', function() {
     return engine.destroy();
   });
   describe('intrinsic properties', function() {
-    it('should bind to scrolling', function(done) {
+    itIfNotPhantom('should bind to scrolling', function(done) {
       engine.once('solve', function(e) {
         expect(stringify(engine.values)).to.eql(stringify({
           "$scroller[scroll-top]": 0,
@@ -6298,7 +6302,13 @@ describe('Matrix', function() {
 
 
 },{}],12:[function(require,module,exports){
-describe('Standalone page tests', function() {
+var describeIfNotPhantom;
+
+describeIfNotPhantom = (typeof window !== "undefined" && window !== null ? window.callPhantom : void 0) != null ? function(desc, f) {
+  return describe.skip("SKIPPED on PhantomJS: " + desc, f);
+} : describe;
+
+describeIfNotPhantom('Standalone page tests', function() {
   var container, engine, iframe, roughAssert;
   engine = container = iframe = null;
   afterEach(function() {
@@ -8319,6 +8329,12 @@ describe('Units', function() {
 
 
 },{}],20:[function(require,module,exports){
+var itIfNotPhantom;
+
+itIfNotPhantom = (typeof window !== "undefined" && window !== null ? window.callPhantom : void 0) != null ? function(desc, f) {
+  return it.skip("SKIPPED on PhantomJS: " + desc, f);
+} : it;
+
 describe('Vanilla CSS', function() {
   var container, engine, getSource;
   engine = null;
@@ -8803,7 +8819,7 @@ describe('Vanilla CSS', function() {
     });
   });
   return describe('imported and unscoped', function() {
-    return it('should dump', function(done) {
+    return itIfNotPhantom('should dump', function(done) {
       container.innerHTML = "<div id=\"something\">\n  <div class=\"outer\">\n    <button></button>\n    <button></button>\n  </div>\n  <div class=\"outie\">\n    <button></button>\n    <button></button>\n  </div>\n  <style type=\"text/gss\">\n    .outer, .outie {\n      @import fixtures/external-file-css1.gss;\n\n      opacity: 1;\n    }\n  </style>\n</div>";
       return engine.once('solve', function() {
         var el, i, len, ref;
