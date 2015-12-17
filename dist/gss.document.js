@@ -16772,8 +16772,10 @@ Exporter = (function() {
                 selector = '';
               }
               text += Array.prototype.map.call(child.sheet.cssRules, function(rule) {
-                text = rule.cssText;
-                return selector + rule.cssText + '\n';
+                text = rule.cssText.replace(/\[matches~="(.*?)"\]/g, function(m, selector) {
+                  return prefix + selector.replace(/@[^↓]+/g, '').replace(/↓&/g, '').replace(/↓/g, ' ');
+                });
+                return selector + text + '\n';
               }).join('\n');
             }
           } else if (child.sheet) {
