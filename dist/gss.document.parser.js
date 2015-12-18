@@ -29932,7 +29932,7 @@ Update.prototype = {
         solution[property] = value;
       }
     }
-    timeout = window.GSS_TIMEOUT || 30000;
+    timeout = (typeof window !== "undefined" && window !== null ? window.GSS_TIMEOUT : void 0) || 30000;
     if (this.engine.console.getTime(this.started) > timeout) {
       error = new Error('GSS Update takes more than ' + timeout / 1000 + 's');
       repeating = {};
@@ -32623,7 +32623,7 @@ Exporter = (function() {
     that = _context;
     node = void 0;
     if (that === 'null') {
-      throw 'not an  dom reference';
+      throw new Error('not an dom reference');
     }
     index = getIndex(that);
     while (that.tagName) {
