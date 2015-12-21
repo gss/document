@@ -32673,7 +32673,7 @@ Exporter = (function() {
   };
 
   Exporter.prototype.serialize = function(element, prefix, inherited, unit, baseFontSize, linebreaks) {
-    var breaking, broken, char, child, childFontSize, chrs, content, counter, current, exported, fontSize, index, inherits, j, k, l, len, len1, len2, offset, position, prev, property, pstyles, r, range, rect, ref, ref1, ref2, ref3, ref4, ref5, selector, style, styles, text, value;
+    var breaking, char, child, childFontSize, content, counter, current, exported, fontSize, index, inherits, j, k, l, len, len1, len2, position, property, range, rect, ref, ref1, ref2, ref3, ref4, ref5, selector, style, styles, text, value;
     if (element == null) {
       element = this.engine.scope;
     }
@@ -32693,7 +32693,6 @@ Exporter = (function() {
       element = element.documentElement;
     }
     text = "";
-    chrs = 0;
     if ((fontSize = inherited.fontSize) == null) {
       styles = window.getComputedStyle(element, null);
       inherited.fontSize = fontSize = parseFloat(styles['font-size']);
@@ -32738,34 +32737,6 @@ Exporter = (function() {
         } else if (child.tagName !== 'SCRIPT') {
           if (child.offsetParent || child.offsetWidth || child.offsetHeight || child.tagName === 'svg') {
             styles = window.getComputedStyle(child, null);
-            if (linebreaks) {
-              if (styles.display === 'inline' || styles.display === 'inline-block') {
-                if (prev = child.previousSibling) {
-                  pstyles = prev.nodeType === 1 && window.getComputedStyle(prev);
-                  if (!pstyles || pstyles.display === 'inline' || pstyles.display === 'inline-block') {
-                    if ((prev.offsetTop != null) && (child.offsetTop != null)) {
-                      broken = prev.offsetTop < child.offsetTop && prev.offsetLeft > child.offsetLeft;
-                    } else {
-                      rect = child.getBoundingClientRect();
-                      if (prev.nodeType === 1) {
-                        r = prev.getBoundingClientRect();
-                        broken = Math.abs(r.top - rect.top) > rect.height / 5 && r.left > rect.left;
-                      } else if (linebreaks.last === prev) {
-                        broken = Math.abs(linebreaks.position - rect.top) > rect.height / 5 && linebreaks.left > rect.left;
-                      } else {
-                        broken = true;
-                      }
-                    }
-                    if (broken) {
-                      offset = -1;
-                      if (linebreaks.current.indexOf(linebreaks.counter - 1) === -1) {
-                        linebreaks.current.push(linebreaks.counter - 1);
-                      }
-                    }
-                  }
-                }
-              }
-            }
             childFontSize = parseFloat(styles['font-size']);
             if (style = child.getAttribute('style')) {
               style = style.replace(/(\d+|\.\d+|\d+\.\d+)px/g, function(m) {
@@ -32870,7 +32841,7 @@ Exporter = (function() {
           range.setEnd(child, counter + 1);
           if (rect = range.getBoundingClientRect()) {
             if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 5) {
-              if (linebreaks.position && chrs) {
+              if (linebreaks.position) {
                 index = linebreaks.counter;
                 if (!content.charAt(counter - 1).match(/[\s\n]/) && content.charAt(counter - 2).match(/-|\u2013|\u2014/)) {
                   index--;
@@ -32884,7 +32855,6 @@ Exporter = (function() {
               linebreaks.last = child;
               linebreaks.position = rect.top;
               linebreaks.left = rect.left;
-              chrs++;
             }
           }
           counter++;

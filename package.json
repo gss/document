@@ -44,7 +44,7 @@
     "./vendor"
   ],
   "dependencies": {
-    "gss-engine": "git://github.com/gss/engine.git#67011e2",
+    "gss-engine": "git://github.com/gss/engine.git#6f4eac",
     "gss-parser": "git://github.com/gss/parser.git#61c4b2849e78d76b0e67b20a5abc08ce52b6c9cb",
     "vfl-compiler": "~1.1.3"
   }
