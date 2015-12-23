@@ -18508,6 +18508,8 @@ Stylesheet = (function(superClass) {
     return '';
   };
 
+  Stylesheet.DeimportizeRegExp = new RegExp("@import[^" + Command.prototype.DESCEND + "]+" + Command.prototype.DESCEND);
+
   Stylesheet.prototype.update = function(engine, operation, property, value, stylesheet, rule) {
     var body, generated, i, index, j, len, needle, ops, other, previous, prop, ref, rules, selectors, sheet, watchers;
     watchers = this.getWatchers(engine, stylesheet);
@@ -18765,7 +18767,7 @@ Stylesheet = (function(superClass) {
   Stylesheet.empty = [''];
 
   Stylesheet.prototype.combineSelectors = function(results, operation) {
-    var index, j, k, l, len, len1, ref, ref1, result, selector, separated, update;
+    var index, j, k, l, len, len1, len2, n, ref, ref1, ref2, result, selector, separated, update;
     if (results == null) {
       results = Stylesheet.empty;
     }
@@ -18774,18 +18776,22 @@ Stylesheet = (function(superClass) {
       result = results[index];
       if (operation.selectors) {
         if (result.substring(0, 12) === ' [matches~="') {
-          update.push(' ' + this.getCustomSelector(result.selector, result));
-        } else {
           ref = operation.selectors;
           for (k = 0, len1 = ref.length; k < len1; k++) {
             selector = ref[k];
+            update.push(' ' + this.getCustomSelector(selector, result));
+          }
+        } else {
+          ref1 = operation.selectors;
+          for (l = 0, len2 = ref1.length; l < len2; l++) {
+            selector = ref1[l];
             update.push(selector + result);
           }
         }
       } else if (result.substring(0, 12) === ' [matches~="') {
         update.push(' ' + this.getCustomSelector(operation.command.path, result));
       } else if (operation[0] === ',') {
-        for (index = l = 1, ref1 = operation.length; l < ref1; index = l += 1) {
+        for (index = n = 1, ref2 = operation.length; n < ref2; index = n += 1) {
           separated = this.getRuleSelector(operation[index], operation.command) + result;
           if (update.indexOf(separated) === -1) {
             update.push(separated);
@@ -18819,6 +18825,9 @@ Stylesheet = (function(superClass) {
   Stylesheet.prototype.getCustomSelector = function(selector, suffix, prefix) {
     var DESCEND;
     DESCEND = this.DESCEND;
+    if (selector.substring(0, 12) === ' [matches~="') {
+      selector = selector.slice(12, -2);
+    }
     selector = selector.replace(/\s+/g, DESCEND);
     if (suffix) {
       if (suffix.charAt(0) === ' ') {
@@ -18837,7 +18846,7 @@ Stylesheet = (function(superClass) {
 
   Stylesheet.prototype.getCanonicalSelector = function(selector) {
     selector = selector.trim();
-    selector = selector.replace(Stylesheet.CanonicalizeSelectorRegExp, Stylesheet.CanonicalizeSelectorCallback).replace(/\s+/g, this.DESCEND);
+    selector = selector.replace(Stylesheet.CanonicalizeSelectorRegExp, Stylesheet.CanonicalizeSelectorCallback).replace(/\s+/g, this.DESCEND).replace(Stylesheet.DeimportizeRegExp, '');
     return selector;
   };
 

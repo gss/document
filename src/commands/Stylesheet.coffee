@@ -47,6 +47,9 @@ class Stylesheet extends Command.List
     if symbol == Command::DESCEND
       return symbol
     return ''
+  @DeimportizeRegExp: new RegExp(
+    "@import[^" + Command::DESCEND + "]+" + Command::DESCEND
+  )
 
   update: (engine, operation, property, value, stylesheet, rule) ->
     watchers = @getWatchers(engine, stylesheet)
@@ -247,7 +250,8 @@ class Stylesheet extends Command.List
     for result, index in results
       if operation.selectors
         if result.substring(0, 12) == ' [matches~="'
-          update.push ' ' + @getCustomSelector(result.selector, result)
+          for selector in operation.selectors
+            update.push ' ' + @getCustomSelector(selector, result)
         else
           for selector in operation.selectors
             update.push selector + result
@@ -279,6 +283,8 @@ class Stylesheet extends Command.List
 
   getCustomSelector: (selector, suffix, prefix) ->
     DESCEND = @DESCEND
+    if selector.substring(0, 12) == ' [matches~="'
+      selector = selector.slice(12, -2)
     selector = selector.replace(/\s+/g, DESCEND)
     if suffix
       if suffix.charAt(0) == ' '
@@ -295,7 +301,8 @@ class Stylesheet extends Command.List
     selector = selector.trim()
     selector = selector.
       replace(Stylesheet.CanonicalizeSelectorRegExp, Stylesheet.CanonicalizeSelectorCallback).
-      replace(/\s+/g, @DESCEND)#.
+      replace(/\s+/g, @DESCEND).
+      replace(Stylesheet.DeimportizeRegExp, '')
     return selector
 
 
