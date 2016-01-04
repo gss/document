@@ -32845,9 +32845,15 @@ Exporter = (function() {
         content = child.textContent;
         while (counter < content.length) {
           char = content.charAt(counter);
-          range = document.createRange();
-          range.setStart(child, counter);
-          range.setEnd(child, counter + 1);
+          if (char.match(/[\uD800-\uDFFF]/)) {
+            range = document.createRange();
+            range.setStart(child, counter);
+            range.setEnd(child, ++counter + 1);
+          } else {
+            range = document.createRange();
+            range.setStart(child, counter);
+            range.setEnd(child, counter + 1);
+          }
           if (rect = range.getBoundingClientRect()) {
             if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 5) {
               if (linebreaks.position) {
