@@ -15855,6 +15855,9 @@ Linear = (function(superClass) {
       this.paths = {};
     }
     this.instance = new c.SimplexSolver();
+    if (this.onsolved) {
+      this.instance.onsolved = this.onsolved.bind(this);
+    }
     this.instance.autoSolve = false;
     if (this.console.level > 2) {
       c.debug = true;
@@ -16901,7 +16904,7 @@ Exporter = (function() {
           if (char.match(/[\uD800-\uDFFF]/)) {
             range = document.createRange();
             range.setStart(child, counter);
-            range.setEnd(child, ++counter + 1);
+            range.setEnd(child, counter + 2);
           } else {
             range = document.createRange();
             range.setStart(child, counter);
