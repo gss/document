@@ -31802,9 +31802,6 @@ Linear = (function(superClass) {
       this.paths = {};
     }
     this.instance = new c.SimplexSolver();
-    if (this.onsolved) {
-      this.instance.onsolved = this.onsolved.bind(this);
-    }
     this.instance.autoSolve = false;
     if (this.console.level > 2) {
       c.debug = true;
@@ -32848,14 +32845,11 @@ Exporter = (function() {
         content = child.textContent;
         while (counter < content.length) {
           char = content.charAt(counter);
+          range = document.createRange();
+          range.setStart(child, counter);
+          range.setEnd(child, counter + 1);
           if (char.match(/[\uD800-\uDFFF]/)) {
-            range = document.createRange();
-            range.setStart(child, counter);
-            range.setEnd(child, counter + 2);
-          } else {
-            range = document.createRange();
-            range.setStart(child, counter);
-            range.setEnd(child, counter + 1);
+            counter++;
           }
           if (rect = range.getBoundingClientRect()) {
             if (rect.width && rect.top && Math.abs(rect.top - linebreaks.position) > rect.height / 5) {
