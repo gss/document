@@ -16803,17 +16803,21 @@ Exporter = (function() {
             if (style = child.getAttribute('style')) {
               style = style.replace(/([a-z_-]+)(\:[^;]*?)(\d+|\.\d+|\d+\.\d+)px/g, function(m, property, pre, value) {
                 if (property === 'width') {
-                  if (Math.abs(child.offsetWidth - child.parentNode.offsetWidth) < 2.9) {
+                  if (Math.abs(child.offsetWidth - child.parentNode.offsetWidth) < 3) {
                     value = child.parentNode.offsetWidth;
                   }
                 } else if (property === 'height') {
-                  if (Math.abs(child.offsetHeight - child.parentNode.offsetHeight) < 2.9) {
+                  if (Math.abs(child.offsetHeight - child.parentNode.offsetHeight) < 3) {
                     value = child.parentNode.offsetHeight;
                   }
                 }
                 if (property === 'left' || property === 'top') {
                   if (Math.abs(parseFloat(value)) < 2) {
                     value = 0;
+                  } else if (property === 'left' && Math.abs(child.offsetLeft + child.offsetWidth - child.parentNode.offsetWidth) < 3) {
+                    value = child.parentNode.offsetWidth - child.offsetWidth + 0.15;
+                  } else if (property === 'top' && Math.abs(child.offsetTop + child.offsetHeight - child.parentNode.offsetHeight) < 3) {
+                    value = child.parentNode.offsetHeight - child.offsetHeight + 0.15;
                   }
                 } else if (value === '1') {
                   value = '1.49';
