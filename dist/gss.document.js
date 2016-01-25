@@ -16801,14 +16801,27 @@ Exporter = (function() {
             styles = window.getComputedStyle(child, null);
             childFontSize = parseFloat(styles['font-size']);
             if (style = child.getAttribute('style')) {
-              style = style.replace(/(\d+|\.\d+|\d+\.\d+)px/g, function(m) {
-                if (m === '1px') {
-                  m = '1.49px';
+              style = style.replace(/([a-z_-]+)(\:[^;]*?)(\d+|\.\d+|\d+\.\d+)px/g, function(m, property, pre, value) {
+                if (property === 'width') {
+                  if (Math.abs(child.offsetWidth - child.parentNode.offsetWidth) < 2.9) {
+                    value = child.parentNode.offsetWidth;
+                  }
+                } else if (property === 'height') {
+                  if (Math.abs(child.offsetHeight - child.parentNode.offsetHeight) < 2.9) {
+                    value = child.parentNode.offsetHeight;
+                  }
+                }
+                if (property === 'left' || property === 'top') {
+                  if (Math.abs(parseFloat(value)) < 2) {
+                    value = 0;
+                  }
+                } else if (value === '1') {
+                  value = '1.49';
                 }
                 if (unit === 'em') {
-                  return parseFloat((parseFloat(m) / childFontSize).toFixed(4)) + unit;
+                  return property + pre + parseFloat((parseFloat(value) / childFontSize).toFixed(4)) + unit;
                 } else {
-                  return parseFloat((parseFloat(m) / baseFontSize).toFixed(4)) + unit;
+                  return property + pre + parseFloat((parseFloat(value) / baseFontSize).toFixed(4)) + unit;
                 }
               });
               if (style.charAt(style.length - 1) !== ';') {
