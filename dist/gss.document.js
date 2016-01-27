@@ -16801,7 +16801,7 @@ Exporter = (function() {
             styles = window.getComputedStyle(child, null);
             childFontSize = parseFloat(styles['font-size']);
             if (style = child.getAttribute('style')) {
-              style = style.replace(/([a-z_-]+)(\:[^;]*?)(\d+|\.\d+|\d+\.\d+)px/g, function(m, property, pre, value) {
+              style = style.replace(/([a-z_-]+)(\:[^;]*?)(-?\d+|-?\.\d+|-?\d+\.\d+)px/g, function(m, property, pre, value) {
                 if (property === 'width') {
                   if (Math.abs(child.offsetWidth - child.parentNode.offsetWidth) < 3) {
                     value = child.parentNode.offsetWidth;
